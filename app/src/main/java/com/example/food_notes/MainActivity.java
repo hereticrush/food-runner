@@ -14,12 +14,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         View fabAddContent = findViewById(R.id.fabAddContent);
-        fabAddContent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddNewUserActivity.class);
-                startActivity(intent);
-            }
+        fabAddContent.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AddNewUserActivity.class);
+            startActivity(intent);
         });
     }
 }

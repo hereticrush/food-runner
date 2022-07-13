@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/button_radius.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/card_radius.xml" value="0.216" />
         <entry key="app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.216" />
-        <entry key="app/src/main/res/layout/activity_add_new_user.xml" value="0.17028985507246377" />
+        <entry key="app/src/main/res/layout/activity_add_new_user.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.14130434782608695" />
       </map>
     </option>
