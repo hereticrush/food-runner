@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Food Runner</string>
+    <string name="button_create_new_user_placeholder_text">CREATE A USER</string>
+    <string name="edit_text_hint">Title</string>
+    <string name="button_text_create_post">CREATE</string>
+    <string name="edit_text_hint_desc">Description</string>
+    <string name="edit_text_password_placeholder">Enter Password</string>
+    <string name="edit_text_username_hint">Enter a username</string>
+    <string name="edit_text_password_hint">Enter a password</string>
+</resources>

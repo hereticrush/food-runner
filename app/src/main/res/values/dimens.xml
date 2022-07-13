@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="button_shape_radius">20dp</dimen>
+    <dimen name="button_margin">13dp</dimen>
+    <dimen name="button_text_size">20sp</dimen>
+    <dimen name="edit_text_text_size">18sp</dimen>
+    <dimen name="image_border_stroke_size">0.5dp</dimen>
+    <dimen name="padding_content">16dp</dimen>
+    <dimen name="card_radius">9dp</dimen>
+</resources>
