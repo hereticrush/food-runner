@@ -7,4 +7,10 @@
     <string name="edit_text_password_placeholder">Enter Password</string>
     <string name="edit_text_username_hint">Enter a username</string>
     <string name="edit_text_password_hint">Enter a password</string>
+    <string name="edit_text_choose_image">CHOOSE IMAGE</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="edit_text_post_title">Title</string>
+    <string name="register_btn_placeholder_text">REGISTER</string>
+    <string name="login_btn_placeholder_text">LOGIN</string>
+    <string name="create_post_fab_cd">CREATE POST</string>
 </resources>

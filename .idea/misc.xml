@@ -3,11 +3,25 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../layout/custom_preview.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/add_post_button_shape.xml" value="0.1585" />
+        <entry key="app/src/main/res/drawable/app_gradient_main_background.xml" value="0.1405" />
         <entry key="app/src/main/res/drawable/button_radius.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/card_radius.xml" value="0.216" />
         <entry key="app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.216" />
-        <entry key="app/src/main/res/layout/activity_add_new_user.xml" value="0.1" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.14130434782608695" />
+        <entry key="app/src/main/res/drawable/image_view_border.xml" value="0.216" />
+        <entry key="app/src/main/res/drawable/ratingstars.xml" value="0.1585" />
+        <entry key="app/src/main/res/layout/activity_add_new_user.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/activity_add_post.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.14583333333333334" />
+        <entry key="app/src/main/res/layout/activity_user_main.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/fragment_add_post.xml" value="0.17188873291015627" />
+        <entry key="app/src/main/res/layout/fragment_add_user.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/fragment_login.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/fragment_user_main.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/fragment_user_register.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/row_item.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/row_user_item.xml" value="0.2203125" />
       </map>
     </option>
   </component>

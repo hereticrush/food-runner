@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'androidx.navigation.safeargs'
 }
 
 android {
@@ -13,6 +14,10 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding true
     }
 
     buildTypes {
@@ -32,6 +37,7 @@ dependencies {
     def room_version = "2.4.2"
     def nav_version = "2.5.0"
     def fragment_version = "1.5.0"
+    def rx_version = "3.0.2"
 
     // Java language implementation
     implementation "androidx.fragment:fragment:$fragment_version"
@@ -44,6 +50,8 @@ dependencies {
 
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    implementation 'com.google.android.material:material:1.6.1'
 
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-ui:$nav_version"
@@ -67,7 +75,13 @@ dependencies {
     // Because RxAndroid releases are few and far between, it is recommended you also
     // explicitly depend on RxJava's latest version for bug fixes and new features.
     // (see https://github.com/ReactiveX/RxJava/releases for latest 3.x.x version)
-    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+    implementation "io.reactivex.rxjava3:rxjava:$rx_version"
+
+    //Dexter eases the use of permissions
+    implementation 'com.karumi:dexter:6.2.3'
+
+    // Paging 3
+    implementation "androidx.paging:paging-compose:1.0.0-alpha15"
 
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
