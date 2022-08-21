@@ -21,6 +21,8 @@ import android.widget.RatingBar;
 import android.widget.Toast;
 
 import com.example.food_notes.R;
+import com.example.food_notes.databinding.FragmentAddPostBinding;
+import com.example.food_notes.ui.activities.PostsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -36,6 +38,7 @@ public class AddPostFragment extends Fragment {
 
     private static final String TAG = "add_post";
     //private AppCompatTextView tvChooseImage;
+    private FragmentAddPostBinding binding;
     private AppCompatEditText title, description;
     private RatingBar ratingBar;
     private FloatingActionButton fab_create, fab_back, fab_choose_image;
@@ -55,6 +58,7 @@ public class AddPostFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        binding = FragmentAddPostBinding.inflate(inflater, container, false);
         View view = inflater.inflate(R.layout.fragment_add_post, container, false);
         fab_choose_image = view.findViewById(R.id.fab_choose_image);
         title = view.findViewById(R.id.et_title);
@@ -64,54 +68,40 @@ public class AddPostFragment extends Fragment {
         fab_create = view.findViewById(R.id.fab_create_post);
         initRatingBar(ratingBar);
         
-        return view;
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        //tvChooseImage = view.findViewById(R.id.tv_choose_image);
-        //title = view.findViewById(R.id.et_title);
-        //description = view.findViewById(R.id.et_description);
-        showDialogOptions(fab_choose_image);
-        fab_back.setOnClickListener(v -> backToUserMainFragment());
-        new Thread(() -> createPost(fab_create)).start();
+        binding.fabBackToMain.setOnClickListener(v -> backToUserMainFragment());
+        binding.fabCreatePost.setOnClickListener(v -> createPost());
     }
     //TODO IMPLEMENT THIS FUNCTION AS IT IS: GO TO GALLERY, SET PERMS, GET THE IMAGE AND CONVERT URL TO STRING , STORE IN DB
     //TODO BUG HAS TO DO WITH FUNCTION CALLS IN THIS FUNCTION
-    private void showDialogOptions(@NonNull View view) { view.findViewById(R.id.fab_choose_image).setOnClickListener(
-            v -> {
-                showPermissionDialog();
-                Toast.makeText(getActivity(), "Works like a charm", Toast.LENGTH_SHORT).show();
-            });
-    }
 
     //TODO gotta work this func out, clashing with ui or related to thread
     private void showPermissionDialog() {
-         ArrayList<String> items = new ArrayList<>();
-         final CharSequence[] arr = items.toArray(new CharSequence[2]);
-         final boolean[] clickedOption = {false, false};
-         items.add("Select photo from gallery");
-         items.add("Capture a photo with camera");
-         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity().getApplicationContext()).setTitle("Select Options")
-                         .setMultiChoiceItems(arr, clickedOption, new DialogInterface.OnMultiChoiceClickListener() {
-                             @Override
-                             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                                clickedOption[which] = isChecked;
-
-                                String currentItem = items.get(which);
-
-                                 Toast.makeText(getActivity().getApplicationContext(), arr[which], Toast.LENGTH_SHORT).show();
-                                 if (currentItem.matches(arr[0].toString())) {
-                                     Toast.makeText(getActivity().getApplicationContext(), "Choose an image!", Toast.LENGTH_SHORT).show();
-                                     //chooseImageFromGallery();
-                                 } else if (currentItem.matches(arr[1].toString())) {
-                                     //TODO WRITE A FUNCTION TO CAPTURE PHOTO WITH CAM
-                                     captureImageWithCamera();
-                                 }
-                             }
-                         });
-         builder.show();
+        final ArrayList<String> items = new ArrayList<>(2);
+        items.add("Select photo from gallery");
+        items.add("Capture a photo with camera");
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity().getApplicationContext());
+        builder.setTitle(" Choose an option ");
+        builder.setItems(items.toArray(new String[2]), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) // TODO needs fix
+                {
+                    case 0:
+                        chooseImageFromGallery();
+                        break;
+                    case 1:
+                        captureImageWithCamera();
+                        break;
+                    default: dialog.dismiss();
+                }
+            }
+        }).show();
     }
 
     private void captureImageWithCamera() {
@@ -119,7 +109,7 @@ public class AddPostFragment extends Fragment {
     }
 
     private void chooseImageFromGallery() {
-       //getPermissionForGallery();
+        getPermissionForGallery();
         Toast.makeText(getActivity().getApplicationContext(), "This works as well", Toast.LENGTH_SHORT).show();
     }
 
@@ -188,35 +178,22 @@ public class AddPostFragment extends Fragment {
         manager.popBackStack("main", FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
+    private void toPostsActivity() {
+        Intent toPosts = new Intent(getActivity(), PostsActivity.class);
+        startActivity(toPosts);
+    }
 
-    private void createPost(View view) {
-        boolean flag_value = areFieldsFilled();
-        try {
-            view.setOnClickListener(v -> {
-                if (!flag_value) {
-                    Toast.makeText(getActivity().getApplicationContext(), "You cannot get outta here", Toast.LENGTH_SHORT).show();
-                } else {
-                    backToUserMainFragment();
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+    private void createPost() {
+        toPostsActivity();
     }
 
     /**
      * if any field(title,desc) is empty return false, otherwise true
      * @return bool
      */
-    private boolean areFieldsFilled() {
-        if (!checkDescriptionLength()) {
-            description.setError("Description is required to create a post");
-        }
-        if (!checkTitleLength()) {
-            title.setError("Title is required to create a post");
-        }
-        else {return checkDescriptionLength() && checkTitleLength();}
-        return false;
+    private boolean isFilledAllRequiredFields() {
+        return checkDescriptionLength() && checkTitleLength();
     }
 
     /**
@@ -224,8 +201,11 @@ public class AddPostFragment extends Fragment {
       * @return bool
      */
     private boolean checkDescriptionLength() {
-        return description.getText().toString().length() < 140 &&
-                description.getText().toString().length() > 5;
+        if (description.getText().toString().length() < 140 &&
+                description.getText().toString().length() > 5) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -233,8 +213,16 @@ public class AddPostFragment extends Fragment {
      * @return bool
      */
     private boolean checkTitleLength() {
-        return title.getText().toString().length() < 50 &&
-                title.getText().toString().length() > 0;
+        if (binding.etTitle.getText().toString().length() < 50 &&
+                binding.etTitle.getText().toString().length() > 0) {
+            return true;
+        }
+        return false;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
 }

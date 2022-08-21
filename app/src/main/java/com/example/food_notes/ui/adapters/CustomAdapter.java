@@ -25,7 +25,6 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class CustomAdapter extends RecyclerView.Adapter<CustomViewHolder> {
 
     private final Context mContext;
-    private CompositeDisposable mDisposable;
     private final UserViewModel mViewModel;
 
     public CustomAdapter(Context mContext, UserViewModel viewModel) {
@@ -43,9 +42,9 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomViewHolder> {
     public void onBindViewHolder(@NonNull CustomViewHolder holder, int position) {
         List<User> users = new ArrayList<>(
         mViewModel.getAllUsers().blockingFirst());
-        holder.textId.setText(String.valueOf(users.get(position).getUser_id()));
-        holder.textUsername.setText(users.get(position).getUsername());
-        holder.textPassword.setText(users.get(position).getPassword());
+        holder.getTextId().setText(String.valueOf(users.get(position).getUser_id()));
+        holder.getTextUsername().setText(users.get(position).getUsername());
+        holder.getTextPassword().setText(users.get(position).getPassword());
     }
 
 

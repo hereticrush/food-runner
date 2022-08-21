@@ -1,13 +1,20 @@
 package com.example.food_notes.ui.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 import com.example.food_notes.R;
 import com.example.food_notes.ui.fragments.UserRegisterFragment;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,7 +22,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);;
+        setContentView(R.layout.activity_main);
+
+
         showRegisterForm();
 
     }

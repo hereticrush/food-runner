@@ -6,11 +6,11 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:theme="@style/Theme.Food_Notes"
-    android:background="@drawable/app_gradient_main_background"
     tools:context=".ui.fragments.UserMainFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_user_main"
+        android:background="@drawable/app_gradient_main_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="@dimen/padding_content"

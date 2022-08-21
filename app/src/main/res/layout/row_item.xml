@@ -7,13 +7,12 @@
     android:tag="user main card container">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cv_user_main"
+        android:id="@+id/card_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:cardBackgroundColor="@color/color_accent_dark"
-        app:cardCornerRadius="@dimen/card_radius"
-        app:cardElevation="@dimen/elevation_all"
-        app:cardUseCompatPadding="true">
+        app:cardCornerRadius="@dimen/user_main_margin"
+        app:cardElevation="@dimen/elevation_all" >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:padding="@dimen/user_main_margin"
@@ -26,6 +25,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/user_main_margin"
                 android:paddingStart="@dimen/user_main_margin"
+                android:paddingEnd="@dimen/user_main_margin"
                 android:textSize="@dimen/edit_text_text_size"
                 android:text="KEŞKE SİNEK ÇIKMASAYDI"
                 android:textStyle="bold"
