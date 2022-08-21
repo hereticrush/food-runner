@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -51,7 +52,7 @@ public class UserMainFragment extends Fragment {
         ViewModelFactory mFactory = Injection.provideViewModelFactory(getActivity());
         mViewModel = new ViewModelProvider(this, mFactory).get(UserViewModel.class);
         if (getArguments() != null) {
-            String user = getArguments().getString(LOGGED_USER);
+            String usr = getArguments().getString(LOGGED_USER);
             String pwd = getArguments().getString(LOGGED_PASSWORD);
         }
     }
@@ -87,6 +88,11 @@ public class UserMainFragment extends Fragment {
                     }
                 })
         );
+    }
+
+    private void displayCardView() {
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
     private void backToLoginFragment() {

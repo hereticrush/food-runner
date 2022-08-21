@@ -128,7 +128,9 @@ public class LoginFragment extends Fragment {
 
     //TODO check this func something is fishy here
     private Boolean queryDatabaseForRegisteredUser() {
-        return mDisposable.add(mViewModel.getUser(et_username.getText().toString(), et_password.getText().toString())
+        String username = et_username.getText().toString();
+        String password = et_password.getText().toString();
+        return mDisposable.add(mViewModel.getUser(username, password)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe());

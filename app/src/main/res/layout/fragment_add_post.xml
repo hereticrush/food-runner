@@ -29,7 +29,17 @@
                 android:layout_height="wrap_content"
                 android:padding="@dimen/padding_content">
 
-                <androidx.appcompat.widget.AppCompatTextView
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/fab_choose_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_set_image"
+                    app:layout_constraintEnd_toStartOf="@+id/iv_set_image"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/cl_add_post"
+                    android:src="@drawable/ic_baseline_add_24" />
+
+                <!--<androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tv_choose_image"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -42,7 +52,7 @@
                     app:layout_constraintBottom_toBottomOf="@id/iv_set_image"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/cl_add_post"
-                    tools:ignore="TouchTargetSizeCheck" />
+                     /> -->
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/iv_set_image"
