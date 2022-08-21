@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentAddPostBinding;
+import com.example.food_notes.db.ApplicationDatabase;
 import com.example.food_notes.ui.activities.PostsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.karumi.dexter.Dexter;
@@ -41,6 +42,7 @@ public class AddPostFragment extends Fragment {
     private FragmentAddPostBinding binding;
     private AppCompatEditText title, description;
     private RatingBar ratingBar;
+    private boolean flag_value;
     private FloatingActionButton fab_create, fab_back, fab_choose_image;
     private AddPostFragment() {}
 
@@ -59,21 +61,14 @@ public class AddPostFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentAddPostBinding.inflate(inflater, container, false);
-        View view = inflater.inflate(R.layout.fragment_add_post, container, false);
-        fab_choose_image = view.findViewById(R.id.fab_choose_image);
-        title = view.findViewById(R.id.et_title);
-        description = view.findViewById(R.id.et_description);
-        ratingBar = view.findViewById(R.id.rating_bar_add_post);
-        fab_back = view.findViewById(R.id.fab_back_to_main);
-        fab_create = view.findViewById(R.id.fab_create_post);
-        initRatingBar(ratingBar);
-        
+
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initRatingBar();
         binding.fabBackToMain.setOnClickListener(v -> backToUserMainFragment());
         binding.fabCreatePost.setOnClickListener(v -> createPost());
     }
@@ -105,12 +100,12 @@ public class AddPostFragment extends Fragment {
     }
 
     private void captureImageWithCamera() {
-        Toast.makeText(getActivity().getApplicationContext(), "Go capture an image!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "Go capture an image!", Toast.LENGTH_SHORT).show();
     }
 
     private void chooseImageFromGallery() {
         getPermissionForGallery();
-        Toast.makeText(getActivity().getApplicationContext(), "This works as well", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "This works as well", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -126,7 +121,7 @@ public class AddPostFragment extends Fragment {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
                         if (multiplePermissionsReport.areAllPermissionsGranted()) {
-                            Toast.makeText(getActivity().getApplicationContext(), "Went to gallery", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "Went to gallery", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -135,12 +130,12 @@ public class AddPostFragment extends Fragment {
                         showRationaleDialogForPermissions();
                     }
                 }).withErrorListener(
-                        dexterError -> Toast.makeText(getActivity().getApplicationContext(), "An error occurred! " + dexterError.toString(), Toast.LENGTH_SHORT).show()
+                        dexterError -> Toast.makeText(getActivity(), "An error occurred! " + dexterError.toString(), Toast.LENGTH_SHORT).show()
                 ).onSameThread().check();
     }
 
     private void showRationaleDialogForPermissions() {
-        new AlertDialog.Builder(getActivity().getApplicationContext())
+        new AlertDialog.Builder(getActivity())
                 .setMessage("You are required to turn on permissions from settings")
                 .setPositiveButton("To Settings", new DialogInterface.OnClickListener() {
                     @Override
@@ -160,14 +155,12 @@ public class AddPostFragment extends Fragment {
 
     /**
      * initializes few attributes of the rating bar in the add_post fragment
-     * @param view
+     *
      */
-    private void initRatingBar(View view) {
-        if (view != null ) {
-            ratingBar.setNumStars(5);
-            ratingBar.setIsIndicator(false);
-            ratingBar.setRating(0);
-        }
+    private void initRatingBar() {
+            binding.ratingBarAddPost.setNumStars(5);
+            binding.ratingBarAddPost.setIsIndicator(false);
+            binding.ratingBarAddPost.setRating(0);
     }
 
     /**

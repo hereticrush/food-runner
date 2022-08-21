@@ -92,5 +92,7 @@ public abstract class ApplicationDatabase extends RoomDatabase {
         return isDbCreated;
     }
 
-
+    public static ExecutorService getDatabaseWriteExecutor() {
+        return databaseWriteExecutor;
+    }
 }

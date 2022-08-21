@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.example.food_notes.R;
 import com.example.food_notes.data.user.User;
+import com.example.food_notes.db.ApplicationDatabase;
 import com.example.food_notes.db.ApplicationExecutors;
 import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.UserViewModel;

@@ -20,9 +20,11 @@ import android.widget.Toast;
 
 import com.example.food_notes.R;
 import com.example.food_notes.data.user.User;
+import com.example.food_notes.databinding.FragmentLoginBinding;
 import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.UserViewModel;
 import com.example.food_notes.ui.view.ViewModelFactory;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -40,9 +42,10 @@ public class LoginFragment extends Fragment {
     private static final String TAG = "login";
 
     private UserViewModel mViewModel;
+    private FragmentLoginBinding binding;
     private final CompositeDisposable mDisposable = new CompositeDisposable();
-    private AppCompatEditText et_username;
-    private AppCompatEditText et_password;
+    private TextInputEditText editTextUsername;
+    private TextInputEditText editTextPassword;
     private AppCompatButton mButton;
 
     private LoginFragment(){}
@@ -60,80 +63,63 @@ public class LoginFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_login, container, false);
-
-        mButton = view.findViewById(R.id.fragment_login_button);
-        et_username = view.findViewById(R.id.et_login_username);
-        et_password = view.findViewById(R.id.et_login_password);
-
-        return view;
+        binding = FragmentLoginBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String username = Objects.requireNonNull(et_username.getText()).toString();
-        String password = Objects.requireNonNull(et_password.getText()).toString();
-        mButton.setOnClickListener(v -> {
+        String username = binding.etLoginUsername.getText().toString().trim();
+        String password = binding.etLoginPassword.getText().toString().trim();
+        binding.fragmentLoginButton.setOnClickListener(v -> {
             if (checkInputFields()) {
-                 if (queryDatabaseForRegisteredUser()) {
+                 if (requestLoginIfUserExists(username, password)) {
                      Bundle args = new Bundle();
                      args.putString("LOGGED_USER", username);
                      args.putString("LOGGED_PASSWORD", password);
                      setArguments(args);
-                     try {
-                         requireActivity().runOnUiThread(() -> {
-                             Toast.makeText(getActivity(), "Logging in...", Toast.LENGTH_SHORT).show();
-                         });
-                         Thread.sleep(1000);
-                         toUserActivity();
-                     } catch (InterruptedException e) {
-                         e.printStackTrace();
-                     }
+                     Log.d(USERNAME + " " + PASSWORD, "data:"+username+","+password);
+                     toUserActivity();
                 } else {
-                    Toast.makeText(getActivity().getApplicationContext(), "No entry, invalid user", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this.getActivity(), "No entry, invalid user", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this.getActivity().getApplicationContext(), "Please fill the required fields.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.getActivity(), "Please fill the required fields.", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
         mDisposable.clear();
     }
+
     //TODO write this func
     private Boolean checkInputFields() {
-        if (TextUtils.isEmpty(et_username.getText()) && TextUtils.isEmpty(et_password.getText())) {
-            Toast.makeText(getActivity().getApplicationContext(), "Required fields must be filled.", Toast.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(binding.etLoginUsername.getText()) && TextUtils.isEmpty(binding.etLoginPassword.getText())) {
+            Toast.makeText(getActivity(), "Required fields must be filled.", Toast.LENGTH_SHORT).show();
             return false;
-        } else if (TextUtils.isEmpty(et_password.getText())) {
-            et_password.setError("Password is required.");
+        } else if (TextUtils.isEmpty(binding.etLoginPassword.getText())) {
+            binding.etLoginPassword.setError("Password is required.");
             return false;
-        } else if (et_username.getText().toString().trim().length() < 8) {
-            et_username.setError("Username must be at least 8 characters long.");
+        } else if (binding.etLoginUsername.getText().toString().trim().length() < 8) {
+            binding.etLoginUsername.setError("Username must be at least 8 characters long.");
             return false;
-        } else if (et_password.getText().toString().trim().length() < 8) {
-            et_password.setError("Password must be at least 8 character long.");
+        } else if (binding.etLoginPassword.getText().toString().trim().length() < 8) {
+            binding.etLoginPassword.setError("Password must be at least 8 character long.");
             return false;
         } else
             return true;
     }
 
-    //TODO check this func something is fishy here
-    private Boolean queryDatabaseForRegisteredUser() {
-        String username = et_username.getText().toString();
-        String password = et_password.getText().toString();
-        return mDisposable.add(mViewModel.getUser(username, password)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe());
+    public Boolean requestLoginIfUserExists(@NonNull final String usr, final String pwd) {
+        return mDisposable.add(mViewModel.getUser(usr, pwd).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe());
     }
 
     private void toUserActivity() {

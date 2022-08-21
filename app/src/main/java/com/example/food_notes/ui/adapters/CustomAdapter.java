@@ -12,10 +12,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.food_notes.R;
 import com.example.food_notes.data.user.User;
+import com.example.food_notes.db.ApplicationDatabase;
 import com.example.food_notes.ui.view.UserViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Flowable;
@@ -40,8 +42,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull CustomViewHolder holder, int position) {
-        List<User> users = new ArrayList<>(
-        mViewModel.getAllUsers().blockingFirst());
+        List<User> users = new ArrayList<>(mViewModel.getAllUsers().blockingFirst());
         holder.getTextId().setText(String.valueOf(users.get(position).getUser_id()));
         holder.getTextUsername().setText(users.get(position).getUsername());
         holder.getTextPassword().setText(users.get(position).getPassword());
