@@ -12,27 +12,19 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.food_notes.R;
-import com.example.food_notes.data.user.User;
 import com.example.food_notes.databinding.FragmentLoginBinding;
 import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.UserViewModel;
 import com.example.food_notes.ui.view.ViewModelFactory;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.util.ArrayList;
-import java.util.Objects;
-
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 public class LoginFragment extends Fragment {
@@ -41,12 +33,11 @@ public class LoginFragment extends Fragment {
     private static final String PASSWORD = "PASSWORD";
     private static final String TAG = "login";
 
-    private UserViewModel mViewModel;
+    private UserViewModel mUserViewModel;
     private FragmentLoginBinding binding;
-    private final CompositeDisposable mDisposable = new CompositeDisposable();
-    private TextInputEditText editTextUsername;
-    private TextInputEditText editTextPassword;
+    private CompositeDisposable mDisposable;
     private AppCompatButton mButton;
+    private AppCompatEditText editTextUsername;
 
     private LoginFragment(){}
 
@@ -58,7 +49,8 @@ public class LoginFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ViewModelFactory mFactory = Injection.provideViewModelFactory(getActivity());
-        mViewModel = new ViewModelProvider(this, mFactory).get(UserViewModel.class);
+        mUserViewModel = new ViewModelProvider(this, mFactory).get(UserViewModel.class);
+        mDisposable = new CompositeDisposable();
     }
 
 
@@ -72,7 +64,6 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         String username = binding.etLoginUsername.getText().toString().trim();
         String password = binding.etLoginPassword.getText().toString().trim();
         binding.fragmentLoginButton.setOnClickListener(v -> {
@@ -82,7 +73,6 @@ public class LoginFragment extends Fragment {
                      args.putString("LOGGED_USER", username);
                      args.putString("LOGGED_PASSWORD", password);
                      setArguments(args);
-                     Log.d(USERNAME + " " + PASSWORD, "data:"+username+","+password);
                      toUserActivity();
                 } else {
                     Toast.makeText(this.getActivity(), "No entry, invalid user", Toast.LENGTH_SHORT).show();
@@ -118,8 +108,7 @@ public class LoginFragment extends Fragment {
     }
 
     public Boolean requestLoginIfUserExists(@NonNull final String usr, final String pwd) {
-        return mDisposable.add(mViewModel.getUser(usr, pwd).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe());
+        return mDisposable.add(mUserViewModel.getUser(usr, pwd).subscribe());
     }
 
     private void toUserActivity() {

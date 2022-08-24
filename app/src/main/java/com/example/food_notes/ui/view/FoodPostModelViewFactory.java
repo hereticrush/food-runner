@@ -21,7 +21,7 @@ public class FoodPostModelViewFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(FoodPostViewModel.class)) {
-            return (T) new FoodPostViewModel(mDataSource, application);
+            return (T)(new FoodPostViewModel(mDataSource, application));
         }
         throw new IllegalArgumentException("ViewModel class not found");
     }

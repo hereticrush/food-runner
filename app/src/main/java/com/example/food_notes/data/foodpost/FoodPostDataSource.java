@@ -21,6 +21,8 @@ public interface FoodPostDataSource {
 
     Single<Date> getDateById(Long id);
 
+    Single<FoodPostAndPicture> getFoodPostAndPictureById(Long id);
+
     void deleteAllData();
 
     void deleteFoodPostById(Long post_id);

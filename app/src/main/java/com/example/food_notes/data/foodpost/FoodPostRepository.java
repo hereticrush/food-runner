@@ -37,6 +37,7 @@ public class FoodPostRepository implements FoodPostDataSource{
         mFoodPostDao.deleteAllPosts();
     }
 
+    @Override
     public void deleteFoodPostById(Long id) {
         mFoodPostDao.deleteFoodPostById(id);
     }
@@ -46,10 +47,12 @@ public class FoodPostRepository implements FoodPostDataSource{
         return mFoodPostDao.getPostsAndPictures();
     }
 
+    @Override
     public Single<FoodPostAndPicture> getFoodPostAndPictureById(Long id) {
         return mFoodPostDao.getFoodPostAndPictureById(id);
     }
 
+    @Override
     public Flowable<List<FoodPostAndPicture>> getFoodAndImage() {
         return mFoodPostDao.getFoodAndPicture();
     }

@@ -17,7 +17,7 @@ public interface UserDataSource {
 
     Completable insertOrUpdateUser(User user);
 
-    void deleteUserByUsername(String username);
+    void deleteUserByUsername(final String username);
 
     void deleteAllUsers();
 }

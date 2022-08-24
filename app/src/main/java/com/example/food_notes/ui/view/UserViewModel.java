@@ -10,8 +10,10 @@ import com.example.food_notes.data.user.UserDataSource;
 
 import java.util.List;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 public class UserViewModel extends AndroidViewModel {
@@ -26,9 +28,11 @@ public class UserViewModel extends AndroidViewModel {
 
     //TODO make sure this function queries correctly
     public Flowable<User> getUser(final String username, final String password) {
-        return mDataSource.getUser(username, password).map(
+        return mDataSource.getUser(username, password).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .map(user -> user.getUsername().matches(username) && user.getPassword().matches(password)).cast(User.class);
+        /*return mDataSource.getUser(username, password).map(
                 user -> user.getUsername().matches(username) && user.getPassword().matches(password)
-                ? user : null);
+                ? user : null);*/
     }
 
     public Completable updateUsername(final String username, final String password) {
