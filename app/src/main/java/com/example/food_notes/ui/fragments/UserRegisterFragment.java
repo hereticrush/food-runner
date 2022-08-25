@@ -1,6 +1,5 @@
 package com.example.food_notes.ui.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,22 +18,25 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.food_notes.R;
-import com.example.food_notes.data.user.User;
-import com.example.food_notes.db.ApplicationDatabase;
-import com.example.food_notes.db.ApplicationExecutors;
+import com.example.food_notes.databinding.FragmentUserRegisterBinding;
 import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.UserViewModel;
 import com.example.food_notes.ui.view.ViewModelFactory;
 
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.observers.DisposableCompletableObserver;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class UserRegisterFragment extends Fragment {
 
     private static final String TAG = UserRegisterFragment.class.getSimpleName();
-    private ViewModelFactory mFactory;
     private UserViewModel mViewModel;
+    private FragmentUserRegisterBinding binding;
     private final CompositeDisposable mDisposable = new CompositeDisposable();
     private AppCompatEditText et_username;
     private AppCompatEditText et_password;
@@ -47,20 +49,18 @@ public class UserRegisterFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFactory = Injection.provideViewModelFactory(getActivity());
+        ViewModelFactory mFactory = Injection.provideViewModelFactory(getActivity());
         mViewModel = new ViewModelProvider(this, mFactory).get(UserViewModel.class);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_user_register, container, false);
-
-        mButton = view.findViewById(R.id.user_register_button);
-        et_username = view.findViewById(R.id.et_register_username);
-        et_password = view.findViewById(R.id.et_register_password);
-
-        return view;
+        binding = FragmentUserRegisterBinding.inflate(inflater, container, false);
+        et_username = binding.etRegisterUsername;
+        et_password = binding.etRegisterPassword;
+        mButton = binding.userRegisterButton;
+        return binding.getRoot();
     }
 
     @Override
@@ -68,12 +68,20 @@ public class UserRegisterFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         String username = et_username.getText().toString();
         String password = et_password.getText().toString();
-        mButton.setOnClickListener(v -> {
+        /*mButton.setOnClickListener(v -> {
             Boolean VALID = addUserToDatabase();
-            if (!queryDatabaseForRegisteredUser(username, password) && !VALID) {
+            if (!queryUserInDatabase(username, password) && !VALID) {
                 Toast.makeText(getActivity().getApplicationContext(), "No entry", Toast.LENGTH_SHORT).show();
-            } else if (queryDatabaseForRegisteredUser(username, password) && VALID) {
+            } else if (queryUserInDatabase(username, password) && VALID) {
                 toLoginActivity();
+            }
+        });*/
+        mButton.setOnClickListener(v -> {
+            if (checkCredentialValidity(username, password)) {
+                addUserToDatabase();
+            } else {
+                Log.d("REGEX", "Do not match");
+                Toast.makeText(getActivity(), "No entry", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -81,7 +89,6 @@ public class UserRegisterFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-
         mDisposable.clear();
     }
 
@@ -89,7 +96,7 @@ public class UserRegisterFragment extends Fragment {
         Bundle bundle = new Bundle();
         bundle.putString("USERNAME", et_username.getText().toString());
         bundle.putString("PASSWORD", et_password.getText().toString());
-        LoginFragment fragment = LoginFragment.getInstance(); //TODO this can get params from previous fragment and pass the data
+        LoginFragment fragment = LoginFragment.getInstance(); //this can get params from previous fragment and pass the data
         fragment.setArguments(bundle);
         FragmentManager manager = getParentFragmentManager();
         manager.beginTransaction().setReorderingAllowed(true).replace(
@@ -97,48 +104,30 @@ public class UserRegisterFragment extends Fragment {
         ).addToBackStack("register").commit();
     }
 
-    private boolean queryDatabaseForRegisteredUser(final String username, final String password) {
-
-        return mDisposable.add(mViewModel.getUser(username, password).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).map(
-                        user -> {
-                            String rUsername = user.getUsername();
-                            String rPassword = user.getPassword();
-                            return rUsername.matches(username) && rPassword.matches(password);
-                        }
-                ).subscribe());
-    }
-
-    private Boolean addUserToDatabase() {
+    private void addUserToDatabase() {
         String username = et_username.getText().toString();
         String password = et_password.getText().toString();
-        if (!checkCredentialValidity(username, password)) {
-            Toast.makeText(getActivity().getApplicationContext(), "Credentials not valid", Toast.LENGTH_SHORT).show();
-            return false;
-        } else {
-            mDisposable.add(mViewModel.updateUsername(username, password)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(() -> mButton.setEnabled(true), throwable -> Log.e(TAG, "Unable to update username", throwable)));
-            return true;
-        }
+        mDisposable.add(mViewModel.updateUsername(username, password)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableCompletableObserver() {
+                    @Override
+                    public void onComplete() {
+                        Toast.makeText(getActivity(), "Successfully added user.", Toast.LENGTH_SHORT).show();
+                        toLoginActivity();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(getActivity(), "Registration failed.", Toast.LENGTH_SHORT).show();
+                    }
+                }));
     }
 
-    private boolean checkCredentialValidity(@NonNull String username, String password) {
-
-        if (username.startsWith(" ") || password.startsWith(" ")) {
-            Toast.makeText(getActivity().getApplicationContext(), "Cannot start with whitespace", Toast.LENGTH_SHORT).show();
-            return false;
-        } else if (username.trim().length() < 8 || password.trim().length() < 8) {
-            Toast.makeText(getActivity().getApplicationContext(), "No less than 8", Toast.LENGTH_SHORT).show();
-            return false;
-        } else if (TextUtils.isEmpty(et_username.getText())) {
-            Toast.makeText(getActivity().getApplicationContext(), "Username required", Toast.LENGTH_SHORT).show();
-            return false;
-        } else if (TextUtils.isEmpty(et_password.getText())) {
-            Toast.makeText(getActivity().getApplicationContext(), "Password req", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
+    private boolean checkCredentialValidity(final String username,final String password) {
+        Pattern pattern = Pattern.compile("^([\\p{Alnum}!@#$%-]){7,24}[^\\s]\1*$");
+        Matcher matcher = pattern.matcher(username);
+        Matcher matcher1 = pattern.matcher(password);
+        return matcher.find() && matcher1.find();
     }
 }

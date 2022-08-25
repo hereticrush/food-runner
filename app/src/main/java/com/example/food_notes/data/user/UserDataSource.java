@@ -6,10 +6,11 @@ import java.util.List;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 public interface UserDataSource {
 
-    Flowable<User> getUser(String username, String password);
+    Single<User> getUser(String username, String password);
 
     Flowable<List<User>> getAllUsers();
 

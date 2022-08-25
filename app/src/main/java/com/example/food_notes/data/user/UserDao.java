@@ -1,7 +1,6 @@
 package com.example.food_notes.data.user;
 
 import androidx.room.Dao;
-import androidx.room.Ignore;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
@@ -25,7 +24,7 @@ public interface UserDao {
     Flowable<List<User>> getAllUsers();
 
     @Query("SELECT * FROM users WHERE username LIKE :username AND password LIKE :password")
-    Flowable<User> getUsernameAndPassword(String username, String password);
+    Single<User> getUsernameAndPassword(String username, String password);
 
     @Transaction
     @Query("SELECT users.user_id, food_posts.post_id, users.username FROM users INNER JOIN food_posts ON food_posts.user_id WHERE food_posts.user_id=users.user_id AND users.user_id = :userId")

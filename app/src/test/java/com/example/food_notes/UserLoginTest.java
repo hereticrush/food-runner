@@ -16,12 +16,13 @@ import com.example.food_notes.data.user.UserRepository;
 import com.example.food_notes.db.ApplicationDatabase;
 
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Single;
 
 @RunWith(JUnit4.class)
 public class UserLoginTest {
 
     private UserDataSource model;
-    private Flowable<User> userFlowable;
+    private Single<User> userFlowable;
     private User testUser;
     private ApplicationDatabase database;
     private Context context;
@@ -37,8 +38,8 @@ public class UserLoginTest {
         model = new UserRepository(database.userDao());
         model.insertOrUpdateUser(testUser);
         userFlowable = model.getUser("Hello", "World");
-        assertEquals(userFlowable.blockingLast().getUser_id(), testUser.getUser_id());
-        assertEquals(userFlowable.blockingLast().getUsername(), testUser.getUsername());
-        assertEquals(userFlowable.blockingLast().getPassword(), testUser.getPassword());
+        assertEquals(userFlowable.blockingGet().getUser_id(), testUser.getUser_id());
+        assertEquals(userFlowable.blockingGet().getUsername(), testUser.getUsername());
+        assertEquals(userFlowable.blockingGet().getPassword(), testUser.getPassword());
     }
 }

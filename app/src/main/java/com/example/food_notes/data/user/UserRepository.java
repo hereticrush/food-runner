@@ -3,7 +3,6 @@ package com.example.food_notes.data.user;
 import com.example.food_notes.data.relations.UserWithFoodPosts;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
@@ -18,7 +17,7 @@ public class UserRepository implements UserDataSource {
     }
 
     @Override
-    public Flowable<User> getUser(final String username,final String password) { return mUserDao.getUsernameAndPassword(username, password); }
+    public Single<User> getUser(final String username, final String password) { return mUserDao.getUsernameAndPassword(username, password); }
 
     @Override
     public Flowable<List<User>> getAllUsers() {

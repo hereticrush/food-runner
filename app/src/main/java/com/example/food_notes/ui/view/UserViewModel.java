@@ -13,6 +13,8 @@ import java.util.List;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
@@ -27,12 +29,9 @@ public class UserViewModel extends AndroidViewModel {
     }
 
     //TODO make sure this function queries correctly
-    public Flowable<User> getUser(final String username, final String password) {
-        return mDataSource.getUser(username, password).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .map(user -> user.getUsername().matches(username) && user.getPassword().matches(password)).cast(User.class);
-        /*return mDataSource.getUser(username, password).map(
-                user -> user.getUsername().matches(username) && user.getPassword().matches(password)
-                ? user : null);*/
+    public Single<User> getUser(final String username, final String password) {
+        mUser = mDataSource.getUser(username, password).subscribeOn(Schedulers.io()).blockingGet();
+        return Single.just(mUser);
     }
 
     public Completable updateUsername(final String username, final String password) {

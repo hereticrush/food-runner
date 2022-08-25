@@ -24,7 +24,9 @@ import com.example.food_notes.ui.view.UserViewModel;
 import com.example.food_notes.ui.view.ViewModelFactory;
 import com.google.android.material.textfield.TextInputEditText;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 public class LoginFragment extends Fragment {
@@ -108,7 +110,11 @@ public class LoginFragment extends Fragment {
     }
 
     public Boolean requestLoginIfUserExists(@NonNull final String usr, final String pwd) {
-        return mDisposable.add(mUserViewModel.getUser(usr, pwd).subscribe());
+        return true;
+    }
+
+    private void success() {
+        Toast.makeText(getActivity().getApplicationContext(), "Successfully logged in", Toast.LENGTH_SHORT).show();
     }
 
     private void toUserActivity() {
