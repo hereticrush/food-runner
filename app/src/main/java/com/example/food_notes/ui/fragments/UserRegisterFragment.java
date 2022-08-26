@@ -24,6 +24,7 @@ import com.example.food_notes.ui.view.UserViewModel;
 import com.example.food_notes.ui.view.ViewModelFactory;
 
 import java.util.Objects;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,16 +67,8 @@ public class UserRegisterFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        String username = et_username.getText().toString();
-        String password = et_password.getText().toString();
-        /*mButton.setOnClickListener(v -> {
-            Boolean VALID = addUserToDatabase();
-            if (!queryUserInDatabase(username, password) && !VALID) {
-                Toast.makeText(getActivity().getApplicationContext(), "No entry", Toast.LENGTH_SHORT).show();
-            } else if (queryUserInDatabase(username, password) && VALID) {
-                toLoginActivity();
-            }
-        });*/
+        final String username = et_username.getText().toString().trim();
+        final String password = et_password.getText().toString().trim();
         mButton.setOnClickListener(v -> {
             if (checkCredentialValidity(username, password)) {
                 addUserToDatabase();
@@ -125,9 +118,13 @@ public class UserRegisterFragment extends Fragment {
     }
 
     private boolean checkCredentialValidity(final String username,final String password) {
-        Pattern pattern = Pattern.compile("^([\\p{Alnum}!@#$%-]){7,24}[^\\s]\1*$");
-        Matcher matcher = pattern.matcher(username);
-        Matcher matcher1 = pattern.matcher(password);
-        return matcher.find() && matcher1.find();
+
+        Pattern pattern = Pattern.compile("(^[[\\p{Alnum}!\\-@$_][^\\s]]{8,24}$)");
+        Matcher matcherA = pattern.matcher(username);
+        Matcher matcherB = pattern.matcher(password);
+        if (matcherA.matches()) {
+            return matcherB.matches();
+        }
+        return false;
     }
 }

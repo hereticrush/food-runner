@@ -16,7 +16,7 @@ public class UserRegisterTest extends ExampleInstrumentedTest {
 
     @Before
     public void setPattern() {
-        this.pattern = Pattern.compile("^([\\p{Alnum}!@#$%-]){7,24}[^\\s]\1*$");
+        this.pattern = Pattern.compile("(^[[\\p{Alnum}!\\-@$_][^\\s]]{7,24}$)");
     }
 
     @Test
