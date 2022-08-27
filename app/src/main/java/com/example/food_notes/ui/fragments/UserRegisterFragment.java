@@ -22,6 +22,7 @@ import com.example.food_notes.databinding.FragmentUserRegisterBinding;
 import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.UserViewModel;
 import com.example.food_notes.ui.view.ViewModelFactory;
+import com.example.food_notes.validation.RegexValidation;
 
 import java.util.Objects;
 import java.util.regex.MatchResult;
@@ -29,18 +30,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.observers.DisposableCompletableObserver;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class UserRegisterFragment extends Fragment {
 
-    private static final String TAG = UserRegisterFragment.class.getSimpleName();
     private UserViewModel mViewModel;
     private FragmentUserRegisterBinding binding;
     private final CompositeDisposable mDisposable = new CompositeDisposable();
-    private AppCompatEditText et_username;
-    private AppCompatEditText et_password;
+    private final RegexValidation validation = new RegexValidation();
+    private AppCompatEditText editTextUsername;
+    private AppCompatEditText editTextPassword;
     private AppCompatButton mButton;
 
     public UserRegisterFragment() {}
@@ -58,8 +60,8 @@ public class UserRegisterFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentUserRegisterBinding.inflate(inflater, container, false);
-        et_username = binding.etRegisterUsername;
-        et_password = binding.etRegisterPassword;
+        editTextUsername = binding.etRegisterUsername;
+        editTextPassword = binding.etRegisterPassword;
         mButton = binding.userRegisterButton;
         return binding.getRoot();
     }
@@ -67,14 +69,15 @@ public class UserRegisterFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        final String username = et_username.getText().toString().trim();
-        final String password = et_password.getText().toString().trim();
-        mButton.setOnClickListener(v -> {
-            if (checkCredentialValidity(username, password)) {
-                addUserToDatabase();
-            } else {
-                Log.d("REGEX", "Do not match");
-                Toast.makeText(getActivity(), "No entry", Toast.LENGTH_SHORT).show();
+        mButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Boolean valid = checkCredentialValidity(editTextUsername.getText().toString().trim(),
+                        editTextPassword.getText().toString().trim());
+                if (valid) {
+                    addUserToDatabase();
+                }
+                else Toast.makeText(getActivity(), "No entry", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -87,8 +90,8 @@ public class UserRegisterFragment extends Fragment {
 
     private void toLoginActivity() {
         Bundle bundle = new Bundle();
-        bundle.putString("USERNAME", et_username.getText().toString());
-        bundle.putString("PASSWORD", et_password.getText().toString());
+        bundle.putString("USERNAME", Objects.requireNonNull(editTextUsername.getText()).toString().trim());
+        bundle.putString("PASSWORD", Objects.requireNonNull(editTextPassword.getText()).toString().trim());
         LoginFragment fragment = LoginFragment.getInstance(); //this can get params from previous fragment and pass the data
         fragment.setArguments(bundle);
         FragmentManager manager = getParentFragmentManager();
@@ -98,8 +101,8 @@ public class UserRegisterFragment extends Fragment {
     }
 
     private void addUserToDatabase() {
-        String username = et_username.getText().toString();
-        String password = et_password.getText().toString();
+        String username = Objects.requireNonNull(editTextUsername.getText()).toString().trim();
+        String password = Objects.requireNonNull(editTextPassword.getText()).toString().trim();
         mDisposable.add(mViewModel.updateUsername(username, password)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -117,14 +120,24 @@ public class UserRegisterFragment extends Fragment {
                 }));
     }
 
-    private boolean checkCredentialValidity(final String username,final String password) {
-
-        Pattern pattern = Pattern.compile("(^[[\\p{Alnum}!\\-@$_][^\\s]]{8,24}$)");
-        Matcher matcherA = pattern.matcher(username);
-        Matcher matcherB = pattern.matcher(password);
-        if (matcherA.matches()) {
-            return matcherB.matches();
+    @NonNull
+    private Boolean checkCredentialValidity(String username, String password) {
+        if (!(validation.validateUsername(username) || validation.validatePassword(password))) {
+            Toast.makeText(getActivity(), "Please fill the required fields", Toast.LENGTH_SHORT).show();
+            System.out.println("1");
+            return false;
+        } else if (!validation.validatePassword(password)) {
+            editTextPassword.setError("Password required");
+            System.out.println("2");
+            editTextUsername.setError(null);
+            return false;
+        } else if (!validation.validateUsername(username)) {
+            editTextUsername.setError("Username required");
+            System.out.println("3");
+            editTextPassword.setError(null);
+            return false;
         }
-        return false;
+        System.out.println("assuming true");
+        return true;
     }
 }
