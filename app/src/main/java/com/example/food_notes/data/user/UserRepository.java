@@ -1,6 +1,8 @@
 package com.example.food_notes.data.user;
 
-import com.example.food_notes.data.relations.UserWithFoodPosts;
+import android.app.Application;
+
+import com.example.food_notes.db.ApplicationDatabase;
 
 import java.util.List;
 
@@ -11,37 +13,35 @@ import io.reactivex.rxjava3.core.Single;
 public class UserRepository implements UserDataSource {
 
     private final UserDao mUserDao;
+    private Single<User> mUser;
+    private Flowable<List<User>> mAllUsers;
 
-    public UserRepository(UserDao userDao) {
-        mUserDao = userDao;
+    public UserRepository(Application application) {
+        ApplicationDatabase database = ApplicationDatabase.getInstance(application);
+        mUserDao = database.userDao();
+        mAllUsers = mUserDao.getAllUsers();
     }
 
     @Override
-    public Single<User> getUser(final String username, final String password) { return mUserDao.getUsernameAndPassword(username, password); }
+    public Single<User> getUser(Long id) { return mUserDao.getUser(id); }
 
     @Override
     public Flowable<List<User>> getAllUsers() {
-        return mUserDao.getAllUsersByUsername();
+        return mUserDao.getAllUsers();
     }
 
     @Override
     public Completable insertOrUpdateUser(User user) {
-        return mUserDao.insertUser(user);
+        return mUserDao.insertOrUpdateUser(user);
     }
 
     @Override
-    public void deleteAllUsers() {
-        mUserDao.deleteAllUsers();
+    public Completable deleteUserByUsername(User user) {
+        return mUserDao.deleteUserByUsername(user);
     }
 
     @Override
-    public void deleteUserByUsername(final String username) {
-        mUserDao.deleteUserByUsername(username);
+    public Completable deleteAllUsers() {
+        return mUserDao.deleteAllUsers();
     }
-
-    @Override
-    public Flowable<List<UserWithFoodPosts>> getUserWithPostsById(final Long id) {
-        return mUserDao.getUserWithPosts(id);
-    }
-
 }

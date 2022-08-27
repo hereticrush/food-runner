@@ -38,11 +38,6 @@ public class LoginFragment extends Fragment implements ApiLogin {
 
     private FragmentLoginBinding binding;
     private AuthenticationViewModel mAuthViewModel;
-    private final CompositeDisposable mDisposable = new CompositeDisposable();
-    private AppCompatButton mButton;
-    private AppCompatEditText editTextUsername;
-    private  AppCompatEditText editTextPassword;
-
     private CustomToastMessage toaster;
 
     private LoginFragment(){}
@@ -56,6 +51,8 @@ public class LoginFragment extends Fragment implements ApiLogin {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(getActivity(), R.layout.fragment_login);
         mAuthViewModel = new ViewModelProvider(this.getActivity()).get(AuthenticationViewModel.class);
+        binding.setAuthViewModel(mAuthViewModel);
+        mAuthViewModel.getApiLogin().onReady();
     }
 
     @Override
@@ -68,52 +65,14 @@ public class LoginFragment extends Fragment implements ApiLogin {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        String username = editTextUsername.getText().toString().trim();
-        String password = editTextPassword.getText().toString().trim();
-        binding.fragmentLoginButton.setOnClickListener(v -> {
-            if (checkInputFields()) {
-                 if (requestLoginIfUserExists(username, password)) {
-                     Bundle args = new Bundle();
-                     args.putString("LOGGED_USER", username);
-                     args.putString("LOGGED_PASSWORD", password);
-                     setArguments(args);
-                     toUserActivity();
-                } else {
-                    Toast.makeText(getActivity(), "No entry, invalid user", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getActivity(), "Please fill the required fields.", Toast.LENGTH_SHORT).show();
-            }
-        });
+
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mDisposable.clear();
+    public void onStop() {
+        super.onStop();
     }
 
-    //TODO write this func
-    private Boolean checkInputFields() {
-        if (TextUtils.isEmpty(binding.etLoginUsername.getText()) && TextUtils.isEmpty(binding.etLoginPassword.getText())) {
-            Toast.makeText(getActivity(), "Required fields must be filled.", Toast.LENGTH_SHORT).show();
-            return false;
-        } else if (TextUtils.isEmpty(binding.etLoginPassword.getText())) {
-            binding.etLoginPassword.setError("Password is required.");
-            return false;
-        } else if (binding.etLoginUsername.getText().toString().trim().length() < 8) {
-            binding.etLoginUsername.setError("Username must be at least 8 characters long.");
-            return false;
-        } else if (binding.etLoginPassword.getText().toString().trim().length() < 8) {
-            binding.etLoginPassword.setError("Password must be at least 8 character long.");
-            return false;
-        } else
-            return true;
-    }
-
-    private void success() {
-        Toast.makeText(getActivity(), "Successfully logged in", Toast.LENGTH_SHORT).show();
-    }
 
     private void toUserActivity() {
         UserMainFragment fragment = UserMainFragment.getInstance();

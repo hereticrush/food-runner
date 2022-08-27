@@ -1,5 +1,6 @@
 package com.example.food_notes.injection;
 
+import android.app.Application;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -15,20 +16,20 @@ import com.example.food_notes.ui.view.UserViewModelFactory;
 public class Injection {
 
     @NonNull
-    public static UserDataSource provideUserDataSource(Context context) {
-        ApplicationDatabase database = ApplicationDatabase.getInstance(context);
-        return new UserRepository(database.userDao());
+    public static UserDataSource provideUserDataSource(Application application) {
+        ApplicationDatabase database = ApplicationDatabase.getInstance(application);
+        return new UserRepository(application);
     }
 
     @NonNull
-    public static UserViewModelFactory provideViewModelFactory(Context context) {
-        UserDataSource repository = provideUserDataSource(context);
+    public static UserViewModelFactory provideViewModelFactory(Application application) {
+        UserDataSource repository = provideUserDataSource(application);
         return new UserViewModelFactory(repository);
     }
 
-    @NonNull
-    public static FoodPostDataSource provideFoodPostDataSource(Context context) {
-        ApplicationDatabase database = ApplicationDatabase.getInstance(context);
+    /*@NonNull
+    public static FoodPostDataSource provideFoodPostDataSource(Application application) {
+        ApplicationDatabase database = ApplicationDatabase.getInstance(application);
         return new FoodPostRepository(database.foodPostDao());
     }
 
@@ -36,5 +37,5 @@ public class Injection {
     public static FoodPostModelViewFactory provideFoodPostViewModelFactory(Context context) {
         FoodPostDataSource repository = provideFoodPostDataSource(context);
         return new FoodPostModelViewFactory(repository);
-    }
+    }*/
 }

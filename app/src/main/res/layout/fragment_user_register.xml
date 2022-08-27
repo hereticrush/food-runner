@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="reg_view_model"
+            type="com.example.food_notes.ui.view.model.RegisterViewModel" />
+    </data>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/app_gradient_main_background"
     android:orientation="vertical"
     android:gravity="center"
@@ -32,6 +41,7 @@
                 android:ems="@android:integer/config_mediumAnimTime"
                 android:layout_marginBottom="@dimen/til_margin_top"
                 android:hint="@string/edit_text_username_hint"
+                android:text="@={reg_view_model.username}"
                 tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
 
@@ -53,6 +63,7 @@
                 android:layout_marginTop="@dimen/til_margin_top"
                 android:hint="@string/edit_text_password_hint"
                 android:inputType="textPassword"
+                android:text="@{reg_view_model.password}"
                 tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -62,6 +73,7 @@
             android:layout_marginTop="@dimen/til_margin_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="@{reg_view_model::onClickRegisterButton}"
             android:textAlignment="center"
             android:text="@string/register_btn_placeholder_text"
             android:textSize="@dimen/button_text_size"
@@ -74,4 +86,5 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-</androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</layout>

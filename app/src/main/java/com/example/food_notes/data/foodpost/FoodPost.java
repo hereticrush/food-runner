@@ -27,9 +27,9 @@ import com.example.food_notes.data.user.User;
         }
 )
 public class FoodPost {
-        @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "post_id") private Long post_id;
+        @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "post_id") private Long post_id = 0L;
         @ColumnInfo(name = "user_id") private Long user_id;
-        @ColumnInfo(name = "img_id") private Long img_id;
+        @ColumnInfo(name = "img_id") private Long img_id = 0L;
         @ColumnInfo(name = "title") private String title;
         @ColumnInfo(name = "description") private String description;
         @ColumnInfo(name = "rating") private float rating;

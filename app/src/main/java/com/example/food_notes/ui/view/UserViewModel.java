@@ -3,17 +3,14 @@ package com.example.food_notes.ui.view;
 import android.app.Application;
 
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.ViewModel;
 
 import com.example.food_notes.data.user.User;
 import com.example.food_notes.data.user.UserDataSource;
 
 import java.util.List;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -26,12 +23,6 @@ public class UserViewModel extends AndroidViewModel {
     public UserViewModel(UserDataSource repository, Application application) {
         super(application);
         mDataSource = repository;
-    }
-
-    //TODO make sure this function queries correctly
-    public Single<User> getUser(final String username, final String password) {
-        mUser = mDataSource.getUser(username, password).subscribeOn(Schedulers.io()).blockingGet();
-        return Single.just(mUser);
     }
 
     public Completable updateUsername(final String username, final String password) {

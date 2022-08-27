@@ -1,11 +1,10 @@
 package com.example.food_notes.ui.view;
 
-public interface ApiLogin {
+public interface ApiRegister {
 
-    void onReady();
+    void onHold();
 
     void onSuccess();
 
     void onFailed(String log);
-
 }

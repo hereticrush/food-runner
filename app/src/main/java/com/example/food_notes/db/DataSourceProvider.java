@@ -9,4 +9,5 @@ public interface DataSourceProvider {
 
     UserDataSource provideUserDataSource(final Context context);
     FoodPostDataSource provideFoodPostDataSource(final Context context);
+
 }

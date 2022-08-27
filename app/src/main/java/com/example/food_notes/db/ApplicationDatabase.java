@@ -74,7 +74,7 @@ public abstract class ApplicationDatabase extends RoomDatabase {
                             database.setDatabaseCreated();
                         });
                     }
-                }).build();
+                }).fallbackToDestructiveMigration().build();
     }
 
     private void setDatabaseCreated() {

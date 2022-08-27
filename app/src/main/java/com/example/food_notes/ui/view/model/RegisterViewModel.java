@@ -4,22 +4,26 @@ import android.view.View;
 
 import androidx.lifecycle.ViewModel;
 
-import com.example.food_notes.ui.view.ApiLogin;
+import com.example.food_notes.ui.view.ApiRegister;
 import com.example.food_notes.ui.view.util.regex.RegexValidation;
 
-public class AuthenticationViewModel extends ViewModel {
+public class RegisterViewModel extends ViewModel {
 
     private String username;
     private String password;
-    private ApiLogin apiLogin;
+    private ApiRegister apiRegister;
     private final RegexValidation validation = new RegexValidation();
 
-    public void onClickLoginButton(View view) {
-        apiLogin.onReady();
+    public void onClickRegisterButton(View view) {
+        apiRegister.onHold();
         if (!(validation.validateUsername(username) || validation.validatePassword(password))) {
-            apiLogin.onFailed("Credentials are invalid");
+            apiRegister.onFailed("");
+        } else if (validation.validateUsername(username)) {
+            apiRegister.onFailed("Invalid username");
+        } else if (validation.validatePassword(password)) {
+            apiRegister.onFailed("Invalid password");
         } else {
-            apiLogin.onSuccess();
+            apiRegister.onSuccess();
         }
     }
 
@@ -39,7 +43,7 @@ public class AuthenticationViewModel extends ViewModel {
         this.password = password;
     }
 
-    public ApiLogin getApiLogin() {
-        return apiLogin;
+    public ApiRegister getApiRegister() {
+        return apiRegister;
     }
 }

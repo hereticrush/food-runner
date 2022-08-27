@@ -48,12 +48,7 @@ public class UserMainFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UserViewModelFactory mFactory = Injection.provideViewModelFactory(getActivity());
-        mViewModel = new ViewModelProvider(this, mFactory).get(UserViewModel.class);
-        if (getArguments() != null) {
-            String usr = getArguments().getString(LOGGED_USER);
-            String pwd = getArguments().getString(LOGGED_PASSWORD);
-        }
+
     }
 
     @Override
