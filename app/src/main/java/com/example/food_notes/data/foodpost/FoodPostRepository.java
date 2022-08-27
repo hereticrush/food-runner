@@ -1,15 +1,12 @@
 package com.example.food_notes.data.foodpost;
 
-import com.example.food_notes.data.relations.FoodPostAndPicture;
-
-import java.util.Date;
 import java.util.List;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 
-public class FoodPostRepository implements FoodPostDataSource{
+public class FoodPostRepository implements FoodPostDataSource {
 
     private final FoodPostDao mFoodPostDao;
 
@@ -23,7 +20,7 @@ public class FoodPostRepository implements FoodPostDataSource{
     }
 
     @Override
-    public Completable insertOrUpdateData(FoodPost foodPost) {
+    public Completable insertOrUpdate(FoodPost foodPost) {
         return mFoodPostDao.insertOrUpdate(foodPost);
     }
 
@@ -42,23 +39,9 @@ public class FoodPostRepository implements FoodPostDataSource{
         mFoodPostDao.deleteFoodPostById(id);
     }
 
-    @Override
-    public Flowable<List<FoodPostAndPicture>> getPostsAndPictures() {
-        return mFoodPostDao.getPostsAndPictures();
-    }
 
     @Override
-    public Single<FoodPostAndPicture> getFoodPostAndPictureById(Long id) {
-        return mFoodPostDao.getFoodPostAndPictureById(id);
-    }
-
-    @Override
-    public Flowable<List<FoodPostAndPicture>> getFoodAndImage() {
-        return mFoodPostDao.getFoodAndPicture();
-    }
-
-    @Override
-    public Single<Date> getDateById(Long id) {
+    public Single<String> getDateById(Long id) {
         return mFoodPostDao.getDateByPostId(id);
     }
 

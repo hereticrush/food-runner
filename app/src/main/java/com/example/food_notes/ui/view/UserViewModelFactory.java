@@ -9,12 +9,12 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.food_notes.data.user.UserDataSource;
 import com.example.food_notes.data.user.UserRepository;
 
-public class ViewModelFactory implements ViewModelProvider.Factory {
+public class UserViewModelFactory implements ViewModelProvider.Factory {
 
     private final UserDataSource mDataSource;
     Application application;
 
-    public ViewModelFactory(UserDataSource dataSource) { mDataSource = dataSource; }
+    public UserViewModelFactory(UserDataSource dataSource) { mDataSource = dataSource; }
 
     @NonNull
     @Override

@@ -9,8 +9,6 @@ import androidx.room.PrimaryKey;
 
 import com.example.food_notes.data.user.User;
 
-import java.util.Date;
-
 @Entity(
         tableName = "food_posts",
         indices = {
@@ -35,15 +33,15 @@ public class FoodPost {
         @ColumnInfo(name = "title") private String title;
         @ColumnInfo(name = "description") private String description;
         @ColumnInfo(name = "rating") private float rating;
-        @ColumnInfo(name = "date") private Date date;
+        @ColumnInfo(name = "sent_at") private String sent_at;
         @ColumnInfo(name = "latitude") private Double latitude;
         @ColumnInfo(name = "longitude") private Double longitude;
 
         public FoodPost() {}
 
         @Ignore
-        public FoodPost(String title, String description, float rating, Date date) {
-                this.date = date;
+        public FoodPost(String title, String description, float rating, String sent_at) {
+                this.sent_at = sent_at;
                 this.title = title;
                 this.description = description;
                 this.rating = rating;
@@ -60,14 +58,14 @@ public class FoodPost {
         }
 
         @Ignore
-        public FoodPost(Long post_id, Long user_id, Long img_id, String title, String description, float rating, Date date, Double latitude, Double longitude) {
+        public FoodPost(Long post_id, Long user_id, Long img_id, String title, String description, float rating, String sent_at, Double latitude, Double longitude) {
                 this.post_id = post_id;
                 this.user_id = user_id;
                 this.img_id = img_id;
                 this.title = title;
                 this.description = description;
                 this.rating = rating;
-                this.date = date;
+                this.sent_at = sent_at;
                 this.latitude = latitude;
                 this.longitude = longitude;
         }
@@ -120,12 +118,12 @@ public class FoodPost {
                 this.rating = rating;
         }
 
-        public Date getDate() {
-                return date;
+        public String getSent_at() {
+                return sent_at;
         }
 
-        public void setDate(Date date) {
-                this.date = date;
+        public void setSent_at(String sent_at) {
+                this.sent_at = sent_at;
         }
 
         public Double getLatitude() {

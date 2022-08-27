@@ -10,8 +10,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,16 +19,12 @@ import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentUserRegisterBinding;
 import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.UserViewModel;
-import com.example.food_notes.ui.view.ViewModelFactory;
-import com.example.food_notes.validation.RegexValidation;
+import com.example.food_notes.ui.view.UserViewModelFactory;
+import com.example.food_notes.ui.view.util.regex.RegexValidation;
 
 import java.util.Objects;
-import java.util.regex.MatchResult;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.observers.DisposableCompletableObserver;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -52,7 +46,7 @@ public class UserRegisterFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ViewModelFactory mFactory = Injection.provideViewModelFactory(getActivity());
+        UserViewModelFactory mFactory = Injection.provideViewModelFactory(getActivity());
         mViewModel = new ViewModelProvider(this, mFactory).get(UserViewModel.class);
     }
 

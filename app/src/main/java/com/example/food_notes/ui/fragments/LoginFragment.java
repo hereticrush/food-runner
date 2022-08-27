@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -20,26 +21,29 @@ import android.widget.Toast;
 import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentLoginBinding;
 import com.example.food_notes.injection.Injection;
+import com.example.food_notes.ui.view.ApiLogin;
 import com.example.food_notes.ui.view.UserViewModel;
-import com.example.food_notes.ui.view.ViewModelFactory;
-import com.google.android.material.textfield.TextInputEditText;
+import com.example.food_notes.ui.view.UserViewModelFactory;
+import com.example.food_notes.ui.view.model.AuthenticationViewModel;
+import com.example.food_notes.ui.view.util.text.CustomToastMessage;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
-public class LoginFragment extends Fragment {
+public class LoginFragment extends Fragment implements ApiLogin {
 
     private static final String USERNAME = "USERNAME";
     private static final String PASSWORD = "PASSWORD";
     private static final String TAG = "login";
 
-    private UserViewModel mUserViewModel;
     private FragmentLoginBinding binding;
-    private CompositeDisposable mDisposable;
+    private AuthenticationViewModel mAuthViewModel;
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
     private AppCompatButton mButton;
     private AppCompatEditText editTextUsername;
+    private  AppCompatEditText editTextPassword;
+
+    private CustomToastMessage toaster;
 
     private LoginFragment(){}
 
@@ -50,11 +54,9 @@ public class LoginFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ViewModelFactory mFactory = Injection.provideViewModelFactory(getActivity());
-        mUserViewModel = new ViewModelProvider(this, mFactory).get(UserViewModel.class);
-        mDisposable = new CompositeDisposable();
+        binding = DataBindingUtil.setContentView(getActivity(), R.layout.fragment_login);
+        mAuthViewModel = new ViewModelProvider(this.getActivity()).get(AuthenticationViewModel.class);
     }
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -66,8 +68,8 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        String username = binding.etLoginUsername.getText().toString().trim();
-        String password = binding.etLoginPassword.getText().toString().trim();
+        String username = editTextUsername.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
         binding.fragmentLoginButton.setOnClickListener(v -> {
             if (checkInputFields()) {
                  if (requestLoginIfUserExists(username, password)) {
@@ -77,10 +79,10 @@ public class LoginFragment extends Fragment {
                      setArguments(args);
                      toUserActivity();
                 } else {
-                    Toast.makeText(this.getActivity(), "No entry, invalid user", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "No entry, invalid user", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this.getActivity(), "Please fill the required fields.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Please fill the required fields.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -109,12 +111,8 @@ public class LoginFragment extends Fragment {
             return true;
     }
 
-    public Boolean requestLoginIfUserExists(@NonNull final String usr, final String pwd) {
-        return true;
-    }
-
     private void success() {
-        Toast.makeText(getActivity().getApplicationContext(), "Successfully logged in", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "Successfully logged in", Toast.LENGTH_SHORT).show();
     }
 
     private void toUserActivity() {
@@ -126,4 +124,18 @@ public class LoginFragment extends Fragment {
         ).addToBackStack(TAG).commit();
     }
 
+    @Override
+    public void onReady() {
+    }
+
+    @Override
+    public void onSuccess() {
+        toaster.toast("Login is successful.");
+       toUserActivity();
+    }
+
+    @Override
+    public void onFailed(String log) {
+        toaster.toast(log);
+    }
 }

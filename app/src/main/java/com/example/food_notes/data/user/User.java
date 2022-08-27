@@ -17,6 +17,7 @@ public class User {
         @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "user_id") private Long user_id;
         @ColumnInfo(name = "username") private String username;
         @ColumnInfo(name = "password") private String password;
+        @ColumnInfo(name = "created_at") private String created_at;
 
         public User() {}
 
@@ -32,16 +33,24 @@ public class User {
         }
 
         @Ignore
+        public User(Long user_id, String username, String password) {
+                this.user_id = user_id;
+                this.username = username;
+                this.password = password;
+        }
+
+        @Ignore
         public User(String username, String password) {
                 this.username = username;
                 this.password = password;
         }
 
         @Ignore
-        public User(Long user_id, String username, String password) {
+        public User(Long user_id, String username, String password, String created_at) {
                 this.user_id = user_id;
                 this.username = username;
                 this.password = password;
+                this.created_at = created_at;
         }
 
         public Long getUser_id() {
@@ -68,4 +77,11 @@ public class User {
                 this.password = password;
         }
 
+        public String getCreated_at() {
+                return created_at;
+        }
+
+        public void setCreated_at(String created_at) {
+                this.created_at = created_at;
+        }
 }

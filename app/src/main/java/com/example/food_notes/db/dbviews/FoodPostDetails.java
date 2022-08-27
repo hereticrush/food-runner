@@ -3,7 +3,7 @@ package com.example.food_notes.db.dbviews;
 import androidx.room.DatabaseView;
 
 @DatabaseView(
-        "SELECT post_id, title, description, rating, date, img_id " +
+        "SELECT post_id, title, description, rating, sent_at, img_id " +
                 "FROM food_posts "
 )
 public class FoodPostDetails {

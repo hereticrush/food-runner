@@ -12,10 +12,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.food_notes.db.converters.Converters;
 import com.example.food_notes.data.foodpost.FoodPostDao;
-import com.example.food_notes.data.picture.PictureDao;
 import com.example.food_notes.data.user.UserDao;
 import com.example.food_notes.data.foodpost.FoodPost;
-import com.example.food_notes.data.picture.Picture;
 import com.example.food_notes.data.user.User;
 import com.example.food_notes.db.dbviews.FoodPostDetails;
 import com.example.food_notes.db.dbviews.UserDetails;
@@ -27,7 +25,6 @@ import java.util.concurrent.Executors;
         entities = {
                 User.class,
                 FoodPost.class,
-                Picture.class,
         },
         views = {
                 FoodPostDetails.class,
@@ -39,11 +36,9 @@ import java.util.concurrent.Executors;
 @TypeConverters(Converters.class)
 public abstract class ApplicationDatabase extends RoomDatabase {
 
-    public static final String DATABASE_NAME = "food-runner-db";
-
+    private static final String DATABASE_NAME = "food-runner-db";
     public abstract UserDao userDao();
     public abstract FoodPostDao foodPostDao();
-    public abstract PictureDao pictureDao();
 
     private static volatile ApplicationDatabase INSTANCE;
     private static final int THREADS = 4;
@@ -51,6 +46,11 @@ public abstract class ApplicationDatabase extends RoomDatabase {
 
     private final MutableLiveData<Boolean> isDbCreated = new MutableLiveData<>();
 
+    /**
+     * Singleton pattern function for initializing the database
+      * @param context
+     * @return instance of a database
+     */
     public static ApplicationDatabase getInstance(final Context context) {
         if (INSTANCE == null) {
             synchronized (ApplicationDatabase.class) {
@@ -76,7 +76,6 @@ public abstract class ApplicationDatabase extends RoomDatabase {
                     }
                 }).build();
     }
-
 
     private void setDatabaseCreated() {
         isDbCreated.postValue(true);

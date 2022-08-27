@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.RewriteQueriesToDropUnusedColumns;
 import androidx.room.Transaction;
 
 import com.example.food_notes.data.relations.UserWithFoodPosts;
@@ -20,14 +21,21 @@ public interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insertUser(User user);
 
+    @Query("SELECT * FROM users ORDER BY user_id ASC")
+    Flowable<List<User>>getAllUsers();
+
     @Query("SELECT * FROM users ORDER BY username ASC")
-    Flowable<List<User>> getAllUsers();
+    Flowable<List<User>> getAllUsersByUsername();
+
+    @Query("SELECT * FROM users WHERE user_id LIKE :userId")
+    Single<User> getUser(Long userId);
 
     @Query("SELECT * FROM users WHERE username LIKE :username AND password LIKE :password")
     Single<User> getUsernameAndPassword(String username, String password);
 
     @Transaction
-    @Query("SELECT users.user_id, food_posts.post_id, users.username FROM users INNER JOIN food_posts ON food_posts.user_id WHERE food_posts.user_id=users.user_id AND users.user_id = :userId")
+    @Query("SELECT * FROM users JOIN food_posts ON food_posts.user_id WHERE food_posts.user_id=users.user_id AND users.user_id = :userId")
+    @RewriteQueriesToDropUnusedColumns
     Flowable<List<UserWithFoodPosts>> getUserWithPosts(Long userId);
 
     @Query("DELETE FROM users WHERE username LIKE :username")

@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:background="@drawable/app_gradient_main_background"
-    tools:context=".ui.fragments.LoginFragment">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="auth_view_model"
+            type="com.example.food_notes.ui.view.model.AuthenticationViewModel" />
+    </data>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@drawable/app_gradient_main_background"
+        tools:context=".ui.fragments.LoginFragment">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_login"
@@ -32,6 +41,7 @@
                     android:hint="@string/edit_text_username_hint"
                     android:ems="@android:integer/config_mediumAnimTime"
                     android:layout_marginBottom="@dimen/til_margin_top"
+                    android:text="@={auth_view_model.username}"
                     tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -53,6 +63,7 @@
                     android:layout_marginTop="@dimen/til_margin_top"
                     android:ems="@android:integer/config_mediumAnimTime"
                     android:inputType="textPassword"
+                    android:text="@={auth_view_model.password}"
                     tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -66,6 +77,7 @@
                 android:textSize="@dimen/button_text_size"
                 android:textColor="@color/color_light"
                 android:textAlignment="center"
+                android:onClick="@{auth_view_model::onClickLoginButton}"
                 android:background="@drawable/button_radius"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -73,4 +85,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</layout>

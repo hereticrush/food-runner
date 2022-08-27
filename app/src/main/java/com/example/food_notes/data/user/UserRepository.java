@@ -21,7 +21,7 @@ public class UserRepository implements UserDataSource {
 
     @Override
     public Flowable<List<User>> getAllUsers() {
-        return mUserDao.getAllUsers();
+        return mUserDao.getAllUsersByUsername();
     }
 
     @Override

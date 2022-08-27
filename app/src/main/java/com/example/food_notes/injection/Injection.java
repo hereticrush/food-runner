@@ -9,13 +9,8 @@ import com.example.food_notes.data.foodpost.FoodPostRepository;
 import com.example.food_notes.data.user.UserDataSource;
 import com.example.food_notes.data.user.UserRepository;
 import com.example.food_notes.db.ApplicationDatabase;
-import com.example.food_notes.db.DataSourceProvider;
 import com.example.food_notes.ui.view.FoodPostModelViewFactory;
-import com.example.food_notes.ui.view.ViewModelFactory;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.example.food_notes.ui.view.UserViewModelFactory;
 
 public class Injection {
 
@@ -26,9 +21,9 @@ public class Injection {
     }
 
     @NonNull
-    public static ViewModelFactory provideViewModelFactory(Context context) {
+    public static UserViewModelFactory provideViewModelFactory(Context context) {
         UserDataSource repository = provideUserDataSource(context);
-        return new ViewModelFactory(repository);
+        return new UserViewModelFactory(repository);
     }
 
     @NonNull
