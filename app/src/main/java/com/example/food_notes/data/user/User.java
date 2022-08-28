@@ -14,7 +14,7 @@ import androidx.room.PrimaryKey;
         }
 )
 public class User {
-        @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "user_id") private Integer user_id = 0;
+        @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "user_id") private int user_id = 0;
         @ColumnInfo(name = "username") private String username;
         @ColumnInfo(name = "password") private String password;
         @ColumnInfo(name = "created_at") private String created_at;
@@ -27,13 +27,13 @@ public class User {
         }
 
         @Ignore
-        public User(Integer user_id, String username) {
+        public User(int user_id, String username) {
                 this.user_id = user_id;
                 this.username = username;
         }
 
         @Ignore
-        public User(Integer user_id, String username, String password) {
+        public User(int user_id, String username, String password) {
                 this.user_id = user_id;
                 this.username = username;
                 this.password = password;
@@ -46,14 +46,14 @@ public class User {
         }
 
         @Ignore
-        public User(Integer user_id, String username, String password, String created_at) {
+        public User(int user_id, String username, String password, String created_at) {
                 this.user_id = user_id;
                 this.username = username;
                 this.password = password;
                 this.created_at = created_at;
         }
 
-        public Integer getUser_id() {
+        public int getUser_id() {
                 return user_id;
         }
 

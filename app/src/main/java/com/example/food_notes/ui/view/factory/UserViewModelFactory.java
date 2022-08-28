@@ -1,4 +1,4 @@
-package com.example.food_notes.ui.view;
+package com.example.food_notes.ui.view.factory;
 
 import android.app.Application;
 
@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.food_notes.data.user.UserDataSource;
 import com.example.food_notes.data.user.UserRepository;
+import com.example.food_notes.ui.view.UserViewModel;
 
 public class UserViewModelFactory implements ViewModelProvider.Factory {
 

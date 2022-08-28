@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View" />
         <variable
             name="auth_view_model"
             type="com.example.food_notes.ui.view.model.AuthenticationViewModel" />
@@ -41,7 +42,7 @@
                     android:hint="@string/edit_text_username_hint"
                     android:ems="@android:integer/config_mediumAnimTime"
                     android:layout_marginBottom="@dimen/til_margin_top"
-                    android:text="@={auth_view_model.username}"
+                    android:text="@{auth_view_model.username}"
                     tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -63,7 +64,7 @@
                     android:layout_marginTop="@dimen/til_margin_top"
                     android:ems="@android:integer/config_mediumAnimTime"
                     android:inputType="textPassword"
-                    android:text="@={auth_view_model.password}"
+                    android:text="@{auth_view_model.password}"
                     tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck" />
 
             </com.google.android.material.textfield.TextInputLayout>

@@ -6,7 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,11 +15,9 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.food_notes.R;
-import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.adapters.CustomAdapter;
 import com.example.food_notes.ui.adapters.RecyclerViewItemClickListener;
 import com.example.food_notes.ui.view.UserViewModel;
-import com.example.food_notes.ui.view.UserViewModelFactory;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 

@@ -1,23 +1,18 @@
 package com.example.food_notes.injection;
 
 import android.app.Application;
-import android.content.Context;
 
 import androidx.annotation.NonNull;
 
-import com.example.food_notes.data.foodpost.FoodPostDataSource;
-import com.example.food_notes.data.foodpost.FoodPostRepository;
 import com.example.food_notes.data.user.UserDataSource;
 import com.example.food_notes.data.user.UserRepository;
-import com.example.food_notes.db.ApplicationDatabase;
-import com.example.food_notes.ui.view.FoodPostModelViewFactory;
-import com.example.food_notes.ui.view.UserViewModelFactory;
+import com.example.food_notes.ui.view.factory.UserViewModelFactory;
 
 public class Injection {
 
     @NonNull
     public static UserDataSource provideUserDataSource(Application application) {
-        ApplicationDatabase database = ApplicationDatabase.getInstance(application);
+        //ApplicationDatabase database = ApplicationDatabase.getInstance(application);
         return new UserRepository(application);
     }
 

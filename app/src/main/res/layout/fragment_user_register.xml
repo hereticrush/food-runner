@@ -5,9 +5,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <import type="android.view.View" />
         <variable
             name="reg_view_model"
             type="com.example.food_notes.ui.view.model.RegisterViewModel" />
+        <variable
+            name="handler"
+            type="com.example.food_notes.ui.view.CustomHandlers" />
     </data>
 
     <androidx.appcompat.widget.LinearLayoutCompat
@@ -41,7 +45,7 @@
                 android:ems="@android:integer/config_mediumAnimTime"
                 android:layout_marginBottom="@dimen/til_margin_top"
                 android:hint="@string/edit_text_username_hint"
-                android:text="@={reg_view_model.username}"
+                android:text="@{reg_view_model.username}"
                 tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
 
@@ -73,7 +77,7 @@
             android:layout_marginTop="@dimen/til_margin_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{reg_view_model::onClickRegisterButton}"
+            android:onClick="@{ () -> handler.onRegisterButtonClicked() }"
             android:textAlignment="center"
             android:text="@string/register_btn_placeholder_text"
             android:textSize="@dimen/button_text_size"
