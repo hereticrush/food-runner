@@ -1,26 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <data>
-        <import type="android.view.View" />
-        <variable
-            name="reg_view_model"
-            type="com.example.food_notes.ui.view.model.RegisterViewModel" />
-        <variable
-            name="handler"
-            type="com.example.food_notes.ui.view.CustomHandlers" />
-    </data>
 
     <androidx.appcompat.widget.LinearLayoutCompat
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/app_gradient_main_background"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context=".ui.fragments.UserRegisterFragment">
+    tools:context=".ui.fragments.SignupFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_register"
@@ -45,8 +34,9 @@
                 android:ems="@android:integer/config_mediumAnimTime"
                 android:layout_marginBottom="@dimen/til_margin_top"
                 android:hint="@string/edit_text_username_hint"
-                android:text="@{reg_view_model.username}"
-                tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+                tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck"
+                tools:viewBindingType="androidx.appcompat.widget.AppCompatEditText" />
+
 
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -67,8 +57,8 @@
                 android:layout_marginTop="@dimen/til_margin_top"
                 android:hint="@string/edit_text_password_hint"
                 android:inputType="textPassword"
-                android:text="@{reg_view_model.password}"
-                tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+                tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck,SpeakableTextPresentCheck"
+                tools:viewBindingType="androidx.appcompat.widget.AppCompatEditText" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -77,7 +67,6 @@
             android:layout_marginTop="@dimen/til_margin_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{ () -> handler.onRegisterButtonClicked() }"
             android:textAlignment="center"
             android:text="@string/register_btn_placeholder_text"
             android:textSize="@dimen/button_text_size"
@@ -90,5 +79,4 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    </androidx.appcompat.widget.LinearLayoutCompat>
-</layout>
+</androidx.appcompat.widget.LinearLayoutCompat>

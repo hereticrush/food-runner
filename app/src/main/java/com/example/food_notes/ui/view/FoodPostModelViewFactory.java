@@ -17,6 +17,7 @@ public class FoodPostModelViewFactory implements ViewModelProvider.Factory {
         mDataSource = dataSource;
     }
 
+    @SuppressWarnings("unchecked")
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {

@@ -1,6 +1,9 @@
 package com.example.food_notes.ui.fragments;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,18 +13,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentLoginBinding;
-import com.example.food_notes.ui.view.ApiLogin;
+import com.example.food_notes.ui.view.ApiClient;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
 import com.example.food_notes.ui.view.util.text.CustomToastMessage;
 
 
-public class LoginFragment extends Fragment implements ApiLogin {
+public class LoginFragment extends Fragment implements ApiClient {
 
     private static final String USERNAME = "USERNAME";
     private static final String PASSWORD = "PASSWORD";
@@ -40,14 +39,14 @@ public class LoginFragment extends Fragment implements ApiLogin {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAuthViewModel = new ViewModelProvider(this.requireActivity()).get(AuthenticationViewModel.class);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_login, container, false);
-        binding.setLifecycleOwner(requireActivity());
+        binding = DataBindingUtil.setContentView(this.requireActivity(), R.layout.fragment_login);
+        mAuthViewModel = new ViewModelProvider(requireActivity()).get(AuthenticationViewModel.class);
+        binding.setLifecycleOwner(this.requireActivity());
         binding.setAuthViewModel(mAuthViewModel);
         return binding.getRoot();
     }
@@ -55,12 +54,6 @@ public class LoginFragment extends Fragment implements ApiLogin {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
     @Override
@@ -74,13 +67,10 @@ public class LoginFragment extends Fragment implements ApiLogin {
         FragmentManager manager = getParentFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.setReorderingAllowed(true).replace(
-                R.id.fragmentContainerView, fragment, FRAGMENT_TAG
+                R.id.userMainFragment, fragment, FRAGMENT_TAG
         ).addToBackStack(FRAGMENT_TAG).commit();
     }
 
-    @Override
-    public void onReady() {
-    }
 
     @Override
     public void onSuccess() {

@@ -17,7 +17,7 @@ public class Injection {
     }
 
     @NonNull
-    public static UserViewModelFactory provideViewModelFactory(Application application) {
+    public static UserViewModelFactory provideUserViewModelFactory(Application application) {
         UserDataSource repository = provideUserDataSource(application);
         return new UserViewModelFactory(repository);
     }

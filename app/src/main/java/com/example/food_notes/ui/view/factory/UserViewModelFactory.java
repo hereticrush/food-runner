@@ -17,6 +17,7 @@ public class UserViewModelFactory implements ViewModelProvider.Factory {
 
     public UserViewModelFactory(UserDataSource dataSource) { mDataSource = dataSource; }
 
+    @SuppressWarnings("unchecked")
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {

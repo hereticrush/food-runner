@@ -1,8 +1,6 @@
 package com.example.food_notes.ui.view;
 
-public interface ApiLogin {
-
-    void onReady();
+public interface ApiClient {
 
     void onSuccess();
 

@@ -94,7 +94,7 @@ public class UserMainFragment extends Fragment {
     private void toAddPostFragment() {
         FragmentManager manager = getParentFragmentManager();
         manager.beginTransaction().setReorderingAllowed(true).replace(
-                R.id.fragmentContainerView, AddPostFragment.getInstance(), null
+                R.id.userMainFragment, AddPostFragment.getInstance(), null
         ).addToBackStack(TAG).commit();
     }
 

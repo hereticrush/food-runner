@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="android.view.View" />
         <variable
             name="auth_view_model"
             type="com.example.food_notes.ui.view.model.AuthenticationViewModel" />
@@ -40,10 +40,11 @@
                     android:layout_height="wrap_content"
                     android:inputType="textShortMessage"
                     android:hint="@string/edit_text_username_hint"
-                    android:ems="@android:integer/config_mediumAnimTime"
                     android:layout_marginBottom="@dimen/til_margin_top"
-                    android:text="@{auth_view_model.username}"
-                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck" />
+                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck"
+                    android:text="@={auth_view_model.username}"
+                     />
+
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -64,13 +65,14 @@
                     android:layout_marginTop="@dimen/til_margin_top"
                     android:ems="@android:integer/config_mediumAnimTime"
                     android:inputType="textPassword"
-                    android:text="@{auth_view_model.password}"
-                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck" />
+                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck"
+                    android:text="@={auth_view_model.password}"
+                     />
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/fragment_login_button"
+                android:id="@+id/login_button"
                 android:layout_marginTop="@dimen/til_margin_top"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -78,14 +80,13 @@
                 android:textSize="@dimen/button_text_size"
                 android:textColor="@color/color_light"
                 android:textAlignment="center"
-                android:onClick="@{auth_view_model::onClickLoginButton}"
+                android:onClick="@={() -> auth_view_model.onButtonClicked()}"
                 android:background="@drawable/button_radius"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/til_login2"/>
+                app:layout_constraintTop_toBottomOf="@id/til_login2" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
-
 </layout>

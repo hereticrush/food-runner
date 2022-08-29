@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/app_nav"
-    app:startDestination="@id/userRegisterFragment">
+    app:startDestination="@id/loginFragment">
     <fragment
         android:id="@+id/userMainFragment"
         android:name="com.example.food_notes.ui.fragments.UserMainFragment"
@@ -21,11 +21,10 @@
         android:label="fragment_add_post"
         tools:layout="@layout/fragment_add_post" >
         <action
-            android:id="@+id/action_addPostFragment_to_userMainFragment"
+            android:id="@+id/action_addPostFragment_to_userMainFragment2"
             app:destination="@id/userMainFragment"
-            app:restoreState="true"
             app:popUpTo="@id/userMainFragment"
-            app:popUpToSaveState="true"/>
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
@@ -37,16 +36,21 @@
             app:destination="@id/userMainFragment"
             app:popUpTo="@id/userMainFragment"
             app:popUpToInclusive="true"/>
+        <action
+            android:id="@+id/action_loginFragment_to_signupFragment2"
+            app:destination="@id/signupFragment"
+            app:popUpTo="@id/signupFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
-        android:id="@+id/userRegisterFragment"
-        android:name="com.example.food_notes.ui.fragments.UserRegisterFragment"
-        android:label="fragment_user_register"
-        tools:layout="@layout/fragment_user_register" >
+        android:id="@+id/signupFragment"
+        android:name="com.example.food_notes.ui.fragments.SignupFragment"
+        android:label="fragment_signup"
+        tools:layout="@layout/fragment_signup" >
         <action
-            android:id="@+id/action_userRegisterFragment_to_loginFragment"
+            android:id="@+id/action_signupFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/loginFragment"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

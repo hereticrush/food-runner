@@ -20,10 +20,7 @@ import android.view.ViewGroup;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
-import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentAddPostBinding;
-import com.example.food_notes.db.ApplicationDatabase;
-import com.example.food_notes.ui.activities.PostsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -70,7 +67,6 @@ public class AddPostFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         initRatingBar();
         binding.fabBackToMain.setOnClickListener(v -> backToUserMainFragment());
-        binding.fabCreatePost.setOnClickListener(v -> createPost());
     }
     //TODO IMPLEMENT THIS FUNCTION AS IT IS: GO TO GALLERY, SET PERMS, GET THE IMAGE AND CONVERT URL TO STRING , STORE IN DB
     //TODO BUG HAS TO DO WITH FUNCTION CALLS IN THIS FUNCTION
@@ -169,16 +165,6 @@ public class AddPostFragment extends Fragment {
     private void backToUserMainFragment() {
         FragmentManager manager = getParentFragmentManager();
         manager.popBackStack("main", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-    }
-
-    private void toPostsActivity() {
-        Intent toPosts = new Intent(getActivity(), PostsActivity.class);
-        startActivity(toPosts);
-    }
-
-
-    private void createPost() {
-        toPostsActivity();
     }
 
     /**

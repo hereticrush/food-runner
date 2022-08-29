@@ -28,11 +28,7 @@ public interface UserDao {
     Single<User> getUser(Long userId);
 
     @Query("SELECT * FROM users WHERE username LIKE :username")
-    Single<User> getUsername(String username);
-
-    @Transaction
-    @Query("SELECT * FROM users JOIN food_posts ON food_posts.user_id WHERE food_posts.user_id=users.user_id AND users.user_id = :userId")
-    Flowable<List<UserWithFoodPosts>> getUserWithPosts(Long userId);
+    Single<User> getUserByName(String username);
 
     @Delete
     Completable deleteUserByUsername(User user);

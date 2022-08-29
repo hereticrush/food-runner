@@ -1,48 +1,58 @@
 package com.example.food_notes.ui.view.model;
 
-import android.view.View;
+import android.app.Application;
 
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.food_notes.data.user.User;
-import com.example.food_notes.ui.view.ApiLogin;
+import com.example.food_notes.data.user.UserDataSource;
+import com.example.food_notes.ui.view.ApiClient;
+import com.example.food_notes.ui.view.CustomHandlers;
 import com.example.food_notes.ui.view.util.regex.UserRegexValidation;
 
-public class AuthenticationViewModel extends ViewModel {
+import io.reactivex.rxjava3.core.Single;
 
-    private String username;
-    private String password;
-    private MutableLiveData<User> mUser;
-    private ApiLogin apiLogin;
-    private UserRegexValidation validation;
+public class AuthenticationViewModel extends AndroidViewModel implements CustomHandlers {
 
-    public void onClickLoginButton(View view) {
-        apiLogin.onReady();
-        if (!(validation.validate(username) || validation.validate(password))) {
-            apiLogin.onFailed("Credentials are invalid");
-        } else {
-            apiLogin.onSuccess();
-        }
+    private LiveData<String> username;
+    private LiveData<String> password;
+    private final UserDataSource mDataSource;
+    Application application;
+    private ApiClient apiClient;
+
+    public AuthenticationViewModel(UserDataSource repository, Application application){
+        super(application);
+        mDataSource = repository;
     }
 
-    public String getUsername() {
-        return username;
+    public LiveData<String> getUsername() {
+        return this.username;
     }
 
-    public void setUsername(String username) {
+    public void setUsername(LiveData<String> username) {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public LiveData<String> getPassword() {
+        return this.password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(LiveData<String> password) {
         this.password = password;
     }
 
-    public ApiLogin getApiLogin() {
-        return apiLogin;
+    public ApiClient getApi() {
+        return apiClient;
+    }
+
+    @Override
+    public void onButtonClicked() {
+        if (!(UserRegexValidation.validate(getUsername().getValue(), getPassword().getValue()))) {
+            apiClient.onFailed("Credentials are invalid");
+        } else {
+            apiClient.onSuccess();
+        }
     }
 }

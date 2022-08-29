@@ -14,7 +14,7 @@ public class UserRepository implements UserDataSource {
 
     private final UserDao mUserDao;
     private Single<User> mUser;
-    private Flowable<List<User>> mAllUsers;
+    private final Flowable<List<User>> mAllUsers;
 
     public UserRepository(Application application) {
         ApplicationDatabase database = ApplicationDatabase.getInstance(application);
