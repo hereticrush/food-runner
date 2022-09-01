@@ -39,10 +39,4 @@ public class FoodPostRepository implements FoodPostDataSource {
         mFoodPostDao.deleteFoodPostById(id);
     }
 
-
-    @Override
-    public Single<String> getDateById(Long id) {
-        return mFoodPostDao.getDateByPostId(id);
-    }
-
 }

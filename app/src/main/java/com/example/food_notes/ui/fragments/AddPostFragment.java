@@ -41,7 +41,7 @@ public class AddPostFragment extends Fragment {
     private RatingBar ratingBar;
     private boolean flag_value;
     private FloatingActionButton fab_create, fab_back, fab_choose_image;
-    private AddPostFragment() {}
+    public AddPostFragment() {}
 
     @NonNull
     public static AddPostFragment getInstance() {

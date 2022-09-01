@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.drawerlayout.widget.DrawerLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -19,10 +19,15 @@
             app:defaultNavHost="true"
             app:navGraph="@navigation/app_nav"/>
 
-        <com.google.android.material.navigation.NavigationView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"/>
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:itemBackground="@color/color_primary_dark"
+            app:itemTextColor="@color/color_light"
+            app:itemIconTint="@color/color_light"
+            android:layout_gravity="bottom|end"
+            app:menu="@menu/menu_app"/>
 
 
-</androidx.drawerlayout.widget.DrawerLayout>
+</FrameLayout>

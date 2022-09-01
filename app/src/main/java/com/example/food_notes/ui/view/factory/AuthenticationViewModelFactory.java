@@ -12,7 +12,6 @@ import com.example.food_notes.ui.view.model.AuthenticationViewModel;
 public class AuthenticationViewModelFactory implements ViewModelProvider.Factory {
 
     private final UserDataSource mDataSource;
-    Application application;
 
     public AuthenticationViewModelFactory(UserDataSource dataSource) {
         mDataSource = dataSource;
@@ -23,7 +22,7 @@ public class AuthenticationViewModelFactory implements ViewModelProvider.Factory
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(AuthenticationViewModel.class)) {
-            return (T) new AuthenticationViewModel(mDataSource, application);
+            return (T) new AuthenticationViewModel(mDataSource);
         }
         throw new IllegalArgumentException("ViewModel cannot be instantiated");
     }

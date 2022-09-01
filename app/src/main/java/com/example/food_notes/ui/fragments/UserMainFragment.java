@@ -1,6 +1,10 @@
 package com.example.food_notes.ui.fragments;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -9,43 +13,60 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
-
 import com.example.food_notes.R;
+import com.example.food_notes.databinding.FragmentUserMainBinding;
 import com.example.food_notes.ui.adapters.CustomAdapter;
 import com.example.food_notes.ui.adapters.RecyclerViewItemClickListener;
 import com.example.food_notes.ui.view.UserViewModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
+/**
+ * Fragment structure that has user card items, provide functionalities
+ * such as adding items and removing
+ * main functionality point for
+ * application
+ */
 public class UserMainFragment extends Fragment {
 
     private static final String LOGGED_USER = "LOGGED_USER";
-    private static final String LOGGED_PASSWORD = "LOGGED_PASSWORD";
+    private static final String LOGGED_USERID = "LOGGED_USERID";
     private static final String TAG = "main";
+    private FragmentUserMainBinding binding;
     private RecyclerView recyclerView;
+    private final CompositeDisposable disposable = new CompositeDisposable();
     private UserViewModel mViewModel;
+    private BottomNavigationView bottomNavigationView;
 
-    private UserMainFragment() {}
+    public UserMainFragment() {}
 
-    public static UserMainFragment getInstance() {
-        return new UserMainFragment();
+    public static UserMainFragment newInstance(String username, int user_id) {
+        UserMainFragment fragment = new UserMainFragment();
+        Bundle args = new Bundle();
+        args.putString(LOGGED_USER, username);
+        args.putInt(LOGGED_USERID, user_id);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_user_main, container, false);
+        binding = FragmentUserMainBinding.inflate(inflater, container, false);
+        if (getArguments() != null) {
+            String usr = getArguments().getString(LOGGED_USER);
+            int usr_id = getArguments().getInt(LOGGED_USERID);
+        }
+        //TODO add ui elements to set text to args
+        return binding.getRoot();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -59,6 +80,18 @@ public class UserMainFragment extends Fragment {
         FloatingActionButton fab_add = view.findViewById(R.id.fab_add_post);
         fab_add.setOnClickListener(f -> toAddPostFragment());
 
+    }
+
+    @Override
+    public void onStop() {
+        disposable.clear();
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null; // avoid memory leak
     }
 
     private void displayUsers() {
@@ -92,8 +125,7 @@ public class UserMainFragment extends Fragment {
     }
 
     private void toAddPostFragment() {
-        FragmentManager manager = getParentFragmentManager();
-        manager.beginTransaction().setReorderingAllowed(true).replace(
+        requireActivity().getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).replace(
                 R.id.userMainFragment, AddPostFragment.getInstance(), null
         ).addToBackStack(TAG).commit();
     }

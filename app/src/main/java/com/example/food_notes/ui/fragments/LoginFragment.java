@@ -1,59 +1,119 @@
 package com.example.food_notes.ui.fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.databinding.DataBindingUtil;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleEventObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.navigation.NavBackStackEntry;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.NavigationUI;
 
 import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentLoginBinding;
+import com.example.food_notes.injection.Injection;
+import com.example.food_notes.ui.activities.MainActivity;
 import com.example.food_notes.ui.view.ApiClient;
+import com.example.food_notes.ui.view.factory.AuthenticationViewModelFactory;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
-import com.example.food_notes.ui.view.util.text.CustomToastMessage;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.textfield.TextInputEditText;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 public class LoginFragment extends Fragment implements ApiClient {
 
     private static final String USERNAME = "USERNAME";
-    private static final String PASSWORD = "PASSWORD";
-    private static final String FRAGMENT_TAG = "login";
+    private static final String CLICK_TEXT = "Click here to sign up";
+    private static final String FRAGMENT_TAG = LoginFragment.class.getSimpleName();
 
-    private FragmentLoginBinding binding;
+    private AuthenticationViewModelFactory mFactory;
     private AuthenticationViewModel mAuthViewModel;
-    private CustomToastMessage toaster;
+    private FragmentLoginBinding binding;
+    private final CompositeDisposable disposable = new CompositeDisposable();
+    private TextInputEditText editTextUsername;
+    private TextInputEditText editTextPassword;
+    private AppCompatButton button;
+    private BottomNavigationView bottomNavigationView;
 
-    private LoginFragment(){}
+    public LoginFragment(){}
 
-    public static LoginFragment getInstance() {
-        return new LoginFragment();
+    @Nullable
+    public static LoginFragment newInstance(String username) {
+        Bundle args = new Bundle();
+        args.putString(USERNAME, username);
+        LoginFragment fragment = new LoginFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mFactory = Injection.provideAuthViewModelFactory(requireActivity().getApplication());
+        mAuthViewModel = mFactory.create(AuthenticationViewModel.class);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = DataBindingUtil.setContentView(this.requireActivity(), R.layout.fragment_login);
-        mAuthViewModel = new ViewModelProvider(requireActivity()).get(AuthenticationViewModel.class);
-        binding.setLifecycleOwner(this.requireActivity());
-        binding.setAuthViewModel(mAuthViewModel);
+        binding = FragmentLoginBinding.inflate(inflater, container, false);
+        editTextUsername = binding.etLoginUsername;
+        editTextPassword = binding.etLoginPassword;
+        final NavController navController = NavHostFragment.findNavController(this);
+
+        SpannableString spannableString = new SpannableString(CLICK_TEXT);
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                navController.navigate(LoginFragmentDirections.actionLoginFragmentToSignupFragment2());
+            }
+        };
+        spannableString.setSpan(clickableSpan, 0, 10, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        binding.tvLoginSuggestion.setText(spannableString);
+        binding.tvLoginSuggestion.setMovementMethod(LinkMovementMethod.getInstance());
+        binding.tvLoginSuggestion.setHighlightColor(Color.TRANSPARENT);
+        button = binding.loginButton;
+
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
+        button.setOnClickListener(v -> attemptLogin());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        disposable.clear();
     }
 
     @Override
@@ -63,23 +123,36 @@ public class LoginFragment extends Fragment implements ApiClient {
     }
 
     private void toUserActivity() {
-        UserMainFragment fragment = UserMainFragment.getInstance();
-        FragmentManager manager = getParentFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        transaction.setReorderingAllowed(true).replace(
-                R.id.userMainFragment, fragment, FRAGMENT_TAG
-        ).addToBackStack(FRAGMENT_TAG).commit();
+        requireActivity().getSupportFragmentManager().beginTransaction()
+        .setReorderingAllowed(true).replace(
+                R.id.userMainFragment, new UserMainFragment(), FRAGMENT_TAG
+        ).commit();
     }
 
 
+    private void attemptLogin() {
+        String username = editTextUsername.toString();
+        String password = editTextPassword.toString();
+        /*disposable.add(mAuthViewModel.getUser(username).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).subscribe((user, throwable) -> {
+                    String LOGGED_USER = user.getUsername();
+                    Log.e(FRAGMENT_TAG, "Error occurred", throwable);
+                }));*/
+        disposable.add(mAuthViewModel.insertUser(username, password).subscribeOn(Schedulers.io())
+                .doOnComplete(this::onSuccess)
+                .doOnError(Throwable::printStackTrace)
+                .subscribe(this::toUserActivity));
+        System.out.println("done");
+    }
+
     @Override
     public void onSuccess() {
-        toaster.toast("Login is successful.");
-       toUserActivity();
+        Toast.makeText(requireActivity().getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+        disposable.dispose();
     }
 
     @Override
     public void onFailed(String log) {
-        toaster.toast(log);
+        Toast.makeText(requireActivity().getApplicationContext(), log, Toast.LENGTH_SHORT).show();
     }
 }

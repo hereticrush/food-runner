@@ -9,30 +9,31 @@ import java.util.List;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class UserRepository implements UserDataSource {
 
     private final UserDao mUserDao;
-    private Single<User> mUser;
     private final Flowable<List<User>> mAllUsers;
 
-    public UserRepository(Application application) {
-        ApplicationDatabase database = ApplicationDatabase.getInstance(application);
-        mUserDao = database.userDao();
+    public UserRepository(UserDao userDao) {
+        mUserDao = userDao;
         mAllUsers = mUserDao.getAllUsers();
     }
 
     @Override
-    public Single<User> getUser(Long id) { return mUserDao.getUser(id); }
-
-    @Override
-    public Flowable<List<User>> getAllUsers() {
-        return mUserDao.getAllUsers();
+    public Single<User> getUserById(int id) {
+        return mUserDao.getUserById(id);
     }
 
     @Override
-    public Completable insertOrUpdateUser(User user) {
-        return mUserDao.insertOrUpdateUser(user);
+    public Flowable<List<User>> getAllUsers() {
+        return mAllUsers;
+    }
+
+    @Override
+    public Completable insertUser(User user) {
+        return Completable.wrap(mUserDao.insertUser(user));
     }
 
     @Override

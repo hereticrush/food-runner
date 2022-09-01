@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-
-    <data>
-        <variable
-            name="auth_view_model"
-            type="com.example.food_notes.ui.view.model.AuthenticationViewModel" />
-    </data>
-
     <androidx.appcompat.widget.LinearLayoutCompat
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -34,16 +26,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
-                <androidx.appcompat.widget.AppCompatEditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_login_username"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textShortMessage"
-                    android:hint="@string/edit_text_username_hint"
                     android:layout_marginBottom="@dimen/til_margin_top"
-                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck"
-                    android:text="@={auth_view_model.username}"
-                     />
+                    android:hint="@string/edit_text_username_hint"
+                    android:inputType="textShortMessage"
+                    android:textColorHint="#212121"
+                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck,TextContrastCheck,TextContrastCheck" />
 
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -56,18 +47,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/til_login1"
-                android:hint="@string/edit_text_password_hint">
+                android:hint="@string/edit_text_password_hint"
+                app:passwordToggleEnabled="true">
 
-                <androidx.appcompat.widget.AppCompatEditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_login_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/til_margin_top"
                     android:ems="@android:integer/config_mediumAnimTime"
                     android:inputType="textPassword"
-                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck"
-                    android:text="@={auth_view_model.password}"
-                     />
+                    android:textColorHint="#212121"
+                    tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck,TextContrastCheck,TextContrastCheck" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -80,13 +71,20 @@
                 android:textSize="@dimen/button_text_size"
                 android:textColor="@color/color_light"
                 android:textAlignment="center"
-                android:onClick="@={() -> auth_view_model.onButtonClicked()}"
                 android:background="@drawable/button_radius"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/til_login2" />
 
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_login_suggestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_content"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+        <!--android:text="@string/text_view_suggestion_placeholder"-->
     </androidx.appcompat.widget.LinearLayoutCompat>
-</layout>

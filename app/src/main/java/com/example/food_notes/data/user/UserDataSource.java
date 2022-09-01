@@ -8,11 +8,11 @@ import io.reactivex.rxjava3.core.Single;
 
 public interface UserDataSource {
 
-    Single<User> getUser(Long id);
+    Single<User> getUserById(int id);
 
     Flowable<List<User>> getAllUsers();
 
-    Completable insertOrUpdateUser(User user);
+    Completable insertUser(User user);
 
     Completable deleteUserByUsername(User user);
 

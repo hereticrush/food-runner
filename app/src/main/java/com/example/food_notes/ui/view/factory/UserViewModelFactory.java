@@ -13,7 +13,6 @@ import com.example.food_notes.ui.view.UserViewModel;
 public class UserViewModelFactory implements ViewModelProvider.Factory {
 
     private final UserDataSource mDataSource;
-    Application application;
 
     public UserViewModelFactory(UserDataSource dataSource) { mDataSource = dataSource; }
 
@@ -22,7 +21,7 @@ public class UserViewModelFactory implements ViewModelProvider.Factory {
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom((UserViewModel.class))) {
-            return (T) new UserViewModel(mDataSource, application);
+            return (T) new UserViewModel(mDataSource);
         }
         throw new IllegalArgumentException("ViewModel class is not found");
     }

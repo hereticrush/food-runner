@@ -14,8 +14,6 @@ public interface FoodPostDataSource {
 
     Completable insertOrUpdate(FoodPost foodPost);
 
-    Single<String> getDateById(Long id);
-
     void deleteAllData();
 
     void deleteFoodPostById(Long post_id);

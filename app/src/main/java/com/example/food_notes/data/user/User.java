@@ -1,10 +1,13 @@
 package com.example.food_notes.data.user;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+
+import java.util.Objects;
 
 @Entity(
         tableName = "users",
@@ -23,12 +26,6 @@ public class User {
 
         @Ignore
         public User(String username) {
-                this.username = username;
-        }
-
-        @Ignore
-        public User(int user_id, String username) {
-                this.user_id = user_id;
                 this.username = username;
         }
 
@@ -83,5 +80,18 @@ public class User {
 
         public void setCreated_at(String created_at) {
                 this.created_at = created_at;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+                if (this == o) return true;
+                if (!(o instanceof User)) return false;
+                User user = (User) o;
+                return getUser_id() == user.getUser_id() && Objects.equals(getUsername(), user.getUsername()) && Objects.equals(getPassword(), user.getPassword()) && Objects.equals(getCreated_at(), user.getCreated_at());
+        }
+
+        @Override
+        public int hashCode() {
+                return Objects.hash(getUser_id(), getUsername(), getPassword(), getCreated_at());
         }
 }

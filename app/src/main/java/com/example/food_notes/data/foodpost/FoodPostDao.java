@@ -23,9 +23,6 @@ public interface FoodPostDao {
     @Query("SELECT * FROM food_posts WHERE post_id=:postId")
     Flowable<FoodPost> getFoodPostById(Long postId);
 
-    @Query("SELECT sent_at FROM food_posts WHERE post_id=:id")
-    Single<String> getDateByPostId(Long id);
-
     @Query("DELETE FROM food_posts WHERE food_posts.post_id = :id")
     void deleteFoodPostById(long id);
 

@@ -37,7 +37,8 @@
                     app:layout_constraintEnd_toStartOf="@+id/iv_set_image"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/cl_add_post"
-                    android:src="@drawable/ic_baseline_add_24" />
+                    android:src="@drawable/ic_baseline_add_24"
+                    android:contentDescription="add_item_button" />
 
                 <!--<androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tv_choose_image"
