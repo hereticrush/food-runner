@@ -11,35 +11,46 @@ import com.example.food_notes.db.ApplicationDatabase;
 import com.example.food_notes.ui.view.factory.AuthenticationViewModelFactory;
 import com.example.food_notes.ui.view.factory.UserViewModelFactory;
 
+/**
+ * Dependency injection model suggests some objects
+ * should be dependent to other objects from outside
+ * Injection class implements this type of behaviour
+ */
 public class Injection {
 
+    /**
+     * Provides an UserRepository object to connect
+     * the data classes with viewmodels
+     * @param context
+     * @return UserDataSource object
+     */
     @NonNull
     public static UserDataSource provideUserDataSource(Context context) {
         ApplicationDatabase database = ApplicationDatabase.getInstance(context);
         return new UserRepository(database.userDao());
     }
 
+    /**
+     * Provides a UserViewModel object to access the user repository
+     * @param context
+     * @return UserViewModelFactory object
+     */
     @NonNull
     public static UserViewModelFactory provideUserViewModelFactory(Context context) {
         UserDataSource repository = provideUserDataSource(context);
         return new UserViewModelFactory(repository);
     }
 
+    /**
+     * Provides an Authentication View Model object
+     * to access the data repository(in this case user repository)
+     * @param context
+     * @return AuthenticationViewModel object
+     */
     @NonNull
     public static AuthenticationViewModelFactory provideAuthViewModelFactory(Context context) {
         UserDataSource repository = provideUserDataSource(context);
         return new AuthenticationViewModelFactory(repository);
     }
 
-    /*@NonNull
-    public static FoodPostDataSource provideFoodPostDataSource(Application application) {
-        ApplicationDatabase database = ApplicationDatabase.getInstance(application);
-        return new FoodPostRepository(database.foodPostDao());
-    }
-
-    @NonNull
-    public static FoodPostModelViewFactory provideFoodPostViewModelFactory(Context context) {
-        FoodPostDataSource repository = provideFoodPostDataSource(context);
-        return new FoodPostModelViewFactory(repository);
-    }*/
 }
