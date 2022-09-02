@@ -1,5 +1,6 @@
 package com.example.food_notes.ui.view.model;
 
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.lifecycle.ViewModel;
@@ -17,21 +18,26 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.functions.Predicate;
 import io.reactivex.rxjava3.internal.operators.flowable.FlowableCollect;
 import io.reactivex.rxjava3.internal.operators.flowable.FlowableCollectSingle;
+import io.reactivex.rxjava3.observers.DisposableCompletableObserver;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class AuthenticationViewModel extends ViewModel {
 
-    private boolean isInputValid;
     private final CompositeDisposable disposable = new CompositeDisposable();
     private final UserDataSource mDataSource;
     private User mUser;
@@ -58,50 +64,53 @@ public class AuthenticationViewModel extends ViewModel {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
         String dateString = format.format(currentDate);
         mUser.setCreated_at(dateString);
-        return mDataSource.insertUser(mUser).doOnComplete(() -> System.out.println(mUser + "added."))
-                .doOnError(throwable -> Log.e("ERROR", "Error occurred"));
+        return  Completable.fromCallable(() -> mDataSource.insertUser(mUser))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .delay(2, TimeUnit.SECONDS, AndroidSchedulers.from(Looper.getMainLooper()));
     }
 
-    public Single<User> getUser(final String username) {
+    public Maybe<User> getUser(final String username) {
        return getAllUsers()
+               .observeOn(AndroidSchedulers.mainThread())
+               .subscribeOn(Schedulers.io())
                .flatMap(Flowable::fromIterable)
-               .filter(i -> i.getUsername().matches(username)).toObservable().singleOrError();
+               .filter(user -> username.matches(user.getUsername()))
+               .toObservable().singleElement().delay(1, TimeUnit.SECONDS,
+                       Schedulers.io());
     }
 
 
+    /**
+     * Fetches all users registered in database
+     * @return Flowable list of user object
+     */
     public Flowable<List<User>> getAllUsers() {
         return Flowable.fromAction(mDataSource::getAllUsers);
     }
 
     /**
-     *
+     * Checks whether user input is violating the regex rules
      * @param username username
      * @param password password
+     * @return boolean output for validation
      */
-    private void validateUserCredentials(String username, String password) {
+    public boolean validateUserInput(String username, String password) {
 
-        if (!(UserRegexValidation.INPUT_PATTERN.matcher(username.trim()).matches()
-                || UserRegexValidation.INPUT_PATTERN.matcher(password.trim()).matches())) {
-            setInputValid(false);
-            return;
+        if (!(UserRegexValidation.INPUT_PATTERN.matcher(username).matches()
+                || UserRegexValidation.INPUT_PATTERN.matcher(password).matches())) {
+            System.out.println("1");
+            return false;
         }
-        if (!UserRegexValidation.INPUT_PATTERN.matcher(username.trim()).matches()) {
-            setInputValid(false);
-            return;
+        if (!UserRegexValidation.INPUT_PATTERN.matcher(username).matches()) {
+            System.out.println("2");
+            return false;
         }
-        if (!UserRegexValidation.INPUT_PATTERN.matcher(password.trim()).matches()) {
-            setInputValid(false);
-            return;
+        if (!UserRegexValidation.INPUT_PATTERN.matcher(password).matches()) {
+            System.out.println("3");
+            return false;
         }
-        setInputValid(true);
-    }
-
-    public boolean isInputValid() {
-        return this.isInputValid;
-    }
-
-    public void setInputValid(boolean inputValid) {
-        isInputValid = inputValid;
+        return true;
     }
 
     @Override

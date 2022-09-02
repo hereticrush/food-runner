@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
@@ -39,8 +40,10 @@ import com.example.food_notes.ui.view.model.AuthenticationViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 
+import io.reactivex.Observable;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.functions.Action;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
@@ -105,9 +108,10 @@ public class LoginFragment extends Fragment implements ApiClient {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-
-        button.setOnClickListener(v -> attemptLogin());
+        button.setOnClickListener(v -> {
+            if (isInputValid())
+                attemptLogin();
+        });
     }
 
     @Override
@@ -131,28 +135,46 @@ public class LoginFragment extends Fragment implements ApiClient {
 
 
     private void attemptLogin() {
-        String username = editTextUsername.toString();
-        String password = editTextPassword.toString();
+
         /*disposable.add(mAuthViewModel.getUser(username).observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io()).subscribe((user, throwable) -> {
                     String LOGGED_USER = user.getUsername();
                     Log.e(FRAGMENT_TAG, "Error occurred", throwable);
                 }));*/
-        disposable.add(mAuthViewModel.insertUser(username, password).subscribeOn(Schedulers.io())
-                .doOnComplete(this::onSuccess)
-                .doOnError(Throwable::printStackTrace)
-                .subscribe(this::toUserActivity));
+        String username = editTextUsername.getText().toString();
+        String password = editTextPassword.getText().toString();
+        System.out.println(username + " " + password);
+        disposable.add(mAuthViewModel.insertUser(username, password)
+                .doOnComplete(this::toUserActivity).subscribe(this::onSuccess));
         System.out.println("done");
+
     }
 
     @Override
     public void onSuccess() {
         Toast.makeText(requireActivity().getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-        disposable.dispose();
     }
 
     @Override
     public void onFailed(String log) {
         Toast.makeText(requireActivity().getApplicationContext(), log, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isInputValid() {
+        if (TextUtils.isEmpty(editTextUsername.getText()) &&
+        TextUtils.isEmpty(editTextPassword.getText())) {
+            editTextUsername.setError("");
+            editTextPassword.setError("");
+            return false;
+        }
+        if (TextUtils.isEmpty(editTextUsername.getText())) {
+            editTextUsername.setError("Please enter a username");
+            return false;
+        }
+        if (TextUtils.isEmpty(editTextPassword.getText())) {
+            editTextPassword.setError("Please enter a password");
+            return false;
+        }
+        return true;
     }
 }

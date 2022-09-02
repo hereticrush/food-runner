@@ -9,6 +9,7 @@ import androidx.room.Update;
 
 import java.util.List;
 
+import io.reactivex.Maybe;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
@@ -23,7 +24,7 @@ public interface UserDao {
     Flowable<List<User>>getAllUsers();
 
     @Query("SELECT * FROM users WHERE user_id LIKE :userId")
-    Single<User> getUserById(int userId);
+    Maybe<User> getUserById(int userId);
 
     @Delete
     Completable deleteUserByUsername(User user);

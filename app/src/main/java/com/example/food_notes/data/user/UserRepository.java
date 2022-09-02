@@ -6,6 +6,7 @@ import com.example.food_notes.db.ApplicationDatabase;
 
 import java.util.List;
 
+import io.reactivex.Maybe;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
@@ -22,7 +23,7 @@ public class UserRepository implements UserDataSource {
     }
 
     @Override
-    public Single<User> getUserById(int id) {
+    public Maybe<User> getUserById(int id) {
         return mUserDao.getUserById(id);
     }
 
