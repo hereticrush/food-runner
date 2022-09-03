@@ -144,10 +144,8 @@ public class LoginFragment extends Fragment implements ApiClient {
         String username = editTextUsername.getText().toString();
         String password = editTextPassword.getText().toString();
         System.out.println(username + " " + password);
-        disposable.add(mAuthViewModel.insertUser(username, password)
-                .doOnComplete(this::toUserActivity).subscribe(this::onSuccess));
+        mAuthViewModel.getUser(username);
         System.out.println("done");
-
     }
 
     @Override

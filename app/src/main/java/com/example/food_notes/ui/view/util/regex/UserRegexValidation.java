@@ -7,6 +7,6 @@ import io.reactivex.annotations.NonNull;
 
 public abstract class UserRegexValidation {
 
-    public static final Pattern INPUT_PATTERN = Pattern.compile("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[$#^%&@=_])(?=\\S+$).{8,24}$");
+    public static final Pattern INPUT_PATTERN = Pattern.compile("^(?=.*[0-9a-zA-Z$#^%&@=_])(?=\\S+$).{8,24}$");
 
 }

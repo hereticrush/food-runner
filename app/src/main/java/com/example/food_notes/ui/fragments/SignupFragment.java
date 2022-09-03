@@ -1,6 +1,7 @@
 package com.example.food_notes.ui.fragments;
 
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +23,11 @@ import com.example.food_notes.ui.view.ApiClient;
 import com.example.food_notes.ui.view.factory.AuthenticationViewModelFactory;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class SignupFragment extends Fragment implements ApiClient {
 
@@ -36,7 +41,6 @@ public class SignupFragment extends Fragment implements ApiClient {
     private AppCompatEditText editTextPassword;
 
     public SignupFragment() {}
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,11 +81,11 @@ public class SignupFragment extends Fragment implements ApiClient {
             final String password = editTextPassword.getText().toString();
 
             if (mViewModel.validateUserInput(username, password)) {
-                disposable.add(mViewModel.insertUser(username, password)
-                        .doOnError(e -> {
-                            Log.e("ERROR", e.getLocalizedMessage());
-                        })
-                        .doOnComplete(this::onSuccess).subscribe());
+                mViewModel.insertUser(username, password)
+                        .subscribe(this::onSuccess,
+                                throwable -> onFailed(throwable.getLocalizedMessage()),
+                                disposable);
+                Toast.makeText(requireActivity().getApplicationContext(), "User registered successfully", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(requireActivity().getApplicationContext(), "Please fill the required fields", Toast.LENGTH_SHORT).show();
             }
@@ -100,12 +104,12 @@ public class SignupFragment extends Fragment implements ApiClient {
 
     @Override
     public void onSuccess() {
-        Toast.makeText(requireActivity().getApplicationContext(), "Registered successfully: " + editTextUsername.getText().toString(), Toast.LENGTH_SHORT).show();
         toLogin();
     }
 
     @Override
     public void onFailed(String log) {
-        Toast.makeText(requireActivity().getApplicationContext(), log, Toast.LENGTH_SHORT).show();
+        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), log, Toast.LENGTH_SHORT).show());
+        Log.e("FAILED", log);
     }
 }

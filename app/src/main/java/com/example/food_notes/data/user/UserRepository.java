@@ -34,7 +34,7 @@ public class UserRepository implements UserDataSource {
 
     @Override
     public Completable insertUser(User user) {
-        return Completable.wrap(mUserDao.insertUser(user));
+        return mUserDao.insertUser(user);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.example.food_notes.ui.view.model;
 
 import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.ViewModel;
 
@@ -26,6 +27,8 @@ import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.FlowableEmitter;
+import io.reactivex.rxjava3.core.FlowableOnSubscribe;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -36,7 +39,7 @@ import io.reactivex.rxjava3.internal.operators.flowable.FlowableCollectSingle;
 import io.reactivex.rxjava3.observers.DisposableCompletableObserver;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
-public class AuthenticationViewModel extends ViewModel {
+public class AuthenticationViewModel extends ViewModel implements ApiClient{
 
     private final CompositeDisposable disposable = new CompositeDisposable();
     private final UserDataSource mDataSource;
@@ -64,10 +67,8 @@ public class AuthenticationViewModel extends ViewModel {
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
         String dateString = format.format(currentDate);
         mUser.setCreated_at(dateString);
-        return  Completable.fromCallable(() -> mDataSource.insertUser(mUser))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .delay(2, TimeUnit.SECONDS, AndroidSchedulers.from(Looper.getMainLooper()));
+        return mDataSource.insertUser(mUser).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).delaySubscription(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread());
     }
 
     public Maybe<User> getUser(final String username) {
@@ -76,6 +77,7 @@ public class AuthenticationViewModel extends ViewModel {
                .subscribeOn(Schedulers.io())
                .flatMap(Flowable::fromIterable)
                .filter(user -> username.matches(user.getUsername()))
+               .doOnError(throwable -> Log.e("ERROR", throwable.getLocalizedMessage()))
                .toObservable().singleElement().delay(1, TimeUnit.SECONDS,
                        Schedulers.io());
     }
@@ -86,8 +88,9 @@ public class AuthenticationViewModel extends ViewModel {
      * @return Flowable list of user object
      */
     public Flowable<List<User>> getAllUsers() {
-        return Flowable.fromAction(mDataSource::getAllUsers);
+        return mDataSource.getAllUsers();
     }
+
 
     /**
      * Checks whether user input is violating the regex rules
@@ -119,4 +122,13 @@ public class AuthenticationViewModel extends ViewModel {
         super.onCleared();
     }
 
+    @Override
+    public void onSuccess() {
+        System.out.println("Successfully added user");
+    }
+
+    @Override
+    public void onFailed(String log) {
+       Log.e("FAILED", log);
+    }
 }
