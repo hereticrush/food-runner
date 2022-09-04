@@ -1,7 +1,6 @@
 package com.example.food_notes.ui.fragments;
 
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,11 +22,7 @@ import com.example.food_notes.ui.view.ApiClient;
 import com.example.food_notes.ui.view.factory.AuthenticationViewModelFactory;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class SignupFragment extends Fragment implements ApiClient {
 
@@ -45,7 +40,7 @@ public class SignupFragment extends Fragment implements ApiClient {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //init viewmodel
+        //init view model
         mFactory = Injection.provideAuthViewModelFactory(requireContext());
         mViewModel = mFactory.create(AuthenticationViewModel.class);
     }
@@ -54,7 +49,7 @@ public class SignupFragment extends Fragment implements ApiClient {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentSignupBinding.inflate(inflater, container, false);
-        //init views
+        //init view binding
         btn = binding.userRegisterButton;
         editTextUsername = binding.etRegisterUsername;
         editTextPassword = binding.etRegisterPassword;

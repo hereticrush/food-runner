@@ -1,8 +1,6 @@
 package com.example.food_notes.ui.view.model;
 
-import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.lifecycle.ViewModel;
 
@@ -13,30 +11,17 @@ import com.example.food_notes.ui.view.util.regex.UserRegexValidation;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.FlowableEmitter;
-import io.reactivex.rxjava3.core.FlowableOnSubscribe;
-import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.functions.Predicate;
-import io.reactivex.rxjava3.internal.operators.flowable.FlowableCollect;
-import io.reactivex.rxjava3.internal.operators.flowable.FlowableCollectSingle;
-import io.reactivex.rxjava3.observers.DisposableCompletableObserver;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class AuthenticationViewModel extends ViewModel implements ApiClient{
@@ -71,15 +56,16 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient{
                 .subscribeOn(Schedulers.io()).delaySubscription(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread());
     }
 
-    public Maybe<User> getUser(final String username) {
-       return getAllUsers()
-               .observeOn(AndroidSchedulers.mainThread())
-               .subscribeOn(Schedulers.io())
-               .flatMap(Flowable::fromIterable)
-               .filter(user -> username.matches(user.getUsername()))
-               .doOnError(throwable -> Log.e("ERROR", throwable.getLocalizedMessage()))
-               .toObservable().singleElement().delay(1, TimeUnit.SECONDS,
-                       Schedulers.io());
+    public Single<User> getUser(final String username, final String password) {
+
+        return getAllUsers()
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .flatMap(Flowable::fromIterable)
+                        .filter(user -> user.getUsername().matches(username)
+                        && user.getPassword().matches(password))
+                        .toObservable().singleOrError();
+
     }
 
 
@@ -124,7 +110,7 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient{
 
     @Override
     public void onSuccess() {
-        System.out.println("Successfully added user");
+        System.out.println("Transaction completed");
     }
 
     @Override

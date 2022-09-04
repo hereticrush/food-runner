@@ -1,6 +1,5 @@
 package com.example.food_notes;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -22,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 @RunWith(AndroidJUnit4.class)
@@ -46,36 +44,36 @@ public class DaoQueryTest {
         mDatabase.close();
     }
 
-
     @Test
     public void insertUser_() {
+        User testUser = new User("abcdefgh", "testUser1");
+        mDatabase.userDao().insertUser(testUser).test().assertComplete();
+        model.insertUser("polyphia$3", "newAlbum322@").test().assertComplete();
+    }
+
+
+    @Test
+    public void insertUserAndGetUserThenDeleteUser_() {
         User testUser = new User(102, "test_user1", "test_password1");
         model.insertUser("hell0_wrLd111", "PasSW0rD22")
                 .test().assertComplete();
-        User testU = new User("hell0_wrLd111", "PasSW0rD22");
-        Maybe<User> userMaybe = model.getAllUsers().flatMap(Flowable::fromIterable)
-                .filter(i -> i.getUsername().equals("hell0_wrLd111"))
-                .toObservable().firstElement();
-        userMaybe.test().assertComplete();
-        userMaybe.test().assertValue(testU);
+        model.getUser("hell0_wrLd111", "PasSW0rD22").test().assertValue(
+                user -> user.getUsername().matches("hell0_wrLd111") && user.getPassword().matches("PasSW0rD22")
+        );
+        mDatabase.userDao().deleteAllUsers().test().assertComplete();
     }
 
     @Test
     public void getAllUsersFromDb_() {
-        boolean d = disposable.add(Flowable.just(model.getAllUsers().flatMap(Flowable::fromIterable)
-                .doOnEach(userNotification -> {
-                    User u = userNotification.getValue();
-                }).test().assertComplete()).subscribe());
-        assertTrue(d); // true
-        disposable.dispose();
-        assertTrue(disposable.isDisposed()); // true
+        model.getAllUsers().test().assertComplete();
+        model.getAllUsers().test().assertNoErrors();
     }
 
-    @Test
+    /*@Test
     public void testLoginFragment_init() {
         FragmentScenario<LoginFragment> scenario =  FragmentScenario.launchInContainer(LoginFragment.class);
         scenario.moveToState(Lifecycle.State.RESUMED);
         scenario.recreate();
         scenario.onFragment(loginFragment -> assertNotNull(loginFragment.getActivity()));
-    }
+    }*/
 }
