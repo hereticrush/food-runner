@@ -1,7 +1,6 @@
 package com.example.food_notes.ui.adapters;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.food_notes.R;
-import com.example.food_notes.ui.view.FoodPostViewModel;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.example.food_notes.ui.view.model.FoodPostViewModel;
 
 //TODO implement foodpost adapter for user main rv
 public class FoodPostRecyclerViewAdapter extends RecyclerView.Adapter<FoodPostViewHolder> {

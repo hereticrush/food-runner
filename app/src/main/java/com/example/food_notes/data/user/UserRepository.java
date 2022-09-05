@@ -1,16 +1,10 @@
 package com.example.food_notes.data.user;
 
-import android.app.Application;
-
-import com.example.food_notes.db.ApplicationDatabase;
-
 import java.util.List;
 
 import io.reactivex.Maybe;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class UserRepository implements UserDataSource {
 

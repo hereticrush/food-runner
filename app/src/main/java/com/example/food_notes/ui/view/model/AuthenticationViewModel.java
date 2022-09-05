@@ -24,6 +24,10 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
+/**
+ * ViewModel connects the user interface and data flow together,
+ * AuthenticationViewModel deals with sign up and login events
+ */
 public class AuthenticationViewModel extends ViewModel implements ApiClient{
 
     private final CompositeDisposable disposable = new CompositeDisposable();
@@ -42,8 +46,8 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient{
 
     /**
      * Insert new user object into database, also setting it's time of creation
-     * @param username username
-     * @param password password
+     * @param username username String
+     * @param password password String
      * @return {@link Completable} which completes once user object is updated
      */
     public Completable insertUser(final String username, final String password) {
@@ -56,6 +60,7 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient{
                 .subscribeOn(Schedulers.io()).delaySubscription(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread());
     }
 
+
     public Single<User> getUser(final String username, final String password) {
 
         return getAllUsers()
@@ -66,6 +71,21 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient{
                         && user.getPassword().matches(password))
                         .toObservable().singleOrError();
 
+    }
+
+    /**
+     * Queries database to get a username.
+     * @param id
+     * @return String that represents username, wrapped
+     * in a Flowable
+     */
+    public Flowable<String> getUsername(final int id) {
+        return getAllUsers()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .flatMap(Flowable::fromIterable)
+                .filter(user -> id == user.getUser_id())
+                .concatMap(user -> Flowable.just(user.getUsername()));
     }
 
 
@@ -88,15 +108,12 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient{
 
         if (!(UserRegexValidation.INPUT_PATTERN.matcher(username).matches()
                 || UserRegexValidation.INPUT_PATTERN.matcher(password).matches())) {
-            System.out.println("1");
             return false;
         }
         if (!UserRegexValidation.INPUT_PATTERN.matcher(username).matches()) {
-            System.out.println("2");
             return false;
         }
         if (!UserRegexValidation.INPUT_PATTERN.matcher(password).matches()) {
-            System.out.println("3");
             return false;
         }
         return true;

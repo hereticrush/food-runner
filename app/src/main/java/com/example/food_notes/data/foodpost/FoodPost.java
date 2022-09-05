@@ -13,7 +13,7 @@ import com.example.food_notes.data.user.User;
         tableName = "food_posts",
         indices = {
                 @Index(value = "post_id", unique = true),
-                @Index(value = "user_id"),
+                @Index(value = "user_id", unique = true),
                 @Index(value = "img_id", unique = true),
         },
         foreignKeys = {

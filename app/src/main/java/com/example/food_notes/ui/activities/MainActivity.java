@@ -17,6 +17,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class MainActivity extends AppCompatActivity {
 
     private final static String ENTRY_FRAGMENT = "login";
+
+    // view binding variable
     private ActivityMainBinding binding;
     private BottomNavigationView bottomNavigationView;
 
@@ -25,13 +27,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater()); // viewBinding initialized
         setContentView(binding.getRoot());
+
+        // experimental , may be removed
         bottomNavigationView = binding.bottomNavView;
         bottomNavigationView.setVisibility(View.INVISIBLE);
     }
 
     @Override
     protected void onDestroy() {
-        binding = null;
+        binding = null; // avoid memory leak caused by view binding, and set binding pointer to null once activity changes
         super.onDestroy();
     }
 }

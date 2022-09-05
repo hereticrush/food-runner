@@ -17,7 +17,7 @@ import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentUserMainBinding;
 import com.example.food_notes.ui.adapters.CustomAdapter;
 import com.example.food_notes.ui.adapters.RecyclerViewItemClickListener;
-import com.example.food_notes.ui.view.UserViewModel;
+import com.example.food_notes.ui.view.model.UserViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 

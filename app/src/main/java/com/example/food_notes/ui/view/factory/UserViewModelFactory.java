@@ -1,18 +1,19 @@
 package com.example.food_notes.ui.view.factory;
 
-import android.app.Application;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.food_notes.data.user.UserDataSource;
-import com.example.food_notes.data.user.UserRepository;
-import com.example.food_notes.ui.view.UserViewModel;
+import com.example.food_notes.ui.view.model.UserViewModel;
 
+/**
+ * Factory that creates an instance of UserViewModel object
+ */
 public class UserViewModelFactory implements ViewModelProvider.Factory {
 
     private final UserDataSource mDataSource;
+
 
     public UserViewModelFactory(UserDataSource dataSource) { mDataSource = dataSource; }
 

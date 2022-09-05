@@ -1,7 +1,5 @@
 package com.example.food_notes.ui.view.factory;
 
-import android.app.Application;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
@@ -9,13 +7,19 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.food_notes.data.user.UserDataSource;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
 
+/**
+ * Factory that creates an instance of AuthenticationViewModel object
+ */
 public class AuthenticationViewModelFactory implements ViewModelProvider.Factory {
 
+    // connected to userRepository
     private final UserDataSource mDataSource;
 
+    // constructor
     public AuthenticationViewModelFactory(UserDataSource dataSource) {
         mDataSource = dataSource;
     }
+
 
     @SuppressWarnings("unchecked")
     @NonNull

@@ -1,28 +1,18 @@
 package com.example.food_notes.ui.adapters;
 
-import static java.util.stream.Collectors.toList;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.food_notes.R;
 import com.example.food_notes.data.user.User;
-import com.example.food_notes.db.ApplicationDatabase;
-import com.example.food_notes.ui.view.UserViewModel;
+import com.example.food_notes.ui.view.model.UserViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomViewHolder> {
 
