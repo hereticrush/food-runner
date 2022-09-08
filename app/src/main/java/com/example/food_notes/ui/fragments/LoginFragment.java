@@ -32,7 +32,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 
-public class LoginFragment extends Fragment implements ApiClient {
+public class LoginFragment extends Fragment implements ApiClient{
 
     private static final String USERNAME = "USERNAME";
     private static final String CLICK_TEXT = "Click here to sign up";
@@ -116,33 +116,27 @@ public class LoginFragment extends Fragment implements ApiClient {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         button.setOnClickListener(v -> {
             final String username = editTextUsername.getText().toString();
             final String password = editTextPassword.getText().toString();
-
             // check input fields for user input
-            checkRequiredFields();
-
-            // query database for user item
-            mAuthViewModel.getUser(username, password)
-                    .subscribe(
-                            user -> user.getUsername().matches(username),
-                            throwable -> onFailed(throwable.getLocalizedMessage()),
-                            disposable
-                    );
+            if (checkRequiredFields()) {
+                // query database for user item
+                disposable.add(mAuthViewModel.getUser(username, password)
+                        .subscribe(
+                                action -> onSuccess(),
+                                throwable -> Log.e("ERROR", throwable.getLocalizedMessage())
+                        ));
+            }
         });
-    }
 
-
-    @Override
-    public void onStop() {
-        disposable.clear(); // removes disposable container after switching to another activity
-        super.onStop();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        disposable.clear();
         binding = null; // when this fragment's lifetime is over, viewbinding pointer will be set to null
     }
 
@@ -160,38 +154,42 @@ public class LoginFragment extends Fragment implements ApiClient {
      * Validates if the current user input(username, password) is according to
      * the rules, and makes sure that the input fields are not empty
      */
-    private void checkRequiredFields() {
+    private boolean checkRequiredFields() {
         if (TextUtils.isEmpty(editTextUsername.getText()) &&
         TextUtils.isEmpty(editTextPassword.getText())) {
             editTextUsername.setError("Please enter a username");
             editTextPassword.setError("Please enter a password");
+            return false;
         }
         if (TextUtils.isEmpty(editTextUsername.getText())) {
             editTextUsername.setError("Please enter a username");
+            return false;
         }
         if (TextUtils.isEmpty(editTextPassword.getText())) {
             editTextPassword.setError("Please enter a password");
+            return false;
+        } else if (editTextUsername.getText().toString().length() < 8 || editTextPassword.getText().toString().length() < 8) {
+            editTextUsername.setError("At least 8 characters long");
+            editTextPassword.setError("At least 8 characters long");
+            return false;
         }
+        return true;
     }
 
     /**
-     * If database query response is successful,
-     * this function does whatever is inside, in this case
-     * switching to next fragment
+     * If query response is successful,
+     * this function shows a Toast message and
+     * navigates valid user to next fragment
      */
     @Override
     public void onSuccess() {
+        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "Welcome " + editTextUsername.getText().toString(), Toast.LENGTH_SHORT).show());
         toUserMainFragment();
     }
 
-    /**
-     * If database query response is an error,
-     * this function logs the error to the console
-     * @param log a descriptive definition of what went wrong
-     */
     @Override
     public void onFailed(String log) {
         requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), log, Toast.LENGTH_SHORT).show());
-        Log.e("FAILED TRANSACTION", log);
+        Log.e("FAILED", log);
     }
 }

@@ -1,12 +1,9 @@
 package com.example.food_notes.ui.view.model;
 
-import android.util.Log;
-
 import androidx.lifecycle.ViewModel;
 
 import com.example.food_notes.data.user.User;
 import com.example.food_notes.data.user.UserDataSource;
-import com.example.food_notes.ui.view.ApiClient;
 import com.example.food_notes.ui.view.util.regex.UserRegexValidation;
 
 import java.text.DateFormat;
@@ -20,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -28,73 +25,48 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
  * ViewModel connects the user interface and data flow together,
  * AuthenticationViewModel deals with sign up and login events
  */
-public class AuthenticationViewModel extends ViewModel implements ApiClient{
+public class AuthenticationViewModel extends ViewModel {
 
     private final CompositeDisposable disposable = new CompositeDisposable();
     private final UserDataSource mDataSource;
-    private User mUser;
-    private ApiClient apiClient;
 
     public AuthenticationViewModel(UserDataSource repository){
         mDataSource = repository;
     }
 
-
-    public ApiClient getApi() {
-        return apiClient;
-    }
-
     /**
      * Insert new user object into database, also setting it's time of creation
-     * @param username username String
-     * @param password password String
+     * @param user User entity object
      * @return {@link Completable} which completes once user object is updated
      */
-    public Completable insertUser(final String username, final String password) {
-        mUser = new User(username, password);
+    public Completable insertUser(User user) {
         Date currentDate = Calendar.getInstance().getTime();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
         String dateString = format.format(currentDate);
-        mUser.setCreated_at(dateString);
-        return mDataSource.insertUser(mUser).observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io()).delaySubscription(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread());
+        user.setCreated_at(dateString);
+        return mDataSource.insertUser(user).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).delaySubscription(2, TimeUnit.SECONDS, AndroidSchedulers.mainThread());
     }
 
-
-    public Single<User> getUser(final String username, final String password) {
-
-        return getAllUsers()
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeOn(Schedulers.io())
-                        .flatMap(Flowable::fromIterable)
-                        .filter(user -> user.getUsername().matches(username)
-                        && user.getPassword().matches(password))
-                        .toObservable().singleOrError();
-
-    }
 
     /**
-     * Queries database to get a username.
-     * @param id
-     * @return String that represents username, wrapped
-     * in a Flowable
+     * Get a specific user object from database
+     * @param username String user.username
+     * @param password String user.password
+     * @return emits either 0 or 1, returns a match or an error
      */
-    public Flowable<String> getUsername(final int id) {
-        return getAllUsers()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .flatMap(Flowable::fromIterable)
-                .filter(user -> id == user.getUser_id())
-                .concatMap(user -> Flowable.just(user.getUsername()));
+    public Maybe<User> getUser(final String username, final String password) {
+            return mDataSource.getUser(username, password)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io());
     }
-
 
     /**
      * Fetches all users registered in database
      * @return Flowable list of user object
      */
     public Flowable<List<User>> getAllUsers() {
-        return mDataSource.getAllUsers();
+        return mDataSource.getAllUsers().subscribeOn(Schedulers.computation());
     }
 
 
@@ -125,13 +97,4 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient{
         super.onCleared();
     }
 
-    @Override
-    public void onSuccess() {
-        System.out.println("Transaction completed");
-    }
-
-    @Override
-    public void onFailed(String log) {
-       Log.e("FAILED", log);
-    }
 }

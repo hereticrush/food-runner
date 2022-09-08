@@ -2,7 +2,7 @@ package com.example.food_notes.data.user;
 
 import java.util.List;
 
-import io.reactivex.Maybe;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 
@@ -16,9 +16,15 @@ public class UserRepository implements UserDataSource {
         mAllUsers = mUserDao.getAllUsers();
     }
 
+
     @Override
     public Maybe<User> getUserById(int id) {
-        return mUserDao.getUserById(id);
+       return mUserDao.getUserById(id);
+    }
+
+    @Override
+    public Maybe<User> getUser(String username, String password) {
+        return mUserDao.getUserByUsernameAndPassword(username, password);
     }
 
     @Override

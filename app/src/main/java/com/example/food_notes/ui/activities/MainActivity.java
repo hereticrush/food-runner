@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
 
     // view binding variable
     private ActivityMainBinding binding;
-    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +27,6 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater()); // viewBinding initialized
         setContentView(binding.getRoot());
 
-        // experimental , may be removed
-        bottomNavigationView = binding.bottomNavView;
-        bottomNavigationView.setVisibility(View.INVISIBLE);
     }
 
     @Override

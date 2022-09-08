@@ -16,6 +16,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.food_notes.R;
+import com.example.food_notes.data.user.User;
 import com.example.food_notes.databinding.FragmentSignupBinding;
 import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.ApiClient;
@@ -56,14 +57,10 @@ public class SignupFragment extends Fragment implements ApiClient {
         return binding.getRoot();
     }
 
-    @Override
-    public void onStop() {
-        disposable.clear();
-        super.onStop();
-    }
 
     @Override
     public void onDestroyView() {
+        disposable.clear();
         super.onDestroyView();
         binding = null; // avoid memory leak
     }
@@ -76,11 +73,11 @@ public class SignupFragment extends Fragment implements ApiClient {
             final String password = editTextPassword.getText().toString();
 
             if (mViewModel.validateUserInput(username, password)) {
-                mViewModel.insertUser(username, password)
+                User mUser = new User(username, password);
+                mViewModel.insertUser(mUser)
                         .subscribe(this::onSuccess,
                                 throwable -> onFailed(throwable.getLocalizedMessage()),
                                 disposable);
-                Toast.makeText(requireActivity().getApplicationContext(), "User registered successfully", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(requireActivity().getApplicationContext(), "Please fill the required fields", Toast.LENGTH_SHORT).show();
             }
@@ -99,6 +96,7 @@ public class SignupFragment extends Fragment implements ApiClient {
 
     @Override
     public void onSuccess() {
+        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "User registered successfully", Toast.LENGTH_SHORT).show());
         toLogin();
     }
 
