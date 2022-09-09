@@ -34,9 +34,9 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
  */
 public class AuthenticationViewModel extends ViewModel implements ApiClient {
 
+    // disposable container
     private final CompositeDisposable disposable = new CompositeDisposable();
     private final UserDataSource mDataSource;
-    private MaybeObserver<User> observer;
 
     public AuthenticationViewModel(UserDataSource repository){
         mDataSource = repository;
@@ -71,7 +71,7 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
 
     /**
      * Fetches all users registered in database
-     * @return Flowable list of user object
+     * @return RxJava Flowable list of user object
      */
     public Flowable<List<User>> getAllUsers() {
         return mDataSource.getAllUsers().subscribeOn(Schedulers.computation());
@@ -79,9 +79,9 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
 
 
     /**
-     * Checks whether user input is violating the regex rules
-     * @param username username
-     * @param password password
+     * Checks whether user input is violating the regex rules or not
+     * @param username text input field username
+     * @param password text input field password
      * @return boolean output for validation
      */
     public boolean validateUserInput(String username, String password) {
@@ -99,6 +99,14 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
         return true;
     }
 
+    /**
+     * Connects with the observer in ui thread,
+     * queries for user object and attempts to log the user in
+     * @param username text input field username
+     * @param password text input field password
+     * @return User object wrapped in RxJava Maybe,
+     * either returns 0 or 1, otherwise an error
+     */
     public Maybe<User> login(final String username, final String password) {
         return getUser(username, password)
                 .observeOn(AndroidSchedulers.mainThread())

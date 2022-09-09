@@ -33,9 +33,6 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import io.reactivex.rxjava3.core.MaybeObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.exceptions.UndeliverableException;
-import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.observers.DisposableMaybeObserver;
 
 
@@ -64,7 +61,6 @@ public class LoginFragment extends Fragment implements ApiClient{
 
     private NavHostFragment navHostFragment;
     private NavController navController;
-    private BottomNavigationView bottomNavigationView;
 
     /**
      * Fragment constructor with no arguments
@@ -135,14 +131,8 @@ public class LoginFragment extends Fragment implements ApiClient{
             final String password = editTextPassword.getText().toString();
             // check input fields for user input
             if (checkRequiredFields()) {
-                // query database for user item
+                // attempt login
                 loginUser(username, password);
-                /*disposable.add(mAuthViewModel.getUser(username, password)
-                        .subscribe(
-                                action -> onSuccess(),
-                                throwable -> Log.e("ERROR", throwable.getLocalizedMessage()),
-                                () -> Log.d("COMPLETED", "User not found")
-                        ));*/
             }
         });
 
@@ -181,6 +171,10 @@ public class LoginFragment extends Fragment implements ApiClient{
                 .subscribe(observer);
     }
 
+    /**
+     * Provides a Toast object prototype with custom message
+     * @param msg String type message
+     */
     private void toast(String msg) {
         requireActivity().runOnUiThread(() ->
                 Toast.makeText(requireActivity().getApplicationContext(), msg, Toast.LENGTH_SHORT).show());

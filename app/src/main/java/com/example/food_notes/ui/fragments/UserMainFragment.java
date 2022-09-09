@@ -11,6 +11,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.SavedStateHandle;
+import androidx.navigation.NavBackStackEntry;
+import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -49,6 +55,9 @@ public class UserMainFragment extends Fragment {
 
     private BottomNavigationView bottomNavigationView;
 
+    private NavHostFragment navHostFragment;
+    private NavController navController;
+
     public UserMainFragment() {}
 
     @Nullable
@@ -66,6 +75,22 @@ public class UserMainFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mFactory = Injection.provideUserViewModelFactory(requireActivity().getApplicationContext());
         mUserViewModel = mFactory.create(UserViewModel.class);
+        navController = NavHostFragment.findNavController(this);
+
+        // experimental ...
+        NavBackStackEntry navBackStackEntry = navController.getPreviousBackStackEntry();
+        SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
+        savedStateHandle.getLiveData(LoginFragment.LOGIN_SUCCESSFUL)
+                .observe(navBackStackEntry,(Observer<? super Object>) success -> {
+                    if (!success.equals(true)) {
+                        int startDestination = navController.getGraph().getStartDestinationId();
+                        NavOptions navOptions = new NavOptions.Builder()
+                                .setPopUpTo(startDestination, true)
+                                .build();
+                        navController.navigate(startDestination, null, navOptions);
+                    }
+                });
+
     }
 
     @Override
@@ -78,12 +103,22 @@ public class UserMainFragment extends Fragment {
             int usr_id = getArguments().getInt(LOGGED_USERID);
         }
         bottomNavigationView = binding.bottomNavView;
+
+        // bottom bar navigation setting
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+               if (item.getItemId() == R.id.action_add_card_item) {
+                    toAddPostFragment();
+                    return true;
+                } else if (item.getItemId() == R.id.action_settings) {
+                    Toast.makeText(requireActivity().getApplicationContext(), "Settings", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 return false;
             }
         });
+
         //TODO add ui elements to set text to args
         return binding.getRoot();
     }
@@ -106,7 +141,7 @@ public class UserMainFragment extends Fragment {
         binding = null; // avoid memory leak
     }
 
-    private void displayUsers() {
+    private void displayCardItems() {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         CustomAdapter mAdapter = new CustomAdapter(getActivity(), mUserViewModel);
@@ -131,15 +166,14 @@ public class UserMainFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
-    private void backToLoginFragment() {
-        FragmentManager manager = getParentFragmentManager();
-        manager.popBackStack("login", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-    }
-
+    /**
+     * Navigates user to the AddPostFragment
+     */
     private void toAddPostFragment() {
-        requireActivity().getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).replace(
-                R.id.userMainFragment, AddPostFragment.getInstance(), null
-        ).addToBackStack(TAG).commit();
+        navHostFragment = (NavHostFragment) requireActivity().getSupportFragmentManager()
+                .findFragmentById(R.id.main_nav_host_fragment);
+        navController = navHostFragment.getNavController();
+        navController.navigate(UserMainFragmentDirections.actionUserMainFragmentToAddPostFragment());
     }
 
 }
