@@ -17,10 +17,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.SavedStateHandle;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.food_notes.R;
+import com.example.food_notes.data.user.User;
 import com.example.food_notes.databinding.FragmentLoginBinding;
 import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.ApiClient;
@@ -29,18 +31,25 @@ import com.example.food_notes.ui.view.model.AuthenticationViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 
+import io.reactivex.rxjava3.core.MaybeObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.exceptions.UndeliverableException;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.observers.DisposableMaybeObserver;
 
 
 public class LoginFragment extends Fragment implements ApiClient{
 
     private static final String USERNAME = "USERNAME";
+    public static String LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL";
     private static final String CLICK_TEXT = "Click here to sign up";
     private static final String FRAGMENT_TAG = LoginFragment.class.getSimpleName();
 
     // view model factory and view model
     private AuthenticationViewModelFactory mFactory;
     private AuthenticationViewModel mAuthViewModel;
+    private SavedStateHandle savedStateHandle;
 
     //view binding
     private FragmentLoginBinding binding;
@@ -53,7 +62,8 @@ public class LoginFragment extends Fragment implements ApiClient{
     private TextInputEditText editTextPassword;
     private AppCompatButton button;
 
-
+    private NavHostFragment navHostFragment;
+    private NavController navController;
     private BottomNavigationView bottomNavigationView;
 
     /**
@@ -93,7 +103,7 @@ public class LoginFragment extends Fragment implements ApiClient{
         editTextUsername = binding.etLoginUsername;
         editTextPassword = binding.etLoginPassword;
         button = binding.loginButton;
-        final NavController navController = NavHostFragment.findNavController(this);
+        navController = NavHostFragment.findNavController(this);
 
         // creates a partially clickable text that navigates user to SignupFragment
         SpannableString spannableString = new SpannableString(CLICK_TEXT);
@@ -110,6 +120,9 @@ public class LoginFragment extends Fragment implements ApiClient{
         binding.tvLoginSuggestion.setMovementMethod(LinkMovementMethod.getInstance());
         binding.tvLoginSuggestion.setHighlightColor(Color.TRANSPARENT);
 
+        savedStateHandle = navController
+                .getCurrentBackStackEntry().getSavedStateHandle();
+        savedStateHandle.set(LOGIN_SUCCESSFUL, false);
         return binding.getRoot();
     }
 
@@ -123,31 +136,79 @@ public class LoginFragment extends Fragment implements ApiClient{
             // check input fields for user input
             if (checkRequiredFields()) {
                 // query database for user item
-                disposable.add(mAuthViewModel.getUser(username, password)
+                loginUser(username, password);
+                /*disposable.add(mAuthViewModel.getUser(username, password)
                         .subscribe(
                                 action -> onSuccess(),
-                                throwable -> Log.e("ERROR", throwable.getLocalizedMessage())
-                        ));
+                                throwable -> Log.e("ERROR", throwable.getLocalizedMessage()),
+                                () -> Log.d("COMPLETED", "User not found")
+                        ));*/
             }
         });
 
     }
 
+    public void loginUser(final String username,final String password) {
+
+        MaybeObserver<User> observer = new DisposableMaybeObserver<User>() {
+
+            @Override
+            public void onSuccess(@NonNull User user) {
+                try {
+                    int id = user.getUser_id();
+                    Log.d("SUCCESS", "uid:" + id);
+                    toast("Welcome " + username);
+                    savedStateHandle.set(LOGIN_SUCCESSFUL, true);
+                    toUserMainFragment();
+                } catch (Exception e) {
+                    toast(e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+                toast(e.getMessage());
+                onFailed(e.getLocalizedMessage());
+            }
+
+            @Override
+            public void onComplete() {
+                toast("Invalid credentials");
+                Log.d("COMPLETED", "done");
+            }
+        };
+        mAuthViewModel.login(username, password)
+                .subscribe(observer);
+    }
+
+    private void toast(String msg) {
+        requireActivity().runOnUiThread(() ->
+                Toast.makeText(requireActivity().getApplicationContext(), msg, Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void onStop() {
+        disposable.clear();
+        super.onStop();
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        disposable.clear();
         binding = null; // when this fragment's lifetime is over, viewbinding pointer will be set to null
     }
 
     /**
-     * Navigates user to UserMainFragment
+     * Navigates user to UserMainFragment, also
+     * passing username and login state data alongside
      */
     private void toUserMainFragment() {
-        final NavHostFragment navHostFragment = (NavHostFragment) requireActivity().getSupportFragmentManager()
+        navHostFragment = (NavHostFragment) requireActivity().getSupportFragmentManager()
                 .findFragmentById(R.id.main_nav_host_fragment);
-        final NavController navController = navHostFragment.getNavController();
-        navController.navigate(LoginFragmentDirections.actionLoginFragmentToUserMainFragment());
+        navController = navHostFragment.getNavController();
+        Bundle args = new Bundle();
+        args.putString(USERNAME, editTextUsername.getText().toString());
+        navController.navigate(R.id.userMainFragment, args);
     }
 
     /**
@@ -183,13 +244,11 @@ public class LoginFragment extends Fragment implements ApiClient{
      */
     @Override
     public void onSuccess() {
-        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "Welcome " + editTextUsername.getText().toString(), Toast.LENGTH_SHORT).show());
         toUserMainFragment();
     }
 
     @Override
     public void onFailed(String log) {
-        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), log, Toast.LENGTH_SHORT).show());
         Log.e("FAILED", log);
     }
 }

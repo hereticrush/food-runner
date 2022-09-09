@@ -37,11 +37,16 @@ public class UserMainFragment extends Fragment {
     private static final String LOGGED_USER = "LOGGED_USER";
     private static final String LOGGED_USERID = "LOGGED_USERID";
     private static final String TAG = "main";
+
     private FragmentUserMainBinding binding;
+
     private RecyclerView recyclerView;
+
     private final CompositeDisposable disposable = new CompositeDisposable();
+
     private UserViewModel mUserViewModel;
     private UserViewModelFactory mFactory;
+
     private BottomNavigationView bottomNavigationView;
 
     public UserMainFragment() {}
