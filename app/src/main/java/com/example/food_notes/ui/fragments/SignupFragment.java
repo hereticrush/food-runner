@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -36,6 +37,8 @@ public class SignupFragment extends Fragment implements ApiClient {
     private AppCompatEditText editTextUsername;
     private AppCompatEditText editTextPassword;
 
+    private NavController navController;
+
     public SignupFragment() {}
 
     @Override
@@ -50,6 +53,7 @@ public class SignupFragment extends Fragment implements ApiClient {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentSignupBinding.inflate(inflater, container, false);
+        navController = NavHostFragment.findNavController(this);
         //init view binding
         btn = binding.userRegisterButton;
         editTextUsername = binding.etRegisterUsername;
@@ -88,9 +92,7 @@ public class SignupFragment extends Fragment implements ApiClient {
      * Navigates user to Login Fragment
      */
     private void toLogin() {
-        final NavHostFragment navHostFragment = (NavHostFragment) requireActivity().getSupportFragmentManager()
-                .findFragmentById(R.id.main_nav_host_fragment);
-        final NavController navController = navHostFragment.getNavController();
+        NavBackStackEntry navBackStackEntry = navController.getPreviousBackStackEntry();
         navController.navigate(SignupFragmentDirections.actionSignupFragmentToLoginFragment());
     }
 
@@ -102,7 +104,7 @@ public class SignupFragment extends Fragment implements ApiClient {
 
     @Override
     public void onFailed(String log) {
-        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), log, Toast.LENGTH_SHORT).show());
+        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "User already exists", Toast.LENGTH_SHORT).show());
         Log.e("FAILED", log);
     }
 }

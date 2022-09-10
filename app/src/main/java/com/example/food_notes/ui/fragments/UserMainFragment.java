@@ -1,6 +1,8 @@
 package com.example.food_notes.ui.fragments;
 
+import android.animation.Animator;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +17,7 @@ import androidx.lifecycle.SavedStateHandle;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +33,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import kotlinx.coroutines.flow.StateFlow;
 
 /**
  * Fragment structure that has user card items, provide functionalities
@@ -40,7 +44,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 public class UserMainFragment extends Fragment {
 
     private static final String LOGGED_USERID = "LOGGED_USERID";
-    private static final String TAG = "main";
+    private static final boolean LOGIN_STATE = true;
     private static int USER_ID;
 
     // view binding
@@ -54,6 +58,7 @@ public class UserMainFragment extends Fragment {
     private UserViewModel mUserViewModel;
     private UserViewModelFactory mFactory;
 
+    // bottom nav view
     private BottomNavigationView bottomNavigationView;
 
     // navigation components
@@ -83,20 +88,27 @@ public class UserMainFragment extends Fragment {
         // experimental ...
         navBackStackEntry = navController.getPreviousBackStackEntry();
         savedStateHandle = navBackStackEntry.getSavedStateHandle();
-        savedStateHandle.getLiveData(LoginFragment.LOGIN_SUCCESSFUL)
+        /*savedStateHandle.getLiveData(LoginFragment.LOGIN_SUCCESSFUL)
                 .observe(navBackStackEntry,(Observer<? super Object>) success -> {
-                    if (!success.equals(true)) {
+                    if (!success.equals()) {
                         int startDestination = navController.getGraph().getStartDestinationId();
                         NavOptions navOptions = new NavOptions.Builder()
                                 .setPopUpTo(startDestination, true)
                                 .build();
                         navController.navigate(startDestination, null, navOptions);
                     }
-                });
+                });*/
 
-        // user id of user that logged in
-        USER_ID = savedStateHandle.get(LoginFragment.USER_ID);
-        System.out.println("from user_main uid:"+USER_ID);
+        // user id
+        StateFlow<Integer> stateFlow_userId = savedStateHandle
+                .getStateFlow(LoginFragment.USER_ID, USER_ID);
+        System.out.println("user_main_flow id:"+stateFlow_userId.getValue());
+        try {
+            setLoggedUserid(stateFlow_userId.getValue());
+        } catch (Exception e) {
+            setLoggedUserid(navBackStackEntry.getArguments().getInt(LoginFragment.USER_ID));
+            Log.e("ERROR", e.getLocalizedMessage());
+        }
     }
 
     @Override
@@ -104,25 +116,24 @@ public class UserMainFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentUserMainBinding.inflate(inflater, container, false);
-        if (getArguments() != null) {
-            int usr_id = getArguments().getInt(LOGGED_USERID);
-        }
-        bottomNavigationView = binding.bottomNavView;
 
+        bottomNavigationView = binding.bottomNavView;
         // bottom bar navigation setting
         bottomNavigationView.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                // clicking on items on bottomNavView
                if (item.getItemId() == R.id.action_add_card_item) {
-                    toAddPostFragment();
+                    toAddPostFragment(getUserId());
+                   Log.d("ADD-CARD", "id:"+getUserId());
                     return true;
                 } else if (item.getItemId() == R.id.action_settings) {
                     Toast.makeText(requireActivity().getApplicationContext(), "Settings", Toast.LENGTH_SHORT).show();
                     return true;
                 } else if (item.getItemId() == R.id.action_logout_user) {
-                   navBackStackEntry = navController.getPreviousBackStackEntry();
+                   navBackStackEntry = navController.getCurrentBackStackEntry();
                    int destination = navController.getGraph().getStartDestinationId();
-                   NavOptions navOptions = new NavOptions.Builder().setPopUpTo(destination, true).build();
+                   NavOptions navOptions = new NavOptions.Builder().setPopUpTo(destination, true, true).build();
                    navController.navigate(destination, null, navOptions);
                    savedStateHandle.set(LoginFragment.LOGIN_SUCCESSFUL, false);
                    return true;
@@ -131,7 +142,6 @@ public class UserMainFragment extends Fragment {
             }
         });
 
-        //TODO add ui elements to set text to args
         return binding.getRoot();
     }
 
@@ -180,11 +190,25 @@ public class UserMainFragment extends Fragment {
     /**
      * Navigates user to the AddPostFragment
      */
-    private void toAddPostFragment() {
-        navHostFragment = (NavHostFragment) requireActivity().getSupportFragmentManager()
-                .findFragmentById(R.id.main_nav_host_fragment);
-        navController = navHostFragment.getNavController();
-        navController.navigate(UserMainFragmentDirections.actionUserMainFragmentToAddPostFragment());
+    private void toAddPostFragment(final int id) {
+        Bundle args = new Bundle();
+        args.putInt(LOGGED_USERID, id);
+        args.putBoolean("LOGGED_IN", isLoginState());
+        NavOptions navOptions = new NavOptions.Builder()
+                .setPopUpTo(R.id.addPostFragment, true, true)
+                        .build();
+        navController.navigate(R.id.addPostFragment, args, navOptions);
     }
 
+    public static boolean isLoginState() {
+        return LOGIN_STATE;
+    }
+
+    public static int getUserId() {
+        return USER_ID;
+    }
+
+    public void setLoggedUserid(int id) {
+        UserMainFragment.USER_ID = id;
+    }
 }

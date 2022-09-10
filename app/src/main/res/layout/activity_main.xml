@@ -19,6 +19,17 @@
             app:defaultNavHost="true"
             app:navGraph="@navigation/app_nav"/>
 
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:itemBackground="@color/color_primary_dark"
+            app:itemTextColor="@color/color_light"
+            app:itemIconTint="@color/color_light"
+            android:layout_gravity="bottom|end"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:menu="@menu/menu_app"
+            android:visibility="gone"/>
 
 
 </FrameLayout>

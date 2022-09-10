@@ -18,7 +18,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.SavedStateHandle;
+import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.food_notes.R;
@@ -60,8 +63,8 @@ public class LoginFragment extends Fragment implements ApiClient{
     private TextInputEditText editTextPassword;
     private AppCompatButton button;
 
-    private NavHostFragment navHostFragment;
     private NavController navController;
+    private NavBackStackEntry navBackStackEntry;
 
     /**
      * Fragment constructor with no arguments
@@ -88,8 +91,12 @@ public class LoginFragment extends Fragment implements ApiClient{
         super.onCreate(savedInstanceState);
 
         // initialize the view model from factory
-        mFactory = Injection.provideAuthViewModelFactory(requireActivity().getApplication());
+        mFactory = Injection.provideAuthViewModelFactory(requireActivity().getApplicationContext());
         mAuthViewModel = mFactory.create(AuthenticationViewModel.class);
+        //navHostFragment = (NavHostFragment) requireActivity().getSupportFragmentManager()
+         //       .findFragmentById(R.id.main_nav_host_fragment);
+        navController = NavHostFragment.findNavController(this);
+        navBackStackEntry = navController.getCurrentBackStackEntry();
     }
 
     @Override
@@ -134,6 +141,7 @@ public class LoginFragment extends Fragment implements ApiClient{
             if (checkRequiredFields()) {
                 // attempt login
                 loginUser(username, password);
+
             }
         });
 
@@ -198,14 +206,14 @@ public class LoginFragment extends Fragment implements ApiClient{
      * Navigates user to UserMainFragment, also
      * passing username and login state data alongside
      */
-    private void toUserMainFragment(int id) {
-        navHostFragment = (NavHostFragment) requireActivity().getSupportFragmentManager()
-                .findFragmentById(R.id.main_nav_host_fragment);
-        navController = navHostFragment.getNavController();
+    private void toUserMainFragment(final int id) {
+        Log.d("login ID", "id:"+id);
         Bundle args = new Bundle();
-        args.putString(USERNAME, editTextUsername.getText().toString());
         args.putInt(USER_ID, id);
-        navController.navigate(R.id.userMainFragment, args);
+        NavOptions navOptions = new NavOptions.Builder()
+                .setPopUpTo(R.id.userMainFragment, true, false)
+                .build();
+        navController.navigate(R.id.userMainFragment, args, navOptions);
     }
 
     /**
@@ -248,4 +256,6 @@ public class LoginFragment extends Fragment implements ApiClient{
     public void onFailed(String log) {
         Log.e("FAILED", log);
     }
+
+
 }

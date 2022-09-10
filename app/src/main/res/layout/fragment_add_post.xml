@@ -102,7 +102,7 @@
 
                     <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/et_description"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/edit_text_hint_desc"

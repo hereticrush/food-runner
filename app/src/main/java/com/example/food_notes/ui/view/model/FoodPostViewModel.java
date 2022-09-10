@@ -43,11 +43,15 @@ public class FoodPostViewModel extends ViewModel {
                 .map(FoodPost::getDescription);
     }
 
+    public void loadCardItems() {
+
+    }
+
     public Flowable<List<FoodPost>> getAllFoodPosts() {
         return mDataSource.getAllData();
     }
 
-    public void deleteFoodPost() {
-        mDataSource.deleteFoodPostById(mFoodPost.getPost_id());
+    public void deleteItem(final Long id) {
+        mDataSource.deleteFoodPostById(id);
     }
 }

@@ -12,16 +12,28 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.SavedStateHandle;
+import androidx.navigation.NavBackStackEntry;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
+import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentAddPostBinding;
+import com.example.food_notes.injection.Injection;
+import com.example.food_notes.ui.view.factory.FoodPostModelViewFactory;
+import com.example.food_notes.ui.view.model.FoodPostViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -35,16 +47,30 @@ import java.util.List;
 public class AddPostFragment extends Fragment {
 
     private static final String TAG = "add_post";
-    //private AppCompatTextView tvChooseImage;
+    private static int USER_ID;
+
+    // view binding
     private FragmentAddPostBinding binding;
-    private AppCompatEditText title, description;
+
     private RatingBar ratingBar;
-    private boolean flag_value;
     private FloatingActionButton fab_create, fab_back, fab_choose_image;
+    private EditText title;
+    private EditText description;
+
+    // view model components
+    private FoodPostModelViewFactory mFactory;
+    private FoodPostViewModel mViewModel;
+
+    // navigation components
+    private NavHostFragment navHostFragment;
+    private NavController navController;
+    private SavedStateHandle savedStateHandle;
+    private NavBackStackEntry navBackStackEntry;
+
     public AddPostFragment() {}
 
-    @NonNull
-    public static AddPostFragment getInstance() {
+    @Nullable
+    public static AddPostFragment newInstance() {
         AddPostFragment fragment = new AddPostFragment();
         return fragment;
     }
@@ -52,12 +78,28 @@ public class AddPostFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //init view model
+        mFactory = Injection.provideFoodPostViewModelFactory(requireActivity().getApplicationContext());
+        mViewModel = mFactory.create(FoodPostViewModel.class);
+        navController = NavHostFragment.findNavController(this);
+
+        navBackStackEntry = navController.getPreviousBackStackEntry();
+        savedStateHandle = navBackStackEntry.getSavedStateHandle();
+        if (savedStateHandle.contains("LOGGED_USERID")) {
+            USER_ID = savedInstanceState.getInt("LOGGED_USERID");
+        }
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        //init view binding
         binding = FragmentAddPostBinding.inflate(inflater, container, false);
+        title = binding.tilTitlePost.getEditText();
+        description = binding.tilPost.getEditText();
+        fab_back = binding.fabBackToMain;
+        fab_create = binding.fabCreatePost;
+        fab_choose_image = binding.fabChooseImage;
 
         return binding.getRoot();
     }
@@ -66,7 +108,10 @@ public class AddPostFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initRatingBar();
-        binding.fabBackToMain.setOnClickListener(v -> backToUserMainFragment());
+        if (isFilledAllRequiredFields()) {
+            fab_create.setOnClickListener(v -> backToUserMainFragment());
+        }
+        fab_back.setOnClickListener(v -> backToUserMainFragment());
     }
     //TODO IMPLEMENT THIS FUNCTION AS IT IS: GO TO GALLERY, SET PERMS, GET THE IMAGE AND CONVERT URL TO STRING , STORE IN DB
     //TODO BUG HAS TO DO WITH FUNCTION CALLS IN THIS FUNCTION
@@ -131,7 +176,7 @@ public class AddPostFragment extends Fragment {
     }
 
     private void showRationaleDialogForPermissions() {
-        new AlertDialog.Builder(getActivity())
+        new AlertDialog.Builder(requireActivity())
                 .setMessage("You are required to turn on permissions from settings")
                 .setPositiveButton("To Settings", new DialogInterface.OnClickListener() {
                     @Override
@@ -142,7 +187,7 @@ public class AddPostFragment extends Fragment {
                             intent.setData(uri);
                             startActivity(intent);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Log.e("ERROR", e.getLocalizedMessage());
                         }
                     }
                 }).setNegativeButton("Dismiss", (dialog, which) -> dialog.dismiss())
@@ -150,8 +195,7 @@ public class AddPostFragment extends Fragment {
     }
 
     /**
-     * initializes few attributes of the rating bar in the add_post fragment
-     *
+     * initializes some of the attributes of the rating bar in the add_post fragment
      */
     private void initRatingBar() {
             binding.ratingBarAddPost.setNumStars(5);
@@ -160,11 +204,10 @@ public class AddPostFragment extends Fragment {
     }
 
     /**
-     * pops the recent fragment from the activity stack
+     * Navigates user back to UserMainFragment
      */
     private void backToUserMainFragment() {
-        FragmentManager manager = getParentFragmentManager();
-        manager.popBackStack("main", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        navController.navigate(R.id.userMainFragment);
     }
 
     /**
@@ -172,32 +215,23 @@ public class AddPostFragment extends Fragment {
      * @return bool
      */
     private boolean isFilledAllRequiredFields() {
-        return checkDescriptionLength() && checkTitleLength();
+        if (TextUtils.isEmpty(title.getText()) &&
+        TextUtils.isEmpty(description.getText())) {
+            title.setError("Title is required");
+            description.setError("Description is required");
+            return false;
+        }
+        if (TextUtils.isEmpty(title.getText())) {
+            title.setError("Title is required");
+            return false;
+        }
+        if (TextUtils.isEmpty(description.getText())) {
+            description.setError("Description is required");
+            return false;
+        }
+        return true;
     }
 
-    /**
-     * checks whether description has sufficient number of chars
-      * @return bool
-     */
-    private boolean checkDescriptionLength() {
-        if (description.getText().toString().length() < 140 &&
-                description.getText().toString().length() > 5) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * checks whether title has sufficient number of chars
-     * @return bool
-     */
-    private boolean checkTitleLength() {
-        if (binding.etTitle.getText().toString().length() < 50 &&
-                binding.etTitle.getText().toString().length() > 0) {
-            return true;
-        }
-        return false;
-    }
 
     @Override
     public void onDestroyView() {
