@@ -5,10 +5,13 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.example.food_notes.data.foodpost.FoodPostDataSource;
+import com.example.food_notes.data.foodpost.FoodPostRepository;
 import com.example.food_notes.data.user.UserDataSource;
 import com.example.food_notes.data.user.UserRepository;
 import com.example.food_notes.db.ApplicationDatabase;
 import com.example.food_notes.ui.view.factory.AuthenticationViewModelFactory;
+import com.example.food_notes.ui.view.factory.FoodPostModelViewFactory;
 import com.example.food_notes.ui.view.factory.UserViewModelFactory;
 
 /**
@@ -20,14 +23,26 @@ public class Injection {
 
     /**
      * Provides an UserRepository object to connect
-     * the data classes with viewmodels
-     * @param context
-     * @return UserDataSource object
+     * the data classes with viewmodel
+     * @param context application context
+     * @return UserDataSource interface
      */
     @NonNull
     public static UserDataSource provideUserDataSource(Context context) {
         ApplicationDatabase database = ApplicationDatabase.getInstance(context);
         return new UserRepository(database.userDao());
+    }
+
+    /**
+     * Provides a FoodPostRepository object to connect
+     * the data classes with viewmodel
+     * @param context application context
+     * @return FoodPostDataSource interface
+     */
+    @NonNull
+    public static FoodPostDataSource provideFoodPostDataSource(Context context) {
+        ApplicationDatabase database = ApplicationDatabase.getInstance(context);
+        return new FoodPostRepository(database.foodPostDao());
     }
 
     /**
@@ -42,10 +57,10 @@ public class Injection {
     }
 
     /**
-     * Provides an Authentication View Model object
-     * to access the data repository(in this case user repository)
-     * @param context
-     * @return AuthenticationViewModel object
+     * Provides a factory to create AuthenticationViewModel class instance
+     * to access the data repository(UserRepository)
+     * @param context application context
+     * @return AuthenticationViewModelFactory
      */
     @NonNull
     public static AuthenticationViewModelFactory provideAuthViewModelFactory(Context context) {
@@ -53,4 +68,15 @@ public class Injection {
         return new AuthenticationViewModelFactory(repository);
     }
 
+    /**
+     * Provides a factory to create FoodPostViewModel class instance
+     * to access the data layer(FoodPostRepository)
+     * @param context application context
+     * @return FoodPostViewModelFactory
+     */
+    @NonNull
+    public static FoodPostModelViewFactory provideFoodPostViewModelFactory(Context context) {
+        FoodPostDataSource repository = provideFoodPostDataSource(context);
+        return new FoodPostModelViewFactory(repository);
+    }
 }

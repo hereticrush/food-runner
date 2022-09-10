@@ -48,16 +48,6 @@ public class FoodPost {
         }
 
         @Ignore
-        public FoodPost(Long post_id, Long user_id, Long img_id, String title, String description, float rating) {
-                this.post_id = post_id;
-                this.user_id = user_id;
-                this.img_id = img_id;
-                this.title = title;
-                this.description = description;
-                this.rating = rating;
-        }
-
-        @Ignore
         public FoodPost(Long post_id, Long user_id, Long img_id, String title, String description, float rating, String sent_at, Double latitude, Double longitude) {
                 this.post_id = post_id;
                 this.user_id = user_id;

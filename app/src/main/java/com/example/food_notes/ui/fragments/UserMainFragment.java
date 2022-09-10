@@ -10,7 +10,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.navigation.NavBackStackEntry;
@@ -40,31 +39,35 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
  */
 public class UserMainFragment extends Fragment {
 
-    private static final String LOGGED_USER = "LOGGED_USER";
     private static final String LOGGED_USERID = "LOGGED_USERID";
     private static final String TAG = "main";
+    private static int USER_ID;
 
+    // view binding
     private FragmentUserMainBinding binding;
 
     private RecyclerView recyclerView;
 
     private final CompositeDisposable disposable = new CompositeDisposable();
 
+    // view models
     private UserViewModel mUserViewModel;
     private UserViewModelFactory mFactory;
 
     private BottomNavigationView bottomNavigationView;
 
+    // navigation components
     private NavHostFragment navHostFragment;
     private NavController navController;
+    private NavBackStackEntry navBackStackEntry;
+    private SavedStateHandle savedStateHandle;
 
     public UserMainFragment() {}
 
     @Nullable
-    public static UserMainFragment newInstance(String username, int user_id) {
+    public static UserMainFragment newInstance(int user_id) {
         UserMainFragment fragment = new UserMainFragment();
         Bundle args = new Bundle();
-        args.putString(LOGGED_USER, username);
         args.putInt(LOGGED_USERID, user_id);
         fragment.setArguments(args);
         return fragment;
@@ -78,8 +81,8 @@ public class UserMainFragment extends Fragment {
         navController = NavHostFragment.findNavController(this);
 
         // experimental ...
-        NavBackStackEntry navBackStackEntry = navController.getPreviousBackStackEntry();
-        SavedStateHandle savedStateHandle = navBackStackEntry.getSavedStateHandle();
+        navBackStackEntry = navController.getPreviousBackStackEntry();
+        savedStateHandle = navBackStackEntry.getSavedStateHandle();
         savedStateHandle.getLiveData(LoginFragment.LOGIN_SUCCESSFUL)
                 .observe(navBackStackEntry,(Observer<? super Object>) success -> {
                     if (!success.equals(true)) {
@@ -91,6 +94,9 @@ public class UserMainFragment extends Fragment {
                     }
                 });
 
+        // user id of user that logged in
+        USER_ID = savedStateHandle.get(LoginFragment.USER_ID);
+        System.out.println("from user_main uid:"+USER_ID);
     }
 
     @Override
@@ -99,7 +105,6 @@ public class UserMainFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentUserMainBinding.inflate(inflater, container, false);
         if (getArguments() != null) {
-            String usr = getArguments().getString(LOGGED_USER);
             int usr_id = getArguments().getInt(LOGGED_USERID);
         }
         bottomNavigationView = binding.bottomNavView;
@@ -114,7 +119,14 @@ public class UserMainFragment extends Fragment {
                 } else if (item.getItemId() == R.id.action_settings) {
                     Toast.makeText(requireActivity().getApplicationContext(), "Settings", Toast.LENGTH_SHORT).show();
                     return true;
-                }
+                } else if (item.getItemId() == R.id.action_logout_user) {
+                   navBackStackEntry = navController.getPreviousBackStackEntry();
+                   int destination = navController.getGraph().getStartDestinationId();
+                   NavOptions navOptions = new NavOptions.Builder().setPopUpTo(destination, true).build();
+                   navController.navigate(destination, null, navOptions);
+                   savedStateHandle.set(LoginFragment.LOGIN_SUCCESSFUL, false);
+                   return true;
+               }
                 return false;
             }
         });
@@ -150,7 +162,6 @@ public class UserMainFragment extends Fragment {
                 new RecyclerViewItemClickListener(getActivity(), recyclerView, new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        Toast.makeText(getActivity(), mUserViewModel.getAllUsers().blockingFirst().get(position).getUsername(), Toast.LENGTH_LONG).show();
                     }
 
                     @Override

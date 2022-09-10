@@ -38,6 +38,7 @@ import io.reactivex.rxjava3.observers.DisposableMaybeObserver;
 
 public class LoginFragment extends Fragment implements ApiClient{
 
+    public static String USER_ID = "USER_ID";
     private static final String USERNAME = "USERNAME";
     public static String LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL";
     private static final String CLICK_TEXT = "Click here to sign up";
@@ -149,7 +150,8 @@ public class LoginFragment extends Fragment implements ApiClient{
                     Log.d("SUCCESS", "uid:" + id);
                     toast("Welcome " + username);
                     savedStateHandle.set(LOGIN_SUCCESSFUL, true);
-                    toUserMainFragment();
+                    savedStateHandle.set(USER_ID, id);
+                    toUserMainFragment(id);
                 } catch (Exception e) {
                     toast(e.getLocalizedMessage());
                 }
@@ -196,12 +198,13 @@ public class LoginFragment extends Fragment implements ApiClient{
      * Navigates user to UserMainFragment, also
      * passing username and login state data alongside
      */
-    private void toUserMainFragment() {
+    private void toUserMainFragment(int id) {
         navHostFragment = (NavHostFragment) requireActivity().getSupportFragmentManager()
                 .findFragmentById(R.id.main_nav_host_fragment);
         navController = navHostFragment.getNavController();
         Bundle args = new Bundle();
         args.putString(USERNAME, editTextUsername.getText().toString());
+        args.putInt(USER_ID, id);
         navController.navigate(R.id.userMainFragment, args);
     }
 
@@ -238,7 +241,7 @@ public class LoginFragment extends Fragment implements ApiClient{
      */
     @Override
     public void onSuccess() {
-        toUserMainFragment();
+        Log.d("SUCCESS", "done");
     }
 
     @Override
