@@ -14,7 +14,6 @@ import com.example.food_notes.data.user.User;
         indices = {
                 @Index(value = "post_id", unique = true),
                 @Index(value = "user_id", unique = true),
-                @Index(value = "img_id", unique = true),
         },
         foreignKeys = {
                 @ForeignKey(
@@ -28,7 +27,7 @@ import com.example.food_notes.data.user.User;
 )
 public class FoodPost {
         @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "post_id") private Long post_id = 0L;
-        @ColumnInfo(name = "user_id") private Long user_id;
+        @ColumnInfo(name = "user_id") private int user_id;
         @ColumnInfo(name = "img_id") private Long img_id = 0L;
         @ColumnInfo(name = "title") private String title;
         @ColumnInfo(name = "description") private String description;
@@ -48,7 +47,17 @@ public class FoodPost {
         }
 
         @Ignore
-        public FoodPost(Long post_id, Long user_id, Long img_id, String title, String description, float rating, String sent_at, Double latitude, Double longitude) {
+        public FoodPost(int user_id, String title, String description, float rating, Double latitude, Double longitude) {
+                this.user_id = user_id;
+                this.title = title;
+                this.description = description;
+                this.rating = rating;
+                this.latitude = latitude;
+                this.longitude = longitude;
+        }
+
+        @Ignore
+        public FoodPost(Long post_id, int user_id, Long img_id, String title, String description, float rating, String sent_at, Double latitude, Double longitude) {
                 this.post_id = post_id;
                 this.user_id = user_id;
                 this.img_id = img_id;
@@ -68,11 +77,11 @@ public class FoodPost {
                 this.post_id = post_id;
         }
 
-        public Long getUser_id() {
+        public int getUser_id() {
                 return user_id;
         }
 
-        public void setUser_id(Long user_id) {
+        public void setUser_id(int user_id) {
                 this.user_id = user_id;
         }
 

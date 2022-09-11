@@ -23,9 +23,12 @@ public interface FoodPostDao {
     @Query("SELECT * FROM food_posts WHERE post_id=:postId")
     Flowable<FoodPost> getFoodPostById(Long postId);
 
+    @Query("SELECT img_id FROM food_posts WHERE img_id LIKE :imgId")
+    Single<Long> getFoodPostImageId(Long imgId);
+
     @Query("DELETE FROM food_posts WHERE food_posts.post_id = :id")
-    void deleteFoodPostById(long id);
+    Completable deleteFoodPostById(Long id);
 
     @Query("DELETE FROM food_posts")
-    void deleteAllPosts();
+    Completable deleteAllPosts();
 }

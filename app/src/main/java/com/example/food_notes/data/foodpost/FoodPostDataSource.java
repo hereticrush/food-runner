@@ -14,8 +14,8 @@ public interface FoodPostDataSource {
 
     Completable insertOrUpdate(FoodPost foodPost);
 
-    void deleteAllData();
+    Completable deleteAllData();
 
-    void deleteFoodPostById(Long post_id);
+    Completable deleteFoodPostById(Long post_id);
 
 }

@@ -17,6 +17,7 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.22135416666666666" />
         <entry key="app/src/main/res/layout/activity_posts.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_user_main.xml" value="0.21822916666666667" />
+        <entry key="app/src/main/res/layout/fragment_add_image_options_dialog.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_add_post.xml" value="0.2586805555555556" />
         <entry key="app/src/main/res/layout/fragment_add_user.xml" value="0.21822916666666667" />
         <entry key="app/src/main/res/layout/fragment_login.xml" value="0.182518115942029" />

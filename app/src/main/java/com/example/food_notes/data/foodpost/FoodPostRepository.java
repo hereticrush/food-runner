@@ -29,13 +29,13 @@ public class FoodPostRepository implements FoodPostDataSource {
     }
 
     @Override
-    public void deleteAllData() {
-        mFoodPostDao.deleteAllPosts();
+    public Completable deleteAllData() {
+        return mFoodPostDao.deleteAllPosts();
     }
 
     @Override
-    public void deleteFoodPostById(Long id) {
-        mFoodPostDao.deleteFoodPostById(id);
+    public Completable deleteFoodPostById(Long id) {
+        return mFoodPostDao.deleteFoodPostById(id);
     }
 
 }

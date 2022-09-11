@@ -33,6 +33,7 @@ public class FoodPostRecyclerViewAdapter extends RecyclerView.Adapter<FoodPostVi
 
     @Override
     public void onBindViewHolder(@NonNull FoodPostViewHolder holder, final int position) {
+
     }
 
     @Override

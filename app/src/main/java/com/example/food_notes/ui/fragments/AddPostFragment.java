@@ -67,6 +67,8 @@ public class AddPostFragment extends Fragment {
     private SavedStateHandle savedStateHandle;
     private NavBackStackEntry navBackStackEntry;
 
+    private AddImageOptionsDialogFragment dialogFragment;
+
     public AddPostFragment() {}
 
     @Nullable
@@ -82,6 +84,8 @@ public class AddPostFragment extends Fragment {
         mFactory = Injection.provideFoodPostViewModelFactory(requireActivity().getApplicationContext());
         mViewModel = mFactory.create(FoodPostViewModel.class);
         navController = NavHostFragment.findNavController(this);
+
+
 
         navBackStackEntry = navController.getPreviousBackStackEntry();
         savedStateHandle = navBackStackEntry.getSavedStateHandle();
@@ -100,6 +104,8 @@ public class AddPostFragment extends Fragment {
         fab_back = binding.fabBackToMain;
         fab_create = binding.fabCreatePost;
         fab_choose_image = binding.fabChooseImage;
+        ratingBar = binding.ratingBarAddPost;
+        dialogFragment = new AddImageOptionsDialogFragment();
 
         return binding.getRoot();
     }
@@ -107,37 +113,23 @@ public class AddPostFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initRatingBar();
+        fab_choose_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPermissionDialog();
+            }
+        });
         if (isFilledAllRequiredFields()) {
-            fab_create.setOnClickListener(v -> backToUserMainFragment());
+            fab_create.setOnClickListener(v -> {
+                showPermissionDialog();
+                backToUserMainFragment();
+            });
         }
         fab_back.setOnClickListener(v -> backToUserMainFragment());
     }
-    //TODO IMPLEMENT THIS FUNCTION AS IT IS: GO TO GALLERY, SET PERMS, GET THE IMAGE AND CONVERT URL TO STRING , STORE IN DB
-    //TODO BUG HAS TO DO WITH FUNCTION CALLS IN THIS FUNCTION
 
-    //TODO gotta work this func out, clashing with ui or related to thread
     private void showPermissionDialog() {
-        final ArrayList<String> items = new ArrayList<>(2);
-        items.add("Select photo from gallery");
-        items.add("Capture a photo with camera");
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity().getApplicationContext());
-        builder.setTitle(" Choose an option ");
-        builder.setItems(items.toArray(new String[2]), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) // TODO needs fix
-                {
-                    case 0:
-                        chooseImageFromGallery();
-                        break;
-                    case 1:
-                        captureImageWithCamera();
-                        break;
-                    default: dialog.dismiss();
-                }
-            }
-        }).show();
+        dialogFragment.show(getChildFragmentManager(), AddImageOptionsDialogFragment.TAG);
     }
 
     private void captureImageWithCamera() {

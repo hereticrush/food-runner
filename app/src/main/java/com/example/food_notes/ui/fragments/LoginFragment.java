@@ -141,7 +141,6 @@ public class LoginFragment extends Fragment implements ApiClient{
             if (checkRequiredFields()) {
                 // attempt login
                 loginUser(username, password);
-
             }
         });
 

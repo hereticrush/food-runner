@@ -13,4 +13,6 @@
     <string name="login_btn_placeholder_text">LOGIN</string>
     <string name="create_post_fab_cd">CREATE POST</string>
     <string name="text_view_suggestion_placeholder">Don\'t have an account? Click here to sign up</string>
+    <string name="dialog_option_a">Choose an image from gallery</string>
+    <string name="dialog_option_b">Capture an image with camera</string>
 </resources>

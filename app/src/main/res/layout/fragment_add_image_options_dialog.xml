@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout
+    android:id="@+id/layout_dialog_frame"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/card_radius"
+    app:cardCornerRadius="@dimen/user_main_margin"
+    app:cardElevation="@dimen/elevation_all"
+    app:cardBackgroundColor="@color/color_primary_dark">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="250dp"
+        android:layout_gravity="center"
+        android:background="@drawable/card_radius"
+        android:padding="@dimen/fab_margin"
+        android:elevation="@dimen/button_margin"
+        >
+
+    <androidx.appcompat.widget.AppCompatButton
+        style="@style/Theme.Food_Notes"
+        android:id="@+id/button_dialog_option_a"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dialog_option_a"
+        android:textSize="16sp"
+        android:textColor="@color/color_primary_dark"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/button_dialog_option_b"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="300dp"
+        android:backgroundTint="@color/color_accent"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        style="@style/Theme.Food_Notes"
+        android:id="@+id/button_dialog_option_b"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dialog_option_b"
+        android:textSize="16sp"
+        android:textColor="@color/color_primary_dark"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button"
+        app:layout_constraintTop_toBottomOf="@+id/button_dialog_option_a"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="275dp"
+        android:backgroundTint="@color/color_light"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
