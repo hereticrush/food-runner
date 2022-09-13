@@ -28,7 +28,7 @@ import com.example.food_notes.data.user.User;
 public class FoodPost {
         @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "post_id") private Long post_id = 0L;
         @ColumnInfo(name = "user_id") private int user_id;
-        @ColumnInfo(name = "img_id") private Long img_id = 0L;
+        @ColumnInfo(name = "img_str") private String img_str;
         @ColumnInfo(name = "title") private String title;
         @ColumnInfo(name = "description") private String description;
         @ColumnInfo(name = "rating") private float rating;
@@ -39,7 +39,8 @@ public class FoodPost {
         public FoodPost() {}
 
         @Ignore
-        public FoodPost(String title, String description, float rating, String sent_at) {
+        public FoodPost(String img_str, String title, String description, float rating, String sent_at) {
+                this.img_str = img_str;
                 this.sent_at = sent_at;
                 this.title = title;
                 this.description = description;
@@ -47,8 +48,30 @@ public class FoodPost {
         }
 
         @Ignore
-        public FoodPost(int user_id, String title, String description, float rating, Double latitude, Double longitude) {
+        public FoodPost(int user_id, String title, String description, float rating, String sent_at) {
                 this.user_id = user_id;
+                this.title = title;
+                this.description = description;
+                this.rating = rating;
+                this.sent_at = sent_at;
+        }
+
+        @Ignore
+        public FoodPost(int user_id, String img_str, String title, String description, float rating, String sent_at, Double latitude, Double longitude) {
+                this.user_id = user_id;
+                this.img_str = img_str;
+                this.title = title;
+                this.description = description;
+                this.rating = rating;
+                this.sent_at = sent_at;
+                this.latitude = latitude;
+                this.longitude = longitude;
+        }
+
+        @Ignore
+        public FoodPost(int user_id, String img_str, String title, String description, float rating, Double latitude, Double longitude) {
+                this.user_id = user_id;
+                this.img_str = img_str;
                 this.title = title;
                 this.description = description;
                 this.rating = rating;
@@ -57,10 +80,10 @@ public class FoodPost {
         }
 
         @Ignore
-        public FoodPost(Long post_id, int user_id, Long img_id, String title, String description, float rating, String sent_at, Double latitude, Double longitude) {
+        public FoodPost(Long post_id, int user_id, String img_str, String title, String description, float rating, String sent_at, Double latitude, Double longitude) {
                 this.post_id = post_id;
                 this.user_id = user_id;
-                this.img_id = img_id;
+                this.img_str = img_str;
                 this.title = title;
                 this.description = description;
                 this.rating = rating;
@@ -85,12 +108,12 @@ public class FoodPost {
                 this.user_id = user_id;
         }
 
-        public Long getImg_id() {
-                return img_id;
+        public String getImg_str() {
+                return img_str;
         }
 
-        public void setImg_id(Long img_id) {
-                this.img_id = img_id;
+        public void setImg_str(String img_str) {
+                this.img_str = img_str;
         }
 
         public String getTitle() {

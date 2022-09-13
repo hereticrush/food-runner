@@ -37,9 +37,10 @@ dependencies {
 
     def junit_version = "4.13.2"
     def room_version = "2.4.3"
-    def nav_version = "2.5.1"
+    def nav_version = "2.5.2"
     def fragment_version = "1.5.2"
     def rx_version = '3.1.5'
+    def glide_version = "4.12.0"
 
     // Fragment Java language implementation
     implementation "androidx.fragment:fragment:$fragment_version"
@@ -48,8 +49,9 @@ dependencies {
     // viewmodel
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
 
-    //gson
-    implementation 'com.google.code.gson:gson:2.9.1'
+    // glide
+    implementation "com.github.bumptech.glide:glide:$glide_version"
+    annotationProcessor "com.github.bumptech.glide:compiler:$glide_version"
 
     //retrofit
     implementation "com.squareup.retrofit2:retrofit:2.9.0"

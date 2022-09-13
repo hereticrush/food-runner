@@ -173,7 +173,7 @@ public class LoginFragment extends Fragment implements ApiClient{
             @Override
             public void onComplete() {
                 toast("Invalid credentials");
-                Log.d("COMPLETED", "done");
+                whenCompleted();
             }
         };
         mAuthViewModel.login(username, password)
@@ -256,5 +256,8 @@ public class LoginFragment extends Fragment implements ApiClient{
         Log.e("FAILED", log);
     }
 
-
+    @Override
+    public void whenCompleted() {
+        Log.d("COMPLETED", "done");
+    }
 }

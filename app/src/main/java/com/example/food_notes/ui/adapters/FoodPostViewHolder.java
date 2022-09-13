@@ -19,11 +19,11 @@ public class FoodPostViewHolder extends RecyclerView.ViewHolder {
 
     public FoodPostViewHolder(@NonNull View itemView) {
         super(itemView);
-        textTitle = itemView.findViewById(R.id.tv_title);
-        textDesc = itemView.findViewById(R.id.tv_desc);
-        textDate = itemView.findViewById(R.id.tv_date);
-        ratingBar = itemView.findViewById(R.id.rb_post);
-        imageView = itemView.findViewById(R.id.iv_post_image);
+        textTitle = (TextView) itemView.findViewById(R.id.tv_title);
+        textDesc = (TextView) itemView.findViewById(R.id.tv_desc);
+        textDate = (TextView) itemView.findViewById(R.id.tv_date);
+        ratingBar = (RatingBar) itemView.findViewById(R.id.rb_post);
+        imageView = (ImageView) itemView.findViewById(R.id.iv_post_image);
     }
 
     public TextView getTextTitle() {

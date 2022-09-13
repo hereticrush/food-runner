@@ -17,17 +17,16 @@ public class Converters {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] b = stream.toByteArray();
         String temp = Base64.getEncoder().encodeToString(b);
-        return temp == null ? null : temp;
+        return temp;
     }
 
     @TypeConverter
     public static Bitmap StrToBitmap(String str) {
         try {
             byte[] b = Base64.getDecoder().decode(str);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(
+            return BitmapFactory.decodeByteArray(
                     b, 0, b.length
             );
-            return bitmap;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

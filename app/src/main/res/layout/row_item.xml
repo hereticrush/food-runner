@@ -68,7 +68,6 @@
                     android:layout_margin="@dimen/user_main_margin"
                     android:isIndicator="true"
                     android:numStars="5"
-                    android:rating="1.5"
                     android:theme="@style/RatingBarCustom" />
 
             </LinearLayout>

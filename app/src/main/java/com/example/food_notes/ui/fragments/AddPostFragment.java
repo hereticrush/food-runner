@@ -3,15 +3,20 @@ package com.example.food_notes.ui.fragments;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
@@ -24,9 +29,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentAddPostBinding;
 import com.example.food_notes.injection.Injection;
@@ -43,8 +51,12 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.observers.DisposableObserver;
 
-public class AddPostFragment extends Fragment {
+
+public class AddPostFragment extends Fragment implements AddImageOptionsDialogFragment.AddImageOptionsListener {
 
     private static final String TAG = "add_post";
     private static int USER_ID;
@@ -52,10 +64,12 @@ public class AddPostFragment extends Fragment {
     // view binding
     private FragmentAddPostBinding binding;
 
+    // views
     private RatingBar ratingBar;
     private FloatingActionButton fab_create, fab_back, fab_choose_image;
     private EditText title;
     private EditText description;
+    private ImageView imageView;
 
     // view model components
     private FoodPostModelViewFactory mFactory;
@@ -67,13 +81,17 @@ public class AddPostFragment extends Fragment {
     private SavedStateHandle savedStateHandle;
     private NavBackStackEntry navBackStackEntry;
 
+    // dialog window
     private AddImageOptionsDialogFragment dialogFragment;
 
     public AddPostFragment() {}
 
     @Nullable
-    public static AddPostFragment newInstance() {
+    public static AddPostFragment newInstance(String requestKey) {
         AddPostFragment fragment = new AddPostFragment();
+        Bundle args = new Bundle();
+        args.putString("requestKey", requestKey);
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -85,13 +103,29 @@ public class AddPostFragment extends Fragment {
         mViewModel = mFactory.create(FoodPostViewModel.class);
         navController = NavHostFragment.findNavController(this);
 
-
-
         navBackStackEntry = navController.getPreviousBackStackEntry();
         savedStateHandle = navBackStackEntry.getSavedStateHandle();
         if (savedStateHandle.contains("LOGGED_USERID")) {
             USER_ID = savedInstanceState.getInt("LOGGED_USERID");
         }
+        
+        this.getChildFragmentManager().setFragmentResultListener(
+                "requestKey", this, new FragmentResultListener() {
+                    @Override
+                    public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                        if (requestKey.equals("requestKey")) {
+                            if (result.containsKey("storage")) {
+                                final int RESULT_CODE = result.getInt(requestKey);
+                                Log.d(TAG, "onFragmentResult: "+RESULT_CODE);
+                                if (RESULT_CODE == 750) {
+                                    System.out.println("750");
+                                    Toast.makeText(requireActivity().getApplicationContext(), "storage", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    }
+                }
+        );
     }
 
     @Override
@@ -105,7 +139,7 @@ public class AddPostFragment extends Fragment {
         fab_create = binding.fabCreatePost;
         fab_choose_image = binding.fabChooseImage;
         ratingBar = binding.ratingBarAddPost;
-        dialogFragment = new AddImageOptionsDialogFragment();
+        imageView = binding.ivSetImage;
 
         return binding.getRoot();
     }
@@ -113,22 +147,28 @@ public class AddPostFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        fab_choose_image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPermissionDialog();
-            }
+
+        fab_choose_image.setOnClickListener(v -> {
+            showDialogFragment();
         });
         if (isFilledAllRequiredFields()) {
             fab_create.setOnClickListener(v -> {
-                showPermissionDialog();
+                Drawable drawable = imageView.getDrawable();
+                Glide.with(this).load(drawable).diskCacheStrategy(DiskCacheStrategy.ALL);
+
+                mViewModel.addItem(
+                        USER_ID,
+                        title.getText().toString(),
+                        description.getText().toString(),
+                        ratingBar.getRating());
                 backToUserMainFragment();
             });
         }
         fab_back.setOnClickListener(v -> backToUserMainFragment());
     }
 
-    private void showPermissionDialog() {
+    private void showDialogFragment() {
+        dialogFragment = new AddImageOptionsDialogFragment();
         dialogFragment.show(getChildFragmentManager(), AddImageOptionsDialogFragment.TAG);
     }
 
@@ -229,5 +269,17 @@ public class AddPostFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onDialogStorageOptionClick(DialogFragment dialog) {
+        // TODO implement functions
+        dialog.dismiss();
+    }
+
+    @Override
+    public void onDialogCameraOptionClick(DialogFragment dialog) {
+        // TODO implement functions
+        dialog.dismiss();
     }
 }

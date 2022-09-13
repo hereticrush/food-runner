@@ -1,10 +1,9 @@
 package com.example.food_notes.ui.fragments;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,28 +11,48 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.food_notes.R;
-import com.example.food_notes.databinding.FragmentAddImageOptionsDialogBinding;
+
 
 public class AddImageOptionsDialogFragment extends DialogFragment {
 
-    private FragmentAddImageOptionsDialogBinding binding;
+    public interface AddImageOptionsListener {
+        void onDialogStorageOptionClick(DialogFragment dialog);
+        void onDialogCameraOptionClick(DialogFragment dialog);
+    }
+
+    AddImageOptionsListener listener;
 
     public AddImageOptionsDialogFragment(){
         super(R.layout.fragment_add_image_options_dialog);
     }
 
-    @Nullable
+    //TODO NullPointerException happens , must be fixed (DEBUG)
+    @NonNull
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentAddImageOptionsDialogBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        builder.setMessage(R.string.dialog_title)
+                .setPositiveButton(R.string.dialog_option_a, (dialog, which) -> {
+                    listener.onDialogStorageOptionClick(this);
+                })
+                .setNegativeButton(R.string.dialog_option_b, (dialog, which) -> {
+                    listener.onDialogCameraOptionClick(this);
+                });
+
+        return builder.create();
     }
+
 
     public static String TAG = "AddImageOptionsDialog";
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        try {
+            listener = (AddImageOptionsListener) context;
+        } catch (ClassCastException e) {
+            Log.d(TAG, "onAttach: ERROR must implement AddImageOptionsListener");
+        }
     }
 }

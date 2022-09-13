@@ -128,4 +128,9 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
     public void onFailed(String log) {
         Log.e("FAILED_TRANSACTION", log);
     }
+
+    @Override
+    public void whenCompleted() {
+        Log.d("COMPLETED", "done");
+    }
 }

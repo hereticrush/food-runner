@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Food Runner</string>
     <string name="button_create_new_user_placeholder_text">CREATE A USER</string>
+    <string name="dialog_title">You can choose to</string>
     <string name="edit_text_hint">Title</string>
     <string name="button_text_create_post">CREATE</string>
     <string name="edit_text_hint_desc">Description</string>
@@ -13,6 +14,6 @@
     <string name="login_btn_placeholder_text">LOGIN</string>
     <string name="create_post_fab_cd">CREATE POST</string>
     <string name="text_view_suggestion_placeholder">Don\'t have an account? Click here to sign up</string>
-    <string name="dialog_option_a">Choose an image from gallery</string>
+    <string name="dialog_option_a">Choose an image from local storage</string>
     <string name="dialog_option_b">Capture an image with camera</string>
 </resources>

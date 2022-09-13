@@ -107,4 +107,9 @@ public class SignupFragment extends Fragment implements ApiClient {
         requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "User already exists", Toast.LENGTH_SHORT).show());
         Log.e("FAILED", log);
     }
+
+    @Override
+    public void whenCompleted() {
+        Log.d("COMPLETED", "done");
+    }
 }
