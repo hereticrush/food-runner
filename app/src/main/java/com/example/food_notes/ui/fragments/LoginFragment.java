@@ -21,7 +21,6 @@ import androidx.lifecycle.SavedStateHandle;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.food_notes.R;
@@ -31,7 +30,6 @@ import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.ApiClient;
 import com.example.food_notes.ui.view.factory.AuthenticationViewModelFactory;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 
 import io.reactivex.rxjava3.core.MaybeObserver;
@@ -93,8 +91,6 @@ public class LoginFragment extends Fragment implements ApiClient{
         // initialize the view model from factory
         mFactory = Injection.provideAuthViewModelFactory(requireActivity().getApplicationContext());
         mAuthViewModel = mFactory.create(AuthenticationViewModel.class);
-        //navHostFragment = (NavHostFragment) requireActivity().getSupportFragmentManager()
-         //       .findFragmentById(R.id.main_nav_host_fragment);
         navController = NavHostFragment.findNavController(this);
         navBackStackEntry = navController.getCurrentBackStackEntry();
     }
@@ -146,6 +142,13 @@ public class LoginFragment extends Fragment implements ApiClient{
 
     }
 
+    /**
+     * Subscribes an observer to viewModel in order to observe
+     * the state of the database query by passing user credentials
+     * and attempts an action depending on the response.
+     * @param username String type username
+     * @param password String type password
+     */
     public void loginUser(final String username,final String password) {
 
         MaybeObserver<User> observer = new DisposableMaybeObserver<User>() {

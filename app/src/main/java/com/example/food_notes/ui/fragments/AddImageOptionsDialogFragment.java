@@ -26,7 +26,6 @@ public class AddImageOptionsDialogFragment extends DialogFragment {
         super(R.layout.fragment_add_image_options_dialog);
     }
 
-    //TODO NullPointerException happens , must be fixed (DEBUG)
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -50,7 +49,7 @@ public class AddImageOptionsDialogFragment extends DialogFragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
-            listener = (AddImageOptionsListener) context;
+            this.listener = (AddImageOptionsListener) getParentFragment();
         } catch (ClassCastException e) {
             Log.d(TAG, "onAttach: ERROR must implement AddImageOptionsListener");
         }

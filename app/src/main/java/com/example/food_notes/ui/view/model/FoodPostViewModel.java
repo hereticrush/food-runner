@@ -61,6 +61,15 @@ public class FoodPostViewModel extends ViewModel implements ApiClient {
         return Converters.StrToBitmap(image_str);
     }
 
+    /**
+     * Attempts to add a FoodPost item to database with given attributes.
+     * This function also sets the time
+     * of posting of this object and subscribes a CompletableObserver to it.
+     * @param user_id String type user_id
+     * @param title String type title
+     * @param description String type description
+     * @param rating String rating
+     */
     public void addItem(final int user_id, final String title, final String description, final float rating) {
         Date currentDate = Calendar.getInstance().getTime();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
@@ -147,7 +156,7 @@ public class FoodPostViewModel extends ViewModel implements ApiClient {
 
     @Override
     public void onSuccess() {
-
+        Log.d("SUCCESS", "onSuccess: Transaction was successful");
     }
 
     @Override

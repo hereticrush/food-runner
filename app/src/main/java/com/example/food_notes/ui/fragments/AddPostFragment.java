@@ -41,12 +41,16 @@ import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.factory.FoodPostModelViewFactory;
 import com.example.food_notes.ui.view.model.FoodPostViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,23 +113,6 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
             USER_ID = savedInstanceState.getInt("LOGGED_USERID");
         }
         
-        this.getChildFragmentManager().setFragmentResultListener(
-                "requestKey", this, new FragmentResultListener() {
-                    @Override
-                    public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                        if (requestKey.equals("requestKey")) {
-                            if (result.containsKey("storage")) {
-                                final int RESULT_CODE = result.getInt(requestKey);
-                                Log.d(TAG, "onFragmentResult: "+RESULT_CODE);
-                                if (RESULT_CODE == 750) {
-                                    System.out.println("750");
-                                    Toast.makeText(requireActivity().getApplicationContext(), "storage", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        }
-                    }
-                }
-        );
     }
 
     @Override
@@ -173,11 +160,11 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
     }
 
     private void captureImageWithCamera() {
-        Toast.makeText(getActivity(), "Go capture an image!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireActivity().getApplicationContext(), "Go capture an image!", Toast.LENGTH_SHORT).show();
     }
 
+
     private void chooseImageFromGallery() {
-        getPermissionForGallery();
         Toast.makeText(getActivity(), "This works as well", Toast.LENGTH_SHORT).show();
     }
 
@@ -187,24 +174,48 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
 
     }
 
+    /**
+     * Prompts user to allow entry permission to local storage.
+     */
     private void getPermissionForGallery() {
-        Dexter.withContext(this.getActivity()).withPermissions(Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                .withListener(new MultiplePermissionsListener() {
+        Dexter.withContext(requireActivity()).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                .withListener(new PermissionListener() {
                     @Override
-                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-                        if (multiplePermissionsReport.areAllPermissionsGranted()) {
-                            Toast.makeText(getActivity(), "Went to gallery", Toast.LENGTH_SHORT).show();
-                        }
+                    public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+                        chooseImageFromGallery();
                     }
 
                     @Override
-                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                    public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
+
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
                         showRationaleDialogForPermissions();
                     }
-                }).withErrorListener(
-                        dexterError -> Toast.makeText(getActivity(), "An error occurred! " + dexterError.toString(), Toast.LENGTH_SHORT).show()
-                ).onSameThread().check();
+                }).withErrorListener(dexterError -> Toast.makeText(requireActivity().getApplicationContext(), "Error - "+dexterError.toString(), Toast.LENGTH_SHORT).show())
+                .onSameThread().check();
+    }
+
+    private void getPermissionForCamera() {
+        Dexter.withContext(requireActivity()).withPermission(Manifest.permission.CAMERA)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+                        captureImageWithCamera();
+                    }
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
+
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+                        showRationaleDialogForPermissions();
+                    }
+                }).withErrorListener(dexterError -> Snackbar.make(this.requireContext(), this.requireView(), "E", Snackbar.LENGTH_SHORT));
     }
 
     private void showRationaleDialogForPermissions() {
@@ -227,7 +238,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
     }
 
     /**
-     * initializes some of the attributes of the rating bar in the add_post fragment
+     * Initializes some of the attributes of the rating bar in the add_post fragment.
      */
     private void initRatingBar() {
             binding.ratingBarAddPost.setNumStars(5);
@@ -243,7 +254,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
     }
 
     /**
-     * if any field(title,desc) is empty return false, otherwise true
+     * if any field(title,desc) is empty return false, otherwise true.
      * @return bool
      */
     private boolean isFilledAllRequiredFields() {
@@ -271,15 +282,24 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
         binding = null;
     }
 
+    /**
+     * Calls on DialogListener to listen and handle the click event for storage option.
+     * @param dialog AddImageOptionsDialogFragment
+     */
     @Override
     public void onDialogStorageOptionClick(DialogFragment dialog) {
-        // TODO implement functions
-        dialog.dismiss();
+        Log.d(TAG, "onDialogStorageOptionClick: storage");
+        getPermissionForGallery();
     }
 
+    /**
+     * Calls on DialogListener to listen and handle the click event for camera option
+     * @param dialog AddImageOptionsDialogFragment
+     */
     @Override
     public void onDialogCameraOptionClick(DialogFragment dialog) {
         // TODO implement functions
-        dialog.dismiss();
+        Log.d(TAG, "onDialogCameraOptionClick: camera");
+        captureImageWithCamera();
     }
 }
