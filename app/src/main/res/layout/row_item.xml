@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         app:cardBackgroundColor="@color/color_accent_dark"
         app:cardCornerRadius="@dimen/user_main_margin"
-        app:cardElevation="@dimen/elevation_all" >
+        app:cardElevation="@dimen/fab_margin" >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:padding="@dimen/user_main_margin"
@@ -27,7 +27,7 @@
                 android:paddingStart="@dimen/user_main_margin"
                 android:paddingEnd="@dimen/user_main_margin"
                 android:textSize="@dimen/edit_text_text_size"
-                android:text="KEŞKE SİNEK ÇIKMASAYDI"
+                android:text="lorem ipsum dolor sit amet."
                 android:textStyle="bold"
                 android:textColor="@color/color_primary_dark"
                 app:layout_constraintEnd_toStartOf="@id/tv_date"
@@ -37,7 +37,7 @@
 
             <TextView
                 android:id="@+id/tv_date"
-                android:text="10.09.2002"
+                android:text="mm-dd-yyyy"
                 android:paddingEnd="@dimen/user_main_margin"
                 android:textAlignment="textEnd"
                 android:textSize="@dimen/edit_text_text_size"
@@ -80,7 +80,6 @@
                 android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/tv_title"
                 app:layout_constraintTop_toBottomOf="@+id/tv_title">
 
                 <TextView
@@ -89,7 +88,7 @@
                     android:padding="@dimen/padding_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="placeholder"
+                    android:text="this is a long placeholder text for testing this ui element, and surprisingly, holds pretty solid."
                     android:textSize="@dimen/edit_text_text_desc_size" />
 
                 <ImageView
@@ -97,7 +96,7 @@
                     android:layout_width="120dp"
                     android:layout_height="120dp"
                     android:layout_marginEnd="@dimen/card_view_image_view_margin_end"
-                    android:src="@drawable/ic_baseline_choose_image_24"/>
+                    android:src="@drawable/ic_baseline_choose_image_24" />
 
             </LinearLayout>
 

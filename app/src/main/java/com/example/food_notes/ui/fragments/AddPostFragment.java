@@ -2,22 +2,21 @@ package com.example.food_notes.ui.fragments;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
@@ -28,6 +27,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.SavedStateHandle;
@@ -43,19 +43,21 @@ import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.factory.FoodPostModelViewFactory;
 import com.example.food_notes.ui.view.model.FoodPostViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.single.PermissionListener;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
-import java.io.IOException;
+import java.util.List;
 
-//TODO IMPLEMENT PERMISSIONS FUNCTIONALITY LATER
+import io.reactivex.rxjava3.core.Observable;
+
 public class AddPostFragment extends Fragment implements AddImageOptionsDialogFragment.AddImageOptionsListener {
 
+    public static final int CAMERA_REQUEST_CODE = 1938;
+    public static final int GALLERY = 100;
+    public static final int CAMERA = 200;
     private static final String TAG = "add_post";
     private static int USER_ID;
 
@@ -67,7 +69,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
     private FloatingActionButton fab_create, fab_back, fab_choose_image;
     private EditText title;
     private EditText description;
-    private ImageView imageView;
+    private AppCompatImageView imageView;
 
     // view model components
     private FoodPostModelViewFactory mFactory;
@@ -82,8 +84,12 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
     // dialog window
     private AddImageOptionsDialogFragment dialogFragment;
 
-    // result launcher is required to choose image
-    private ActivityResultLauncher<Intent> resultLauncher;
+    // result launcher is required to choose image and capture image with camera
+    private ActivityResultLauncher<Intent> galleryResultLauncher;
+    private ActivityResultLauncher<Intent> cameraResultLauncher;
+    private ActivityResultLauncher<Uri> mTakePhoto;
+
+    private Observable<Bitmap> mBitmap;
 
     public AddPostFragment() {}
 
@@ -111,6 +117,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
         }
 
         registerIntentToGalleryLauncher();
+        registerIntentToCaptureImageWithCameraLauncher();
     }
 
     @Override
@@ -135,7 +142,6 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
 
         fab_choose_image.setOnClickListener(v -> {
             showDialogFragment();
-
         });
         if (isFilledAllRequiredFields()) {
             fab_create.setOnClickListener(v -> {
@@ -145,7 +151,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
                         description.getText().toString(), 
                         ratingBar.getRating()
                 );
-                requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "Yeah", Toast.LENGTH_SHORT).show());
+                Toast.makeText(requireActivity().getApplicationContext(), "Yeah", Toast.LENGTH_SHORT).show();
                 backToUserMainFragment();
             });
         }
@@ -158,73 +164,58 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
     }
 
     private void captureImageWithCamera() {
-        Toast.makeText(requireActivity().getApplicationContext(), "Go capture an image!", Toast.LENGTH_SHORT).show();
+        Dexter.withContext(requireActivity()).withPermissions(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+        ).withListener(new MultiplePermissionsListener() {
+            @Override
+            public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+                if (multiplePermissionsReport.areAllPermissionsGranted()) {
+                    Log.d(TAG, "onPermissionsChecked: GRANTED CAMERA ACCESS");
+                    // go to camera
+                    Intent intentToCaptureImageWithCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    cameraResultLauncher.launch(intentToCaptureImageWithCamera);
+                }
+            }
+
+            @Override
+            public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                showRationaleDialogForPermissions();
+            }
+        }).withErrorListener(dexterError -> Log.d(TAG, "captureImageWithCamera: gallery"+dexterError.toString()))
+                .onSameThread().check();
     }
 
-    private void chooseImageFromGallery() throws IOException {
+    private void chooseImage() {
         Intent intentToChooseImage = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        resultLauncher.launch(intentToChooseImage);
-        //startActivity(intentToChooseImage);
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Bitmap thumbnail = getContext().getContentResolver().loadThumbnail(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new Size(480, 240), null);
-            imageView.setImageBitmap(thumbnail);
-            }*/
+        galleryResultLauncher.launch(intentToChooseImage);
+    }
 
+    private void chooseImageFromGallery() {
+        Dexter.withContext(requireActivity()).withPermissions(
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                ).withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+                        if (multiplePermissionsReport.areAllPermissionsGranted()) {
+                            Toast.makeText(requireActivity().getApplicationContext(), "Storage access has been granted.", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "onPermissionsChecked: GRANTED STORAGE ACCESS");
+                            // go to gallery
+                            chooseImage();
+                        }
+                    }
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                        showRationaleDialogForPermissions();
+                    }
+                }).withErrorListener(dexterError -> Log.d(TAG, "getPermissionForGallery: ERROR - "+ dexterError.toString()))
+                .onSameThread().check();
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-    }
-
-    /**
-     * Prompts user to allow entry permission to local storage.
-     */
-    private void getPermissionForGallery() {
-        Dexter.withContext(requireActivity()).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                .withListener(new PermissionListener() {
-                    @Override
-                    public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                        try {
-                            chooseImageFromGallery();
-                        } catch (IOException e) {
-                            Log.d(TAG, "onPermissionGranted: "+e.getLocalizedMessage());
-                        }
-                    }
-
-                    @Override
-                    public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
-
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-                        showRationaleDialogForPermissions();
-                    }
-                }).withErrorListener(dexterError -> Toast.makeText(requireActivity().getApplicationContext(), "Error - "+dexterError.toString(), Toast.LENGTH_SHORT).show())
-                .onSameThread().check();
-    }
-
-    private void getPermissionForCamera() {
-        Dexter.withContext(requireActivity()).withPermission(Manifest.permission.CAMERA)
-                .withListener(new PermissionListener() {
-                    @Override
-                    public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                        captureImageWithCamera();
-                    }
-
-                    @Override
-                    public void onPermissionDenied(PermissionDeniedResponse permissionDeniedResponse) {
-
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-                        showRationaleDialogForPermissions();
-                    }
-                }).withErrorListener(dexterError -> Snackbar.make(this.requireContext(), this.requireView(), "E", Snackbar.LENGTH_SHORT));
     }
 
     private void showRationaleDialogForPermissions() {
@@ -238,21 +229,12 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
                             Uri uri = Uri.fromParts("package", intent.getPackage(), null);
                             intent.setData(uri);
                             startActivity(intent);
-                        } catch (Exception e) {
+                        } catch (ActivityNotFoundException e) {
                             Log.e("ERROR", e.getLocalizedMessage());
                         }
                     }
                 }).setNegativeButton("Dismiss", (dialog, which) -> dialog.dismiss())
                 .show();
-    }
-
-    /**
-     * Initializes some of the attributes of the rating bar in the add_post fragment.
-     */
-    private void initRatingBar() {
-            binding.ratingBarAddPost.setNumStars(5);
-            binding.ratingBarAddPost.setIsIndicator(false);
-            binding.ratingBarAddPost.setRating(0);
     }
 
     /**
@@ -298,8 +280,9 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
     @Override
     public void onDialogStorageOptionClick(DialogFragment dialog) {
         Log.d(TAG, "onDialogStorageOptionClick: storage");
-        getPermissionForGallery();
+        chooseImageFromGallery();
     }
+
 
     /**
      * Calls on DialogListener to listen and handle the click event for camera option
@@ -307,30 +290,70 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
      */
     @Override
     public void onDialogCameraOptionClick(DialogFragment dialog) {
-        // TODO implement functions
         Log.d(TAG, "onDialogCameraOptionClick: camera");
-        getPermissionForCamera();
+        captureImageWithCamera();
     }
 
+    /**
+     * Registers the result launcher to provide
+     * entry to gallery, choosing an image and setting thumbnail into imageView
+     */
     private void registerIntentToGalleryLauncher() {
-        resultLauncher = registerForActivityResult(
+        galleryResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
                     public void onActivityResult(ActivityResult result) {
-                        Uri uri = result.getResultCode() == Activity.RESULT_OK && result.getData() != null ? result.getData().getData() : null;
-                        try {
-                            final Bitmap bm = mViewModel.getBitmap(uri.getPath());
-                            Glide.with(imageView)
-                                    .asBitmap()
-                                    .load(bm)
-                                    .error(R.drawable.ic_baseline_choose_image_24)
-                                    .diskCacheStrategy(DiskCacheStrategy.ALL);
-                        } catch (Exception e) {
-                            Log.d(TAG, "onActivityResult: "+e.getLocalizedMessage());
+                        Intent intent = result.getData();
+                        Log.d(TAG, "onActivityResult: Entry intent block");
+                        if (result.getResultCode() == Activity.RESULT_OK && intent != null) {
+                            Uri uri = intent.getData();
+                            Log.d(TAG, "onActivityResult: uri:" + uri.getEncodedPath());
+                            try {
+                                Log.d(TAG, "onActivityResult: Entered try block");
+                                loadImageThumbnail(uri);
+                            } catch (Exception e) {
+                                Log.d(TAG, "onActivityResult: " + e.getLocalizedMessage());
+                            }
+                        }
+                    }
+                });
+    }
+    //TODO needs to be finished
+    private void registerIntentToCaptureImageWithCameraLauncher() {
+        cameraResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        Intent intent = result.getData();
+                        if (result.getResultCode() == Activity.RESULT_OK && intent != null) {
+                            Uri uri = intent.getData();
+                            try {
+                                //TODO experimental
+                                Log.d(TAG, "onActivityResult: Entry camera try block");
+                                Intent parcelizeUri = Intent.parseUri(uri.getPath(), Intent.URI_INTENT_SCHEME);
+                                Log.d(TAG, "onActivityResult: uri:"+parcelizeUri.getData().getPath());
+                                //loadImageThumbnail(uri); //TODO this has to be fixed
+                            } catch (Exception e) {
+                                Log.d(TAG, "onActivityResult: Error:"+e.getLocalizedMessage());
+                            }
                         }
                     }
                 }
         );
+    }
+
+    /**
+     * Loads selected image as a thumbnail into imageView.
+     * @param uri Uri type image file uri
+     */
+    private void loadImageThumbnail(Uri uri) {
+        final int thumbnailSize = 150;
+        Glide.with(requireParentFragment()).load(uri).centerCrop()
+                .thumbnail(Glide.with(requireParentFragment())
+                        .load(uri)
+                        .override(thumbnailSize))
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE).into(imageView);
     }
 }

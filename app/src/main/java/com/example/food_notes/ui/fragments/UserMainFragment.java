@@ -22,10 +22,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.food_notes.R;
 import com.example.food_notes.databinding.FragmentUserMainBinding;
 import com.example.food_notes.injection.Injection;
-import com.example.food_notes.ui.adapters.CustomAdapter;
+import com.example.food_notes.ui.adapters.FoodPostRecyclerViewAdapter;
 import com.example.food_notes.ui.adapters.RecyclerViewItemClickListener;
-import com.example.food_notes.ui.view.factory.UserViewModelFactory;
-import com.example.food_notes.ui.view.model.UserViewModel;
+import com.example.food_notes.ui.view.factory.FoodPostModelViewFactory;
+import com.example.food_notes.ui.view.model.FoodPostViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
@@ -47,13 +47,15 @@ public class UserMainFragment extends Fragment {
     // view binding
     private FragmentUserMainBinding binding;
 
-    private RecyclerView recyclerView;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private FoodPostRecyclerViewAdapter mAdapter;
 
     private final CompositeDisposable disposable = new CompositeDisposable();
 
     // view models
-    private UserViewModel mUserViewModel;
-    private UserViewModelFactory mFactory;
+    private FoodPostModelViewFactory mFoodPostFactory;
+    private FoodPostViewModel mViewModel;
 
     // bottom nav view
     private BottomNavigationView bottomNavigationView;
@@ -78,8 +80,8 @@ public class UserMainFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mFactory = Injection.provideUserViewModelFactory(requireActivity().getApplicationContext());
-        mUserViewModel = mFactory.create(UserViewModel.class);
+        mFoodPostFactory = Injection.provideFoodPostViewModelFactory(requireActivity().getApplicationContext());
+        mViewModel = mFoodPostFactory.create(FoodPostViewModel.class);
         navController = NavHostFragment.findNavController(this);
 
         // experimental ...
@@ -113,6 +115,9 @@ public class UserMainFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentUserMainBinding.inflate(inflater, container, false);
+
+        mRecyclerView = (RecyclerView) binding.rvUserMain;
+        displayCardItems();
 
         bottomNavigationView = binding.bottomNavView;
         // bottom bar navigation setting
@@ -161,14 +166,16 @@ public class UserMainFragment extends Fragment {
     }
 
     private void displayCardItems() {
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        CustomAdapter mAdapter = new CustomAdapter(getActivity(), mUserViewModel);
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.addOnItemTouchListener(
-                new RecyclerViewItemClickListener(getActivity(), recyclerView, new RecyclerViewItemClickListener.OnItemClickListener() {
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        FoodPostRecyclerViewAdapter mAdapter = new FoodPostRecyclerViewAdapter(getActivity(), mViewModel);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addOnItemTouchListener(
+                new RecyclerViewItemClickListener(getActivity(), mRecyclerView, new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
+
                     }
 
                     @Override
@@ -177,11 +184,6 @@ public class UserMainFragment extends Fragment {
                     }
                 })
         );
-    }
-
-    private void displayCardView() {
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
     /**

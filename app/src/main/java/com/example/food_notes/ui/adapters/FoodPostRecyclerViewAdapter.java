@@ -1,10 +1,12 @@
 package com.example.food_notes.ui.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RatingBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,11 +21,52 @@ import java.util.List;
 
 import io.reactivex.rxjava3.core.Flowable;
 
-public class FoodPostRecyclerViewAdapter extends RecyclerView.Adapter<FoodPostViewHolder> {
+public class FoodPostRecyclerViewAdapter extends RecyclerView.Adapter<FoodPostRecyclerViewAdapter.FoodPostViewHolder> {
 
     private final Context mContext;
     private final FoodPostViewModel mFoodPostViewModel;
     private Flowable<List<FoodPost>> items;
+
+    // holder class
+    public static class FoodPostViewHolder extends RecyclerView.ViewHolder {
+        private final TextView textTitle, textDesc, textDate;
+        private final RatingBar ratingBar;
+        private final ImageView imageView;
+
+        /**
+         * Constructs the holder class of FoodPost
+         * @param itemView view
+         */
+        public FoodPostViewHolder(@NonNull View itemView) {
+            super(itemView);
+            textTitle = (TextView) itemView.findViewById(R.id.tv_title);
+            textDesc = (TextView) itemView.findViewById(R.id.tv_desc);
+            textDate = (TextView) itemView.findViewById(R.id.tv_date);
+            ratingBar = (RatingBar) itemView.findViewById(R.id.rb_post);
+            imageView = (ImageView) itemView.findViewById(R.id.iv_post_image);
+        }
+
+        public TextView getTextTitle() {
+            return textTitle;
+        }
+
+        public TextView getTextDesc() {
+            return textDesc;
+        }
+
+        public TextView getTextDate() {
+            return textDate;
+        }
+
+        public RatingBar getRatingBar() {
+            return ratingBar;
+        }
+
+        public ImageView getImageView() {
+            return imageView;
+        }
+    }
+
 
     public FoodPostRecyclerViewAdapter(Context context, FoodPostViewModel foodPostViewModel) {
         this.mContext = context;
