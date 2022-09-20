@@ -6,7 +6,9 @@ buildscript {
     }
     dependencies {
         def nav_version = "2.5.0"
+        def google_service_version = "4.3.14"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
+        classpath "com.google.gms:google-services:$google_service_version"
     }
 }
 

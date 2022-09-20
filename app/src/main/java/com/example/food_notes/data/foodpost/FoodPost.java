@@ -12,21 +12,11 @@ import com.example.food_notes.data.user.User;
 @Entity(
         tableName = "food_posts",
         indices = {
-                @Index(value = "post_id", unique = true),
-                @Index(value = "user_id", unique = true),
-        },
-        foreignKeys = {
-                @ForeignKey(
-                        entity = User.class,
-                        parentColumns = "user_id",
-                        childColumns = "post_id",
-                        onUpdate = ForeignKey.CASCADE,
-                        onDelete = ForeignKey.CASCADE
-                )
+                @Index(value = "post_id", unique = true)
         }
 )
 public class FoodPost {
-        @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "post_id") private Long post_id = 0L;
+        @PrimaryKey @ColumnInfo(name = "post_id") private Long post_id = 0L;
         @ColumnInfo(name = "user_id") private int user_id;
         @ColumnInfo(name = "img_str") private String img_str;
         @ColumnInfo(name = "title") private String title;

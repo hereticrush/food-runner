@@ -30,7 +30,12 @@ import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.ApiClient;
 import com.example.food_notes.ui.view.factory.AuthenticationViewModelFactory;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import io.reactivex.rxjava3.core.MaybeObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -49,6 +54,9 @@ public class LoginFragment extends Fragment implements ApiClient{
     private AuthenticationViewModelFactory mFactory;
     private AuthenticationViewModel mAuthViewModel;
     private SavedStateHandle savedStateHandle;
+
+    // firebase auth
+    private FirebaseAuth mFirebaseAuth;
 
     //view binding
     private FragmentLoginBinding binding;
@@ -93,6 +101,12 @@ public class LoginFragment extends Fragment implements ApiClient{
         mAuthViewModel = mFactory.create(AuthenticationViewModel.class);
         navController = NavHostFragment.findNavController(this);
         navBackStackEntry = navController.getCurrentBackStackEntry();
+
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mFirebaseAuth.getCurrentUser();
+        if (user != null) {
+            toUserMainFragment(user.getUid());
+        }
     }
 
     @Override
@@ -134,12 +148,36 @@ public class LoginFragment extends Fragment implements ApiClient{
             final String username = editTextUsername.getText().toString();
             final String password = editTextPassword.getText().toString();
             // check input fields for user input
+            attemptLogin();
             if (checkRequiredFields()) {
                 // attempt login
-                loginUser(username, password);
+                //loginUser(username, password);
             }
         });
 
+    }
+
+    public void attemptLogin() {
+
+        String email = editTextUsername.getText().toString();
+        String password = editTextPassword.getText().toString();
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            Toast.makeText(requireActivity().getApplicationContext(), "Enter email and password", Toast.LENGTH_SHORT).show();
+        } else {
+            mFirebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            onFailed(e.getLocalizedMessage());
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                        @Override
+                        public void onSuccess(AuthResult authResult) {
+                            toast("Welcome, "+authResult.getUser().getUid());
+                            toUserMainFragment(authResult.getUser().getUid());
+                        }
+                    });
+        }
     }
 
     /**
@@ -156,7 +194,7 @@ public class LoginFragment extends Fragment implements ApiClient{
             @Override
             public void onSuccess(@NonNull User user) {
                 try {
-                    int id = user.getUser_id();
+                    String id = String.valueOf(user.getUser_id());
                     Log.d("SUCCESS", "uid:" + id);
                     toast("Welcome " + username);
                     savedStateHandle.set(LOGIN_SUCCESSFUL, true);
@@ -208,10 +246,10 @@ public class LoginFragment extends Fragment implements ApiClient{
      * Navigates user to UserMainFragment, also
      * passing username and login state data alongside
      */
-    private void toUserMainFragment(final int id) {
-        Log.d("login ID", "id:"+id);
+    private void toUserMainFragment(final String uid) {
+        Log.d("login ID", "id:"+uid);
         Bundle args = new Bundle();
-        args.putInt(USER_ID, id);
+        args.putString(USER_ID, uid);
         NavOptions navOptions = new NavOptions.Builder()
                 .setPopUpTo(R.id.userMainFragment, true, false)
                 .build();

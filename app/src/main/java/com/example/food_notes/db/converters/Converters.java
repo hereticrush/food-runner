@@ -2,7 +2,10 @@ package com.example.food_notes.db.converters;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.room.TypeConverter;
 
 import java.io.ByteArrayOutputStream;
@@ -12,12 +15,11 @@ import java.util.Date;
 public class Converters {
 
     @TypeConverter
-    public static String BitmapToStr(Bitmap bitmap) {
+    public static String BitmapToStr(@NonNull Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] b = stream.toByteArray();
-        String temp = Base64.getEncoder().encodeToString(b);
-        return temp;
+        return Base64.getEncoder().encodeToString(b);
     }
 
     @TypeConverter
@@ -28,7 +30,7 @@ public class Converters {
                     b, 0, b.length
             );
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d("CONVERTER_ERROR", "StrToBitmap: "+e.getLocalizedMessage());
             return null;
         }
     }

@@ -64,18 +64,18 @@
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/user_register_button"
-            android:layout_marginTop="@dimen/til_margin_top"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAlignment="center"
+            android:layout_marginTop="@dimen/til_margin_top"
+            android:background="@drawable/button_radius"
             android:padding="@dimen/padding_content"
             android:text="@string/register_btn_placeholder_text"
-            android:textSize="@dimen/button_text_size"
+            android:textAlignment="center"
             android:textColor="@color/color_light"
-            android:background="@drawable/button_radius"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="@dimen/button_text_size"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/til_register2"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/til_register2" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,6 +1,7 @@
 package com.example.food_notes.ui.fragments;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,16 +24,24 @@ import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.ApiClient;
 import com.example.food_notes.ui.view.factory.AuthenticationViewModelFactory;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 public class SignupFragment extends Fragment implements ApiClient {
 
-    private static final String FRAGMENT_TAG = "register";
+    private static final String TAG = "sign_up";
     private FragmentSignupBinding binding;
     private AuthenticationViewModelFactory mFactory;
     private AuthenticationViewModel mViewModel;
+
+    private FirebaseAuth mFirebaseAuth;
+
     private final CompositeDisposable disposable = new CompositeDisposable();
+
     private AppCompatButton btn;
     private AppCompatEditText editTextUsername;
     private AppCompatEditText editTextPassword;
@@ -45,8 +54,10 @@ public class SignupFragment extends Fragment implements ApiClient {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //init view model
-        mFactory = Injection.provideAuthViewModelFactory(requireContext());
-        mViewModel = mFactory.create(AuthenticationViewModel.class);
+        /*mFactory = Injection.provideAuthViewModelFactory(requireContext());
+        mViewModel = mFactory.create(AuthenticationViewModel.class);*/
+
+        mFirebaseAuth = FirebaseAuth.getInstance();
     }
 
     @Override
@@ -72,7 +83,7 @@ public class SignupFragment extends Fragment implements ApiClient {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        btn.setOnClickListener(v -> {
+        /*btn.setOnClickListener(v -> {
             final String username = editTextUsername.getText().toString();
             final String password = editTextPassword.getText().toString();
 
@@ -85,7 +96,9 @@ public class SignupFragment extends Fragment implements ApiClient {
             } else {
                 Toast.makeText(requireActivity().getApplicationContext(), "Please fill the required fields", Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
+        btn.setOnClickListener(v -> attemptRegistration());
+
     }
 
     /**
@@ -112,4 +125,28 @@ public class SignupFragment extends Fragment implements ApiClient {
     public void whenCompleted() {
         Log.d("COMPLETED", "done");
     }
+
+    /**
+     * Attempts to sign up through Firebase Authentication
+     */
+    public void attemptRegistration() {
+
+        String email = editTextUsername.getText().toString();
+        String password = editTextPassword.getText().toString();
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            Toast.makeText(requireActivity().getApplicationContext(), "Enter email and password", Toast.LENGTH_SHORT).show();
+        } else {
+            mFirebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            onFailed(e.getLocalizedMessage());
+                        }
+                    }).addOnSuccessListener(authResult -> {
+                        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "User registered successfully", Toast.LENGTH_SHORT).show());
+                        toLogin();
+                    });
+        }
+    }
+
 }

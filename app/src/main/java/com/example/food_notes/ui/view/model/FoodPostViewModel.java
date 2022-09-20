@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.food_notes.data.foodpost.FoodPost;
 import com.example.food_notes.data.foodpost.FoodPostDataSource;
-import com.example.food_notes.db.ApplicationDatabase;
 import com.example.food_notes.db.converters.Converters;
 import com.example.food_notes.ui.view.ApiClient;
 
@@ -39,17 +38,18 @@ public class FoodPostViewModel extends ViewModel implements ApiClient {
         mDataSource = repository;
     }
 
+    // TODO not done yet
     public void loadCardItems() {
         getAllFoodPosts();
     }
 
     /**
-     * Returns a flowable string from a bitmap
+     * Returns a uri string from a bitmap
      * @param bitmap image
-     * @return Flowable wrapped image string
+     * @return image uri string
      */
-    public Flowable<String> fromBitmap(Bitmap bitmap) {
-        return Flowable.just(Converters.BitmapToStr(bitmap)).subscribeOn(Schedulers.io());
+    public String fromBitmap(Bitmap bitmap) {
+        return Converters.BitmapToStr(bitmap);
     }
 
     /**
@@ -66,51 +66,25 @@ public class FoodPostViewModel extends ViewModel implements ApiClient {
      * This function also sets the time
      * of posting of this object and subscribes a CompletableObserver to it.
      * @param user_id String type user_id
+     * @param imageUriString String type image file uri path
      * @param title String type title
      * @param description String type description
-     * @param rating String rating
+     * @param rating float type rating
+     * @param latitude Double type latitude
+     * @param longitude Double type longitude
      */
-    public void addItem(final int user_id, final String title, final String description, final float rating) {
+    public void addItem(final int user_id, final String imageUriString, final String title, final String description,
+            final float rating, final Double latitude, final Double longitude) {
         Date currentDate = Calendar.getInstance().getTime();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
         String dateString = format.format(currentDate);
-
-        mFoodPost = new FoodPost(user_id, title, description, rating, dateString);
-        mDataSource.insertOrUpdate(mFoodPost).delaySubscription(2, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::whenCompleted,
-                        throwable -> onFailed(throwable.getLocalizedMessage()),
-                        disposable
-                );
-    }
-
-    /**
-     * Adds a new item or updates an existing item
-     * @param user_id FoodPost foreign_key user_id int
-     * @param title String type title
-     * @param description String type description
-     * @param latitude Double type latitude of the location
-     * @param longitude Double type longitude of the location
-     * @param rating float type rating range(0, 5) inclusive
-     * @return Completable response, either completed or an error
-     */
-    public void addOrUpdateItem(final int user_id, final String image_string, final String title, final String description, final Double latitude, final Double longitude,
-                               final float rating) {
-        // set the time format of foodPost
-        Date currentDate = Calendar.getInstance().getTime();
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
-        String dateString = format.format(currentDate);
-
-        // add or update foodPost
-        mFoodPost = mFoodPost == null ? new FoodPost(user_id, image_string, title, description, rating, latitude, longitude)
-        : new FoodPost(mFoodPost.getPost_id(), mFoodPost.getUser_id(), image_string, title, description,
-                rating, dateString, latitude, longitude);
-
-        // set the time of foodPost
+        // TODO latitude and longitude are hardcoded right now. Need GoogleAPI locations to set them
+        mFoodPost = new FoodPost(user_id, imageUriString, title, description, rating, latitude, longitude);
         mFoodPost.setSent_at(dateString);
-
-        mDataSource.insertOrUpdate(mFoodPost).observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io()).delaySubscription(2, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+        mDataSource.insertOrUpdate(mFoodPost)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .delaySubscription(2, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(
                         this::whenCompleted,
                         throwable -> onFailed(throwable.getLocalizedMessage()),

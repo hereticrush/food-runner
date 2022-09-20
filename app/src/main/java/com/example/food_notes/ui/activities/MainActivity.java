@@ -11,6 +11,8 @@ import com.example.food_notes.R;
 import com.example.food_notes.databinding.ActivityMainBinding;
 import com.example.food_notes.ui.fragments.LoginFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 /**
  * binding type : ViewBinding
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.main_nav_host_fragment);
         navController = navHostFragment.getNavController();
+
     }
 
     @Override

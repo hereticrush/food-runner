@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "385702337447",
+    "project_id": "food-runner-cf4fc",
+    "storage_bucket": "food-runner-cf4fc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:385702337447:android:1752dd725703828c43b482",
+        "android_client_info": {
+          "package_name": "com.example.food_notes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "385702337447-0pgascb09aek7jrcfgc56b53bsf7g4s6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASR8TwxZfGVDzHenjfvfCd31nE7_ELVkU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "385702337447-0pgascb09aek7jrcfgc56b53bsf7g4s6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

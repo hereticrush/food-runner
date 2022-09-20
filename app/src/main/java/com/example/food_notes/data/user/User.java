@@ -3,21 +3,25 @@ package com.example.food_notes.data.user;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+
+import com.example.food_notes.data.foodpost.FoodPost;
 
 import java.util.Objects;
 
 @Entity(
         tableName = "users",
+        primaryKeys = "user_id",
         indices = {
-                @Index(value = "user_id", unique = true),
                 @Index(value = "username", unique = true),
+                @Index(value = "user_id", unique = true)
         }
 )
 public class User {
-        @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "user_id") private int user_id = 0;
+        @ColumnInfo(name = "user_id") @NonNull private String user_id;
         @ColumnInfo(name = "username") private String username;
         @ColumnInfo(name = "password") private String password;
         @ColumnInfo(name = "created_at") private String created_at;
@@ -30,7 +34,7 @@ public class User {
         }
 
         @Ignore
-        public User(int user_id, String username, String password) {
+        public User(String user_id, String username, String password) {
                 this.user_id = user_id;
                 this.username = username;
                 this.password = password;
@@ -43,18 +47,18 @@ public class User {
         }
 
         @Ignore
-        public User(int user_id, String username, String password, String created_at) {
+        public User(String user_id, String username, String password, String created_at) {
                 this.user_id = user_id;
                 this.username = username;
                 this.password = password;
                 this.created_at = created_at;
         }
 
-        public int getUser_id() {
+        public String getUser_id() {
                 return user_id;
         }
 
-        public void setUser_id(int user_id) {
+        public void setUser_id(String user_id) {
                 this.user_id = user_id;
         }
 
@@ -82,16 +86,4 @@ public class User {
                 this.created_at = created_at;
         }
 
-        @Override
-        public boolean equals(Object o) {
-                if (this == o) return true;
-                if (!(o instanceof User)) return false;
-                User user = (User) o;
-                return getUser_id() == user.getUser_id() && Objects.equals(getUsername(), user.getUsername()) && Objects.equals(getPassword(), user.getPassword()) && Objects.equals(getCreated_at(), user.getCreated_at());
-        }
-
-        @Override
-        public int hashCode() {
-                return Objects.hash(getUser_id(), getUsername(), getPassword(), getCreated_at());
-        }
 }

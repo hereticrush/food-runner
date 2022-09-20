@@ -10,6 +10,8 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import com.example.food_notes.data.mapping.UserAndFoodPostDao;
+import com.example.food_notes.data.mapping.UserAndFoodPostMapping;
 import com.example.food_notes.db.converters.Converters;
 import com.example.food_notes.data.foodpost.FoodPostDao;
 import com.example.food_notes.data.user.UserDao;
@@ -25,6 +27,7 @@ import java.util.concurrent.Executors;
         entities = {
                 User.class,
                 FoodPost.class,
+                UserAndFoodPostMapping.class,
         },
         views = {
                 FoodPostDetails.class,
@@ -39,6 +42,7 @@ public abstract class ApplicationDatabase extends RoomDatabase {
     private static final String DATABASE_NAME = "food-runner-db";
     public abstract UserDao userDao();
     public abstract FoodPostDao foodPostDao();
+    public abstract UserAndFoodPostDao userAndFoodPostDao();
 
     private static volatile ApplicationDatabase INSTANCE;
     private static final int THREADS = 4;

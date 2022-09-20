@@ -28,6 +28,7 @@ import com.example.food_notes.ui.view.factory.FoodPostModelViewFactory;
 import com.example.food_notes.ui.view.model.FoodPostViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.auth.FirebaseAuth;
 
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import kotlinx.coroutines.flow.StateFlow;
@@ -42,7 +43,7 @@ public class UserMainFragment extends Fragment {
 
     private static final String LOGGED_USERID = "LOGGED_USERID";
     private static final boolean LOGIN_STATE = true;
-    private static int USER_ID;
+    private static String USER_ID;
 
     // view binding
     private FragmentUserMainBinding binding;
@@ -56,6 +57,8 @@ public class UserMainFragment extends Fragment {
     // view models
     private FoodPostModelViewFactory mFoodPostFactory;
     private FoodPostViewModel mViewModel;
+
+    private FirebaseAuth mFirebaseAuth;
 
     // bottom nav view
     private BottomNavigationView bottomNavigationView;
@@ -84,6 +87,7 @@ public class UserMainFragment extends Fragment {
         mViewModel = mFoodPostFactory.create(FoodPostViewModel.class);
         navController = NavHostFragment.findNavController(this);
 
+        mFirebaseAuth = FirebaseAuth.getInstance();
         // experimental ...
         navBackStackEntry = navController.getPreviousBackStackEntry();
         savedStateHandle = navBackStackEntry.getSavedStateHandle();
@@ -99,13 +103,13 @@ public class UserMainFragment extends Fragment {
                 });*/
 
         // user id
-        StateFlow<Integer> stateFlow_userId = savedStateHandle
+        StateFlow<String> stateFlow_userId = savedStateHandle
                 .getStateFlow(LoginFragment.USER_ID, USER_ID);
         System.out.println("user_main_flow id:"+stateFlow_userId.getValue());
         try {
             setLoggedUserid(stateFlow_userId.getValue());
         } catch (Exception e) {
-            setLoggedUserid(navBackStackEntry.getArguments().getInt(LoginFragment.USER_ID));
+            setLoggedUserid(navBackStackEntry.getArguments().getString(LoginFragment.USER_ID));
             Log.e("ERROR", e.getLocalizedMessage());
         }
     }
@@ -138,6 +142,7 @@ public class UserMainFragment extends Fragment {
                    NavOptions navOptions = new NavOptions.Builder().setPopUpTo(destination, true, true).build();
                    navController.navigate(destination, null, navOptions);
                    savedStateHandle.set(LoginFragment.LOGIN_SUCCESSFUL, false);
+                   mFirebaseAuth.signOut();
                    return true;
                }
                 return false;
@@ -189,9 +194,9 @@ public class UserMainFragment extends Fragment {
     /**
      * Navigates user to the AddPostFragment
      */
-    private void toAddPostFragment(final int id) {
+    private void toAddPostFragment(final String id) {
         Bundle args = new Bundle();
-        args.putInt(LOGGED_USERID, id);
+        args.putString(LOGGED_USERID, id);
         args.putBoolean("LOGGED_IN", isLoginState());
         NavOptions navOptions = new NavOptions.Builder()
                 .setPopUpTo(R.id.addPostFragment, true, true)
@@ -203,11 +208,11 @@ public class UserMainFragment extends Fragment {
         return LOGIN_STATE;
     }
 
-    public static int getUserId() {
+    public static String getUserId() {
         return USER_ID;
     }
 
-    public void setLoggedUserid(int id) {
+    public void setLoggedUserid(final String id) {
         UserMainFragment.USER_ID = id;
     }
 }

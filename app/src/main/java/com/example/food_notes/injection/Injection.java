@@ -7,6 +7,8 @@ import androidx.annotation.NonNull;
 
 import com.example.food_notes.data.foodpost.FoodPostDataSource;
 import com.example.food_notes.data.foodpost.FoodPostRepository;
+import com.example.food_notes.data.mapping.UserAndFoodPostDataSource;
+import com.example.food_notes.data.mapping.UserAndFoodPostRepository;
 import com.example.food_notes.data.user.UserDataSource;
 import com.example.food_notes.data.user.UserRepository;
 import com.example.food_notes.db.ApplicationDatabase;
@@ -43,6 +45,12 @@ public class Injection {
     public static FoodPostDataSource provideFoodPostDataSource(Context context) {
         ApplicationDatabase database = ApplicationDatabase.getInstance(context);
         return new FoodPostRepository(database.foodPostDao());
+    }
+
+    @NonNull
+    public static UserAndFoodPostDataSource provideDataSource(Context context) {
+        ApplicationDatabase database = ApplicationDatabase.getInstance(context);
+        return new UserAndFoodPostRepository(database.userAndFoodPostDao());
     }
 
     /**
