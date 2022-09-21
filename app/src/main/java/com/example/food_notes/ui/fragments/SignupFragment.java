@@ -127,7 +127,7 @@ public class SignupFragment extends Fragment implements ApiClient {
                     .addOnFailureListener(e -> onFailed(e.getLocalizedMessage()))
                     .addOnSuccessListener(authResult -> {
                         String uid = authResult.getUser().getUid();
-                        mAuthViewModel.insertUserToLocalDB(new User(uid, email, password));
+                        mAuthViewModel.insertUserToLocalDB(uid);
                         requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "User registered successfully", Toast.LENGTH_SHORT).show());
                         toLogin();
                         Log.d(TAG, "attemptRegistration: SUCCESS");

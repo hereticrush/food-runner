@@ -40,6 +40,7 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
     // disposable container
     private final CompositeDisposable disposable = new CompositeDisposable();
     private final UserDataSource mDataSource;
+    private User mUser;
 
     public AuthenticationViewModel(UserDataSource repository){
         mDataSource = repository;
@@ -47,16 +48,18 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
 
     /**
      * Insert new user object into local database, also setting it's time of creation
-     * @param user User entity object
+     * @param uid firebase.uid
      * @return {@link Completable} which completes once user object is updated
      */
-    public Completable insertUserToLocalDB(User user) {
+    public Completable insertUserToLocalDB(final String uid) {
+        mUser = mUser == null ? new User(uid) : new User(mUser.getUser_id());
         Date currentDate = Calendar.getInstance().getTime();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
         String dateString = format.format(currentDate);
-        user.setCreatedAt(dateString);
-        return mDataSource.insertUser(user).observeOn(AndroidSchedulers.mainThread())
+        mUser.setCreatedAt(dateString);
+        return mDataSource.insertUser(mUser).observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io()).delaySubscription(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread());
+
     }
 
     /*/**

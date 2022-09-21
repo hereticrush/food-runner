@@ -30,6 +30,7 @@ import com.example.food_notes.ui.view.model.FoodPostViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 
@@ -98,6 +99,11 @@ public class UserMainFragment extends Fragment {
         navBackStackEntry = navController.getPreviousBackStackEntry();
         savedStateHandle = navBackStackEntry.getSavedStateHandle();
 
+        FirebaseUser user = mFirebaseAuth.getCurrentUser();
+        if (user != null) {
+            USER_ID = user.getUid();
+            Log.d("userMain", "onCreate: id:"+USER_ID);
+        }
     }
 
     @Override

@@ -172,14 +172,15 @@ public class LoginFragment extends Fragment implements ApiClient{
                         public void onSuccess(AuthResult authResult) {
                             final String authenticatedUserId = authResult.getUser().getUid();
                             toast("Welcome, "+authenticatedUserId);
-                            getUserFromLocalDB(authenticatedUserId);
+                            //getUserFromLocalDB(authenticatedUserId);
+                            mAuthViewModel.insertUserToLocalDB(authenticatedUserId);
                             toUserMainFragment(authenticatedUserId);
                         }
                     });
         }
     }
 
-    /**
+    /*/**
      * Attempts to get User from local database.
      * If successful but user item is not found in localDB,
      * inserts user into localDB and then navigates to UserMainFragment.
@@ -187,7 +188,7 @@ public class LoginFragment extends Fragment implements ApiClient{
      * Also wraps the query with a CompositeDisposable container
      * @param uid FirebaseUser.uid
      */
-    public void getUserFromLocalDB(final String uid) {
+    /*public void getUserFromLocalDB(final String uid) {
 
         disposable.add(mAuthViewModel.getUser(uid)
                 .doOnError(throwable ->  {
@@ -199,7 +200,7 @@ public class LoginFragment extends Fragment implements ApiClient{
                 })
                 .doOnSuccess(user -> {
 
-                    mAuthViewModel.insertUserToLocalDB(new User(uid));
+                    mAuthViewModel.insertUserToLocalDB(user);
                     Log.d(TAG, "getUserFromLocalDB: ON_SUCCESS");
                 })
                 .doAfterSuccess(user -> {
@@ -211,7 +212,7 @@ public class LoginFragment extends Fragment implements ApiClient{
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe());
 
-    }
+    }*/
 
     /**
      * Provides a Toast object prototype with custom message
