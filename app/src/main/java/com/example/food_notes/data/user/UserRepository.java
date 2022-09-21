@@ -18,13 +18,8 @@ public class UserRepository implements UserDataSource {
 
 
     @Override
-    public Maybe<User> getUserById(int id) {
-       return mUserDao.getUserById(id);
-    }
-
-    @Override
-    public Maybe<User> getUser(String username, String password) {
-        return mUserDao.getUserByUsernameAndPassword(username, password);
+    public Maybe<User> getUserById(String id) {
+        return mUserDao.getUserById(id);
     }
 
     @Override
@@ -38,8 +33,8 @@ public class UserRepository implements UserDataSource {
     }
 
     @Override
-    public Completable deleteUserByUsername(User user) {
-        return mUserDao.deleteUserByUsername(user);
+    public Completable deleteUser(User user) {
+        return mUserDao.deleteUser(user);
     }
 
     @Override

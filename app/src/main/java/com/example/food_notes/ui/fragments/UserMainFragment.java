@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
@@ -29,6 +30,8 @@ import com.example.food_notes.ui.view.model.FoodPostViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
 
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import kotlinx.coroutines.flow.StateFlow;
@@ -59,12 +62,13 @@ public class UserMainFragment extends Fragment {
     private FoodPostViewModel mViewModel;
 
     private FirebaseAuth mFirebaseAuth;
+    private FirebaseFirestore mFirestore;
+    private FirebaseStorage mStorage;
 
     // bottom nav view
     private BottomNavigationView bottomNavigationView;
 
     // navigation components
-    private NavHostFragment navHostFragment;
     private NavController navController;
     private NavBackStackEntry navBackStackEntry;
     private SavedStateHandle savedStateHandle;
@@ -88,30 +92,12 @@ public class UserMainFragment extends Fragment {
         navController = NavHostFragment.findNavController(this);
 
         mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirestore = FirebaseFirestore.getInstance();
+        mStorage = FirebaseStorage.getInstance();
         // experimental ...
         navBackStackEntry = navController.getPreviousBackStackEntry();
         savedStateHandle = navBackStackEntry.getSavedStateHandle();
-        /*savedStateHandle.getLiveData(LoginFragment.LOGIN_SUCCESSFUL)
-                .observe(navBackStackEntry,(Observer<? super Object>) success -> {
-                    if (!success.equals()) {
-                        int startDestination = navController.getGraph().getStartDestinationId();
-                        NavOptions navOptions = new NavOptions.Builder()
-                                .setPopUpTo(startDestination, true)
-                                .build();
-                        navController.navigate(startDestination, null, navOptions);
-                    }
-                });*/
 
-        // user id
-        StateFlow<String> stateFlow_userId = savedStateHandle
-                .getStateFlow(LoginFragment.USER_ID, USER_ID);
-        System.out.println("user_main_flow id:"+stateFlow_userId.getValue());
-        try {
-            setLoggedUserid(stateFlow_userId.getValue());
-        } catch (Exception e) {
-            setLoggedUserid(navBackStackEntry.getArguments().getString(LoginFragment.USER_ID));
-            Log.e("ERROR", e.getLocalizedMessage());
-        }
     }
 
     @Override
@@ -141,7 +127,6 @@ public class UserMainFragment extends Fragment {
                    int destination = navController.getGraph().getStartDestinationId();
                    NavOptions navOptions = new NavOptions.Builder().setPopUpTo(destination, true, true).build();
                    navController.navigate(destination, null, navOptions);
-                   savedStateHandle.set(LoginFragment.LOGIN_SUCCESSFUL, false);
                    mFirebaseAuth.signOut();
                    return true;
                }

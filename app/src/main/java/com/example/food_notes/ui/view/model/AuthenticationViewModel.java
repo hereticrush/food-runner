@@ -8,6 +8,9 @@ import com.example.food_notes.data.user.User;
 import com.example.food_notes.data.user.UserDataSource;
 import com.example.food_notes.ui.view.ApiClient;
 import com.example.food_notes.ui.view.util.regex.UserRegexValidation;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -43,31 +46,31 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
     }
 
     /**
-     * Insert new user object into database, also setting it's time of creation
+     * Insert new user object into local database, also setting it's time of creation
      * @param user User entity object
      * @return {@link Completable} which completes once user object is updated
      */
-    public Completable insertUser(User user) {
+    public Completable insertUserToLocalDB(User user) {
         Date currentDate = Calendar.getInstance().getTime();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
         String dateString = format.format(currentDate);
-        user.setCreated_at(dateString);
+        user.setCreatedAt(dateString);
         return mDataSource.insertUser(user).observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io()).delaySubscription(2, TimeUnit.SECONDS, AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.io()).delaySubscription(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread());
     }
 
-
-    /**
+    /*/**
      * Get a specific user object from database
      * @param username String user.username
-     * @param password String user.password
      * @return emits either 0 or 1, returns a match or an error
      */
-    public Maybe<User> getUser(final String username, final String password) {
-            return mDataSource.getUser(username, password)
+    public Maybe<User> getUser(final String uid) {
+            return mDataSource.getUserById(uid)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io());
     }
+
+
 
     /**
      * Fetches all users registered in database
@@ -99,7 +102,7 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
         return true;
     }
 
-    /**
+    /*/**
      * Connects with the observer in ui thread,
      * queries for user object and attempts to log the user in
      * @param username text input field username
@@ -107,11 +110,11 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
      * @return User object wrapped in RxJava Maybe,
      * either returns 0 or 1, otherwise an error
      */
-    public Maybe<User> login(final String username, final String password) {
+    /*public Maybe<User> login(final String username, final String password) {
         return getUser(username, password)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io());
-    }
+    }*/
 
     @Override
     protected void onCleared() {

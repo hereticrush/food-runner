@@ -1,6 +1,7 @@
 package com.example.food_notes.ui.fragments;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -35,6 +38,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.bumptech.glide.Glide;
@@ -46,12 +50,16 @@ import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.observers.AddPostLifeCycleObserver;
 import com.example.food_notes.ui.view.factory.FoodPostModelViewFactory;
 import com.example.food_notes.ui.view.model.FoodPostViewModel;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -68,7 +76,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
     private static String URI_STRING;
     private static final String TAG = "add_post";
     private static int USER_ID;
-    private static final int GALLERY = 187;
+    private static final int GALLERY_REQUEST_CODE = 187;
 
     // view binding
     private FragmentAddPostBinding binding;
@@ -96,23 +104,28 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
 
     // navigation components
     private NavController navController;
-    private SavedStateHandle savedStateHandle;
     private NavBackStackEntry navBackStackEntry;
 
     // dialog window
     private AddImageOptionsDialogFragment dialogFragment;
 
-    // permissions array
-    private final String[] PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.CAMERA,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-    };
-
-
-
-    private ActivityResultLauncher<Intent> mGalleryIntent;
+    private final ActivityResultLauncher<Intent> mGalleryIntent = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent uri_data = result.getData();
+                        if (uri_data != null) {
+                            mUri = uri_data.getData();
+                            loadImageThumbnail(mUri);
+                            Log.d(TAG, "onActivityResult: DONE_loadingThumbnail");
+                            //addImageToFirebaseStorage(mUri);
+                        }
+                    }
+                }
+            }
+    );
 
     /**
      * This launcher is used to get the URI of an image from gallery
@@ -126,24 +139,8 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
                     loadImageThumbnail(result);
                     mViewModel.getBitmap(result.getEncodedPath());
                     Log.d(TAG, "onActivityResult: getBitmap?");
-                }
-            }
-    );
-
-    private final ActivityResultLauncher<Uri> mTakePicture = registerForActivityResult(
-            new ActivityResultContracts.TakePicture(),
-            new ActivityResultCallback<Boolean>() {
-                @Override
-                public void onActivityResult(Boolean result) {
-                    if (!result) {
-                        Log.d(TAG, "onActivityResult: NO RESULT");
-                        return;
-                    }
-                    requireContext().grantUriPermission(
-                            "com.example.food_notes",
-                            mUri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                    );
+                    //addImageToFirebaseStorage(result);
+                    Log.d(TAG, "onActivityResult: firebase?");
                 }
             }
     );
@@ -166,20 +163,20 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
         mFactory = Injection.provideFoodPostViewModelFactory(requireActivity().getApplicationContext());
         mViewModel = mFactory.create(FoodPostViewModel.class);
         navController = NavHostFragment.findNavController(this);
+        navBackStackEntry = navController.getCurrentBackStackEntry();
 
         mObserver = new AddPostLifeCycleObserver(requireActivity().getActivityResultRegistry(), requireContext());
         getLifecycle().addObserver(mObserver);
 
-        navBackStackEntry = navController.getPreviousBackStackEntry();
-        savedStateHandle = navBackStackEntry.getSavedStateHandle();
-        if (savedStateHandle.contains("LOGGED_USERID")) {
-            USER_ID = savedInstanceState.getInt("LOGGED_USERID");
-        }
 
         mStorage = FirebaseStorage.getInstance();
         mAuth = FirebaseAuth.getInstance();
         mFirestore = FirebaseFirestore.getInstance();
         mReference = mStorage.getReference();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            Log.d(TAG, "onCreate: USER?"+user.getUid());
+        }
     }
 
     @Override
@@ -207,19 +204,34 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
         });
 
         fab_create.setOnClickListener(v -> {
-            mViewModel.addItem(
-                    USER_ID,
-                    URI_STRING,
-                    title.getText().toString(),
-                    description.getText().toString(),
-                    ratingBar.getRating(),
-                    1.52,
-                    1.11
-            );
+
             backToUserMainFragment();
         });
 
         fab_back.setOnClickListener(v -> backToUserMainFragment());
+    }
+
+    // TODO we can use a hashmap for pair <String firebase.uid, Long post_id> to implement
+    private void addImageToFirebaseStorage(Uri uri) {
+        if (uri != null) {
+            // uuid
+            UUID uuid = UUID.randomUUID();
+            String imageDocumentPath = "images/" + uuid + ".jpg";
+            mReference.child(imageDocumentPath).putFile(uri)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(requireActivity().getApplicationContext(), "Failed to upload", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "onFailure: "+e.getLocalizedMessage());
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(requireActivity().getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
     }
 
     private void showDialogFragment() {
@@ -280,8 +292,10 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
                             Toast.makeText(requireActivity().getApplicationContext(), "Storage access has been granted.", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "onPermissionsChecked: GRANTED STORAGE ACCESS");
                             // go to gallery
-                            mGetContent.launch("image/*");
-                            mGetContent.getContract().getSynchronousResult(requireContext().getApplicationContext(), "image/*");
+                            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            startActivity(intent);
+                            mGalleryIntent.launch(intent);
+                            //mGetContent.getContract().getSynchronousResult(requireContext().getApplicationContext(), "image/*");
                         }
                     }
                     @Override
@@ -328,7 +342,10 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
      * Navigates user back to UserMainFragment
      */
     private void backToUserMainFragment() {
-        navController.navigate(R.id.userMainFragment);
+        navBackStackEntry.getSavedStateHandle().getLiveData("post");
+        NavOptions navOptions = new NavOptions.Builder()
+                .setPopUpTo(R.id.userMainFragment, true, true).build();
+        navController.navigate(R.id.userMainFragment, null, navOptions);
     }
 
     @Override

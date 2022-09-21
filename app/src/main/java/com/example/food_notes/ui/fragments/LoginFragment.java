@@ -37,23 +37,27 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.MaybeObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.observers.DisposableMaybeObserver;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import kotlinx.coroutines.flow.StateFlow;
 
 
 public class LoginFragment extends Fragment implements ApiClient{
 
     public static String USER_ID = "USER_ID";
-    private static final String USERNAME = "USERNAME";
     public static String LOGIN_SUCCESSFUL = "LOGIN_SUCCESSFUL";
     private static final String CLICK_TEXT = "Click here to sign up";
-    private static final String FRAGMENT_TAG = LoginFragment.class.getSimpleName();
+    private static final String TAG = "login";
+    private StateFlow<String> mUid;
 
     // view model factory and view model
     private AuthenticationViewModelFactory mFactory;
     private AuthenticationViewModel mAuthViewModel;
-    private SavedStateHandle savedStateHandle;
 
     // firebase auth
     private FirebaseAuth mFirebaseAuth;
@@ -71,6 +75,7 @@ public class LoginFragment extends Fragment implements ApiClient{
 
     private NavController navController;
     private NavBackStackEntry navBackStackEntry;
+    private SavedStateHandle savedStateHandle;
 
     /**
      * Fragment constructor with no arguments
@@ -80,14 +85,14 @@ public class LoginFragment extends Fragment implements ApiClient{
     /**
      * If username data that need to be passed to next fragment,
      * this function can be used to construct the fragment, added with bundle
-     * @param username user.username
+     * @param uid user.uid
      * @return an instance of LoginFragment loaded with arguments
      */
     @Nullable
-    public static LoginFragment newInstance(String username) {
+    public static LoginFragment newInstance(String uid) {
         Bundle args = new Bundle();
-        args.putString(USERNAME, username);
         LoginFragment fragment = new LoginFragment();
+        args.putString("uid", uid);
         fragment.setArguments(args);
         return fragment;
     }
@@ -134,9 +139,6 @@ public class LoginFragment extends Fragment implements ApiClient{
         binding.tvLoginSuggestion.setMovementMethod(LinkMovementMethod.getInstance());
         binding.tvLoginSuggestion.setHighlightColor(Color.TRANSPARENT);
 
-        savedStateHandle = navController
-                .getCurrentBackStackEntry().getSavedStateHandle();
-        savedStateHandle.set(LOGIN_SUCCESSFUL, false);
         return binding.getRoot();
     }
 
@@ -144,19 +146,13 @@ public class LoginFragment extends Fragment implements ApiClient{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        button.setOnClickListener(v -> {
-            final String username = editTextUsername.getText().toString();
-            final String password = editTextPassword.getText().toString();
-            // check input fields for user input
-            attemptLogin();
-            if (checkRequiredFields()) {
-                // attempt login
-                //loginUser(username, password);
-            }
-        });
+        button.setOnClickListener(v -> attemptLogin());
 
     }
 
+    /**
+     * Attempts login through Firebase Authentication
+     */
     public void attemptLogin() {
 
         String email = editTextUsername.getText().toString();
@@ -169,56 +165,52 @@ public class LoginFragment extends Fragment implements ApiClient{
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             onFailed(e.getLocalizedMessage());
+                            toast("Invalid credentials");
                         }
                     }).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                         @Override
                         public void onSuccess(AuthResult authResult) {
-                            toast("Welcome, "+authResult.getUser().getUid());
-                            toUserMainFragment(authResult.getUser().getUid());
+                            final String authenticatedUserId = authResult.getUser().getUid();
+                            toast("Welcome, "+authenticatedUserId);
+                            getUserFromLocalDB(authenticatedUserId);
+                            toUserMainFragment(authenticatedUserId);
                         }
                     });
         }
     }
 
     /**
-     * Subscribes an observer to viewModel in order to observe
-     * the state of the database query by passing user credentials
-     * and attempts an action depending on the response.
-     * @param username String type username
-     * @param password String type password
+     * Attempts to get User from local database.
+     * If successful but user item is not found in localDB,
+     * inserts user into localDB and then navigates to UserMainFragment.
+     * If successful and user item is already found in localDB, navigates to UserMainFragment.
+     * Also wraps the query with a CompositeDisposable container
+     * @param uid FirebaseUser.uid
      */
-    public void loginUser(final String username,final String password) {
+    public void getUserFromLocalDB(final String uid) {
 
-        MaybeObserver<User> observer = new DisposableMaybeObserver<User>() {
+        disposable.add(mAuthViewModel.getUser(uid)
+                .doOnError(throwable ->  {
+                    toast(throwable.getLocalizedMessage());
+                    onFailed(throwable.getMessage());
+                })
+                .doOnComplete(() -> {
+                    whenCompleted();
+                })
+                .doOnSuccess(user -> {
 
-            @Override
-            public void onSuccess(@NonNull User user) {
-                try {
-                    String id = String.valueOf(user.getUser_id());
-                    Log.d("SUCCESS", "uid:" + id);
-                    toast("Welcome " + username);
-                    savedStateHandle.set(LOGIN_SUCCESSFUL, true);
-                    savedStateHandle.set(USER_ID, id);
-                    toUserMainFragment(id);
-                } catch (Exception e) {
-                    toast(e.getLocalizedMessage());
-                }
-            }
+                    mAuthViewModel.insertUserToLocalDB(new User(uid));
+                    Log.d(TAG, "getUserFromLocalDB: ON_SUCCESS");
+                })
+                .doAfterSuccess(user -> {
 
-            @Override
-            public void onError(@NonNull Throwable e) {
-                toast(e.getMessage());
-                onFailed(e.getLocalizedMessage());
-            }
+                    mAuthViewModel.insertUserToLocalDB(new User(uid));
+                    Log.d(TAG, "getUserFromLocalDB: AFTER_SUCCESS");
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe());
 
-            @Override
-            public void onComplete() {
-                toast("Invalid credentials");
-                whenCompleted();
-            }
-        };
-        mAuthViewModel.login(username, password)
-                .subscribe(observer);
     }
 
     /**

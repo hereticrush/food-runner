@@ -23,13 +23,6 @@ public class UserAndFoodPostRepository implements UserAndFoodPostDataSource{
         return mUserAndFoodPostDao.getUserWithFoodPosts();
     }
 
-    /*@Override
-    public Maybe<User> getUser(int id) {
-        return mUserAndFoodPostDao.getUserWithFoodPosts()
-                .flatMap(Flowable::fromIterable)
-                .singleElement().flatMap(userWithFoodPosts -> userWithFoodPosts.user)
-                .map(o -> Flowable.just(o));
-    }*/
     @Override
     public Completable deleteAllData() {
         return mUserAndFoodPostDao.deleteUsers();

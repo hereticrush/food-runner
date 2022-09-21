@@ -65,7 +65,6 @@ public class FoodPostViewModel extends ViewModel implements ApiClient {
      * Attempts to add a FoodPost item to database with given attributes.
      * This function also sets the time
      * of posting of this object and subscribes a CompletableObserver to it.
-     * @param user_id String type user_id
      * @param imageUriString String type image file uri path
      * @param title String type title
      * @param description String type description
@@ -73,13 +72,13 @@ public class FoodPostViewModel extends ViewModel implements ApiClient {
      * @param latitude Double type latitude
      * @param longitude Double type longitude
      */
-    public void addItem(final int user_id, final String imageUriString, final String title, final String description,
+    public void addItem(final String imageUriString, final String title, final String description,
             final float rating, final Double latitude, final Double longitude) {
         Date currentDate = Calendar.getInstance().getTime();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
         String dateString = format.format(currentDate);
         // TODO latitude and longitude are hardcoded right now. Need GoogleAPI locations to set them
-        mFoodPost = new FoodPost(user_id, imageUriString, title, description, rating, latitude, longitude);
+        mFoodPost = new FoodPost(imageUriString, title, description, rating, latitude, longitude);
         mFoodPost.setSent_at(dateString);
         mDataSource.insertOrUpdate(mFoodPost)
                 .observeOn(AndroidSchedulers.mainThread())

@@ -22,13 +22,10 @@ public interface UserDao {
     Flowable<List<User>>getAllUsers();
 
     @Query("SELECT * FROM users WHERE user_id LIKE :userId")
-    Maybe<User> getUserById(int userId);
-
-    @Query("SELECT * FROM users WHERE username LIKE :username AND password LIKE :password")
-    Maybe<User> getUserByUsernameAndPassword(String username, String password);
+    Maybe<User> getUserById(String userId);
 
     @Delete
-    Completable deleteUserByUsername(User user);
+    Completable deleteUser(User user);
 
     @Query("DELETE FROM users")
     Completable deleteAllUsers();

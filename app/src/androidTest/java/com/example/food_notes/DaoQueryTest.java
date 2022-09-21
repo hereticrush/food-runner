@@ -42,25 +42,12 @@ public class DaoQueryTest {
 
     @Test
     public void insertUser_() {
-        User testUser = new User("abcdefgh", "testUser1");
-        mDatabase.userDao().insertUser(testUser).test().assertNoErrors();
-        model.insertUser(new User("polyphia$3", "newAlbum322@")).test().assertNoErrors();
     }
 
 
     @Test
     public void insertUserAndGetUserThenDeleteUser_() {
-        User testUser = new User(102, "test_user1", "test_password1");
-        User another = new User(144, "testingUseR999", "pasSw0rD_TeST222");
-        model.insertUser(testUser);
-        model.insertUser(another);
-        model.insertUser(new User("hell0_wrLd111", "PasSW0rD22"))
-                .test()
-                .assertNoErrors();
 
-        model.getUser("test_user1", "test_password1")
-                .test()
-                .assertNoErrors();
     }
 
     @Test

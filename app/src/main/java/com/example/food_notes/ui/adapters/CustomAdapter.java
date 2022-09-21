@@ -33,9 +33,9 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull CustomViewHolder holder, int position) {
         List<User> users = new ArrayList<>(mViewModel.getAllUsers().blockingFirst());
-        holder.getTextId().setText(String.valueOf(users.get(position).getUser_id()));
-        holder.getTextUsername().setText(users.get(position).getUsername());
-        holder.getTextPassword().setText(users.get(position).getPassword());
+        holder.getTextId().setText(users.get(position).getUser_id());
+        holder.getTextUsername().setText(users.get(position).getUserEmail());
+        holder.getTextPassword().setText(users.get(position).getUserPassword());
     }
 
 

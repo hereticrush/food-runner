@@ -14,8 +14,6 @@ public interface UserAndFoodPostDataSource {
 
     Flowable<List<UserWithFoodPosts>> getAllData();
 
-    //Maybe<User> getUser(int id);
-
     Completable deleteAllData();
 
     Completable insertUser(User user);

@@ -22,11 +22,11 @@ public class UserViewModel extends ViewModel {
         mDataSource = repository;
     }
 
-    public Completable updateUsername(final String username, final String password) {
+    /*public Completable updateUsername(final String username, final String password) {
         mUser = mUser == null ? new User(username, password)
                 : new User(mUser.getUser_id(), username, password);
         return mDataSource.insertUser(mUser);
-    }
+    }*/
 
     /**
      * Gets all users in the database
