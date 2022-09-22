@@ -7,28 +7,22 @@ import androidx.lifecycle.ViewModel;
 import com.example.food_notes.data.user.User;
 import com.example.food_notes.data.user.UserDataSource;
 import com.example.food_notes.ui.view.ApiClient;
-import com.example.food_notes.ui.view.util.regex.UserRegexValidation;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FieldValue;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
-import io.reactivex.rxjava3.core.MaybeObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.functions.Consumer;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
@@ -51,8 +45,8 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
      * @param uid firebase.uid
      * @return {@link Completable} which completes once user object is updated
      */
-    public Completable insertUserToLocalDB(final String uid) {
-        mUser = mUser == null ? new User(uid) : new User(mUser.getUser_id());
+    public Completable insertUserToLocalDB(final String uid, final String email) {
+        mUser = new User(uid, email);
         Date currentDate = Calendar.getInstance().getTime();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
         String dateString = format.format(currentDate);
@@ -60,6 +54,14 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
         return mDataSource.insertUser(mUser).observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io()).delaySubscription(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread());
 
+    }
+
+    public HashMap<String, Object> createUserHashmap(final String uid, final String email) {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("user_id", uid);
+        data.put("user_email", email);
+        data.put("created_at", FieldValue.serverTimestamp());
+        return data;
     }
 
     /*/**
@@ -81,28 +83,6 @@ public class AuthenticationViewModel extends ViewModel implements ApiClient {
      */
     public Flowable<List<User>> getAllUsers() {
         return mDataSource.getAllUsers().subscribeOn(Schedulers.computation());
-    }
-
-
-    /**
-     * Checks whether user input is violating the regex rules or not
-     * @param username text input field username
-     * @param password text input field password
-     * @return boolean output for validation
-     */
-    public boolean validateUserInput(String username, String password) {
-
-        if (!(UserRegexValidation.INPUT_PATTERN.matcher(username).matches()
-                || UserRegexValidation.INPUT_PATTERN.matcher(password).matches())) {
-            return false;
-        }
-        if (!UserRegexValidation.INPUT_PATTERN.matcher(username).matches()) {
-            return false;
-        }
-        if (!UserRegexValidation.INPUT_PATTERN.matcher(password).matches()) {
-            return false;
-        }
-        return true;
     }
 
     /*/**

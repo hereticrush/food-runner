@@ -17,14 +17,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.SavedStateHandle;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.food_notes.R;
-import com.example.food_notes.data.user.User;
 import com.example.food_notes.databinding.FragmentLoginBinding;
 import com.example.food_notes.injection.Injection;
 import com.example.food_notes.ui.view.ApiClient;
@@ -36,14 +34,10 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.CompletableObserver;
-import io.reactivex.rxjava3.core.MaybeObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.observers.DisposableMaybeObserver;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import kotlinx.coroutines.flow.StateFlow;
 
 
@@ -60,7 +54,8 @@ public class LoginFragment extends Fragment implements ApiClient{
     private AuthenticationViewModel mAuthViewModel;
 
     // firebase auth
-    private FirebaseAuth mFirebaseAuth;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore mFirestore;
 
     //view binding
     private FragmentLoginBinding binding;
@@ -75,7 +70,6 @@ public class LoginFragment extends Fragment implements ApiClient{
 
     private NavController navController;
     private NavBackStackEntry navBackStackEntry;
-    private SavedStateHandle savedStateHandle;
 
     /**
      * Fragment constructor with no arguments
@@ -104,11 +98,18 @@ public class LoginFragment extends Fragment implements ApiClient{
         // initialize the view model from factory
         mFactory = Injection.provideAuthViewModelFactory(requireActivity().getApplicationContext());
         mAuthViewModel = mFactory.create(AuthenticationViewModel.class);
+
+        // init navigation component
         navController = NavHostFragment.findNavController(this);
         navBackStackEntry = navController.getCurrentBackStackEntry();
 
-        mFirebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mFirebaseAuth.getCurrentUser();
+        // init firebase
+        mAuth = FirebaseAuth.getInstance();
+        mFirestore = FirebaseFirestore.getInstance();
+
+        // if user was logged in once and close the app without logout, next time app will immediately
+        // start from userMainFragment
+        FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             toUserMainFragment(user.getUid());
         }
@@ -160,7 +161,7 @@ public class LoginFragment extends Fragment implements ApiClient{
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
             Toast.makeText(requireActivity().getApplicationContext(), "Enter email and password", Toast.LENGTH_SHORT).show();
         } else {
-            mFirebaseAuth.signInWithEmailAndPassword(email, password)
+            mAuth.signInWithEmailAndPassword(email, password)
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
@@ -171,9 +172,7 @@ public class LoginFragment extends Fragment implements ApiClient{
                         @Override
                         public void onSuccess(AuthResult authResult) {
                             final String authenticatedUserId = authResult.getUser().getUid();
-                            toast("Welcome, "+authenticatedUserId);
-                            //getUserFromLocalDB(authenticatedUserId);
-                            mAuthViewModel.insertUserToLocalDB(authenticatedUserId);
+                            toast("Welcome, "+authResult.getUser().getEmail());
                             toUserMainFragment(authenticatedUserId);
                         }
                     });

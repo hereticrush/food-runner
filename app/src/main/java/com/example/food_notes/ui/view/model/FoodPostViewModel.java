@@ -1,6 +1,7 @@
 package com.example.food_notes.ui.view.model;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.lifecycle.ViewModel;
@@ -9,11 +10,13 @@ import com.example.food_notes.data.foodpost.FoodPost;
 import com.example.food_notes.data.foodpost.FoodPostDataSource;
 import com.example.food_notes.db.converters.Converters;
 import com.example.food_notes.ui.view.ApiClient;
+import com.google.firebase.firestore.FieldValue;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -125,6 +128,22 @@ public class FoodPostViewModel extends ViewModel implements ApiClient {
                         throwable -> onFailed(throwable.getLocalizedMessage()),
                         disposable
                 );
+    }
+
+    public HashMap<String, Object> createHashMapFromData(final String uid, final String uriString, final String title, final String description,
+                                                         final float rating, final Double latitude, final Double longitude) {
+
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("user_id", uid);
+        data.put("image_uri", uriString);
+        data.put("title", title);
+        data.put("description", description);
+        data.put("rating", rating);
+        data.put("sent_at", FieldValue.serverTimestamp());
+        data.put("lat", latitude);
+        data.put("lon", longitude);
+
+        return data;
     }
 
     @Override
