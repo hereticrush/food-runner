@@ -4,8 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.food_notes.data.user.UserDataSource;
+import com.example.food_notes.auth.AppAuthentication;
+import com.example.food_notes.db.FirebaseDataSource;
+import com.example.food_notes.db.FirebaseRepository;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
+import com.google.firebase.auth.FirebaseAuth;
 
 /**
  * Factory that creates an instance of AuthenticationViewModel object
@@ -13,11 +16,13 @@ import com.example.food_notes.ui.view.model.AuthenticationViewModel;
 public class AuthenticationViewModelFactory implements ViewModelProvider.Factory {
 
     // connected to userRepository
-    private final UserDataSource mDataSource;
+    private final FirebaseDataSource mDataSource;
+    private final FirebaseAuth mAuth;
 
     // constructor
-    public AuthenticationViewModelFactory(UserDataSource dataSource) {
+    public AuthenticationViewModelFactory(FirebaseDataSource dataSource) {
         mDataSource = dataSource;
+        mAuth = AppAuthentication.AUTH;
     }
 
 

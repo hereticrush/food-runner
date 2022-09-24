@@ -1,135 +1,54 @@
 package com.example.food_notes.ui.view.model;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModel;
 
 import com.example.food_notes.data.foodpost.FoodPost;
-import com.example.food_notes.data.foodpost.FoodPostDataSource;
-import com.example.food_notes.db.converters.Converters;
-import com.example.food_notes.ui.view.ApiClient;
+import com.example.food_notes.data.user.User;
+import com.example.food_notes.db.FirebaseDataSource;
+import com.example.food_notes.ui.fragments.UserMainFragment;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.storage.StorageReference;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * FoodPostViewModel deals with operations
- * involving FoodPost entity and connects with ui
+ * involving FoodPost model and connects with ui
  */
-public class FoodPostViewModel extends ViewModel implements ApiClient {
+public class FoodPostViewModel extends ViewModel {
 
-    private final FoodPostDataSource mDataSource;
-    private FoodPost mFoodPost;
-    private final CompositeDisposable disposable = new CompositeDisposable();
+    private static final String TAG = "food_postVM";
+    private final FirebaseDataSource mDataSource;
+    private StorageReference mReference;
+    private static final String PATH = "images/"+UUID.randomUUID()+".jpg";
 
-    public FoodPostViewModel(FoodPostDataSource repository) {
+
+    public FoodPostViewModel(FirebaseDataSource repository) {
         mDataSource = repository;
     }
 
-    // TODO not done yet
-    public void loadCardItems() {
-        getAllFoodPosts();
-    }
 
     /**
-     * Returns a uri string from a bitmap
-     * @param bitmap image
-     * @return image uri string
+     * Creates a hashMap from FoodPost attributes
+     * @param uid
+     * @param uriString
+     * @param title
+     * @param description
+     * @param rating
+     * @param latitude
+     * @param longitude
+     * @return
      */
-    public String fromBitmap(Bitmap bitmap) {
-        return Converters.BitmapToStr(bitmap);
-    }
-
-    /**
-     * Returns a bitmap from an image string resource
-     * @param image_str image string
-     * @return bitmap
-     */
-    public Bitmap getBitmap(final String image_str) {
-        return Converters.StrToBitmap(image_str);
-    }
-
-    /**
-     * Attempts to add a FoodPost item to database with given attributes.
-     * This function also sets the time
-     * of posting of this object and subscribes a CompletableObserver to it.
-     * @param imageUriString String type image file uri path
-     * @param title String type title
-     * @param description String type description
-     * @param rating float type rating
-     * @param latitude Double type latitude
-     * @param longitude Double type longitude
-     */
-    public void addItem(final String imageUriString, final String title, final String description,
-            final float rating, final Double latitude, final Double longitude) {
-        Date currentDate = Calendar.getInstance().getTime();
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:s", Locale.getDefault());
-        String dateString = format.format(currentDate);
-        // TODO latitude and longitude are hardcoded right now. Need GoogleAPI locations to set them
-        mFoodPost = new FoodPost(imageUriString, title, description, rating, latitude, longitude);
-        mFoodPost.setSent_at(dateString);
-        mDataSource.insertOrUpdate(mFoodPost)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .delaySubscription(2, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::whenCompleted,
-                        throwable -> onFailed(throwable.getLocalizedMessage()),
-                        disposable
-                );
-    }
-
-    /**
-     * Gets all FoodPost items from database
-     * @return Flowable list of FoodPost objects
-     */
-    public Flowable<List<FoodPost>> getAllFoodPosts() {
-        return mDataSource.getAllData().subscribeOn(Schedulers.computation())
-                .onBackpressureBuffer(50, true);
-    }
-
-    /**
-     * Returns the size of the list that contains the data
-     * @return int type decimal number
-     */
-    public int getListSize() {
-        AtomicInteger n = new AtomicInteger();
-        getAllFoodPosts().flatMap(Flowable::fromIterable).forEach(
-                foodPost -> n.getAndIncrement()
-        );
-        return n.get();
-    }
-
-    /**
-     * Deletes a card item
-     * @param id Long type FoodPost_id
-     * @return Completable response, either completed or an error
-     */
-    public void deleteItem(final Long id) {
-        mDataSource.deleteFoodPostById(id).observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io()).delaySubscription(2, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                .subscribe(
-                        this::whenCompleted,
-                        throwable -> onFailed(throwable.getLocalizedMessage()),
-                        disposable
-                );
-    }
-
     public HashMap<String, Object> createHashMapFromData(final String uid, final String uriString, final String title, final String description,
                                                          final float rating, final Double latitude, final Double longitude) {
 
@@ -140,30 +59,59 @@ public class FoodPostViewModel extends ViewModel implements ApiClient {
         data.put("description", description);
         data.put("rating", rating);
         data.put("sent_at", FieldValue.serverTimestamp());
-        data.put("lat", latitude);
-        data.put("lon", longitude);
+        data.put("latitude", latitude);
+        data.put("longitude", longitude);
 
         return data;
     }
 
-    @Override
-    public void onSuccess() {
-        Log.d("SUCCESS", "onSuccess: Transaction was successful");
+    /**
+     * Uploads image to FireStorage and creates a foodPost document
+     * @param uid
+     * @param uri
+     * @param title
+     * @param desc
+     * @param rating
+     * @param latitude
+     * @param longitude
+     */
+    public void uploadImageAndCreateFoodPost(final String uid, final Uri uri, final String title, final String desc, final float rating,
+                                             final Double latitude, final Double longitude) {
+        if (uri != null) {
+            mReference = mDataSource.getStorage().getReference();
+            mReference.child(PATH).putFile(uri)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        Log.d(TAG, "onSuccess: bytes: " + taskSnapshot.getBytesTransferred());
+                        StorageReference reference = mDataSource.getStorage().getReference(PATH);
+                        reference.getDownloadUrl().addOnSuccessListener(resultUri -> {
+                            mDataSource.createPostDocument(
+                                    uid,
+                            createHashMapFromData(uid, resultUri.toString(), title, desc, rating, latitude, longitude)
+                            );
+                        }).addOnFailureListener(e -> Log.d(TAG, "onFailure: FAILED" + e.getLocalizedMessage()));
+                    }).addOnFailureListener(e -> Log.d(TAG, "onFailure: failed"+e.getLocalizedMessage()));
+        }
     }
 
-    @Override
-    public void onFailed(String log) {
-        Log.e("ERROR", log);
+    public void getUserRef() {
+        mDataSource.getUserDocument(UserMainFragment.getUserId())
+                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.d(TAG, "error:"+ error.getLocalizedMessage());
+                        } if (value != null && value.exists()) {
+                            Log.d(TAG, value.getId()+" => "+value.getData());
+                            Map<String, Object> data = value.getData();
+                            if (data != null) {
+                                String user_id = (String) data.get("user_id");
+                                String user_email = (String) data.get("user_email");
+                                User user = new User(user_id, user_email);
+                                Log.d(TAG, "onEvent: "+user.getUser_id());
+                            }
+                        }
+                    }
+                });
     }
 
-    @Override
-    public void whenCompleted() {
-        Log.d("COMPLETED", "done");
-    }
-
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        disposable.clear();
-    }
 }

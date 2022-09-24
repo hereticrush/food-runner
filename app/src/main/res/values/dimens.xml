@@ -8,7 +8,7 @@
     <dimen name="button_margin">13dp</dimen>
     <dimen name="button_text_size">20sp</dimen>
     <dimen name="edit_text_text_size">18sp</dimen>
-    <dimen name="edit_text_text_desc_size">14sp</dimen>
+    <dimen name="edit_text_text_desc_size">17sp</dimen>
     <dimen name="image_border_stroke_size">3dp</dimen>
     <dimen name="padding_content">12dp</dimen>
     <dimen name="card_radius">7dp</dimen>

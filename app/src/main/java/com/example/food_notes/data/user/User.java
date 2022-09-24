@@ -9,37 +9,32 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import com.example.food_notes.data.foodpost.FoodPost;
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.ServerTimestamp;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Objects;
 
-@Entity(
-        tableName = "users",
-        primaryKeys = "user_id",
-        indices = {
-                @Index(value = "user_id", unique = true)
-        }
-)
-public class User {
-        @ColumnInfo(name = "user_id") @NonNull private String user_id;
-        @ColumnInfo(name = "user_email") private String userEmail;
-        @ColumnInfo(name = "user_password") private String userPassword;
-        @ColumnInfo(name = "created_at") private String createdAt;
+public class User implements Serializable {
 
-        public User(@NonNull String user_id) {
-                this.user_id = user_id;
-        }
+        @NonNull private String user_id;
+        private String userEmail;
+        @ServerTimestamp
+        private String createdAt;
 
-        @Ignore
+        public User() {}
+
         public User(@NonNull String user_id, String userEmail) {
                 this.user_id = user_id;
                 this.userEmail = userEmail;
         }
 
-        @Ignore
-        public User(@NonNull String user_id, String userEmail, String userPassword) {
+        public User(@NonNull String user_id, String userEmail, String createdAt) {
                 this.user_id = user_id;
                 this.userEmail = userEmail;
-                this.userPassword = userPassword;
+                this.createdAt = createdAt;
         }
 
         @NonNull
@@ -59,14 +54,6 @@ public class User {
                 this.userEmail = userEmail;
         }
 
-        public String getUserPassword() {
-                return userPassword;
-        }
-
-        public void setUserPassword(String userPassword) {
-                this.userPassword = userPassword;
-        }
-
         public String getCreatedAt() {
                 return createdAt;
         }
@@ -75,4 +62,12 @@ public class User {
                 this.createdAt = createdAt;
         }
 
+        @Exclude
+        public HashMap<String, Object> getUserMap() {
+                HashMap<String, Object> data = new HashMap<>();
+                data.put("user_id", getUser_id());
+                data.put("user_email", getUserEmail());
+                data.put("created_at", FieldValue.serverTimestamp());
+                return data;
+        }
 }

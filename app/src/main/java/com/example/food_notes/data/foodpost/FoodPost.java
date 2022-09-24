@@ -1,52 +1,40 @@
 package com.example.food_notes.data.foodpost;
 
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.ForeignKey;
-import androidx.room.Ignore;
-import androidx.room.Index;
-import androidx.room.PrimaryKey;
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.ServerTimestamp;
 
-import com.example.food_notes.data.user.User;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
 
-@Entity(
-        tableName = "food_posts",
-        indices = {
-                @Index(value = "post_id", unique = true)
-        }
-)
-public class FoodPost {
-        @PrimaryKey @ColumnInfo(name = "post_id") private Long post_id = 0L;
-        @ColumnInfo(name = "img_str") private String img_str;
-        @ColumnInfo(name = "title") private String title;
-        @ColumnInfo(name = "description") private String description;
-        @ColumnInfo(name = "rating") private float rating;
-        @ColumnInfo(name = "sent_at") private String sent_at;
-        @ColumnInfo(name = "latitude") private Double latitude;
-        @ColumnInfo(name = "longitude") private Double longitude;
+
+public class FoodPost implements Serializable {
+        private String user_id;
+        private String image_uri;
+        private String title;
+        private String description;
+        private float rating;
+        @ServerTimestamp
+        private Date sent_at;
+        private Double latitude;
+        private Double longitude;
 
         public FoodPost() {}
 
-        @Ignore
-        public FoodPost(String img_str, String title, String description, float rating, String sent_at) {
-                this.img_str = img_str;
-                this.sent_at = sent_at;
+        public FoodPost(String user_id, String img_str, String title, String description, float rating, Double latitude, Double longitude) {
+                this.user_id = user_id;
+                this.image_uri = img_str;
                 this.title = title;
                 this.description = description;
                 this.rating = rating;
+                this.latitude = latitude;
+                this.longitude = longitude;
         }
 
-        @Ignore
-        public FoodPost(String title, String description, float rating, String sent_at) {
-                this.title = title;
-                this.description = description;
-                this.rating = rating;
-                this.sent_at = sent_at;
-        }
-
-        @Ignore
-        public FoodPost(String img_str, String title, String description, float rating, String sent_at, Double latitude, Double longitude) {
-                this.img_str = img_str;
+        public FoodPost(String user_id, String img_str, String title, String description, float rating, Date sent_at, Double latitude, Double longitude) {
+                this.user_id = user_id;
+                this.image_uri = img_str;
                 this.title = title;
                 this.description = description;
                 this.rating = rating;
@@ -55,42 +43,20 @@ public class FoodPost {
                 this.longitude = longitude;
         }
 
-        @Ignore
-        public FoodPost(String img_str, String title, String description, float rating, Double latitude, Double longitude) {
-                this.img_str = img_str;
-                this.title = title;
-                this.description = description;
-                this.rating = rating;
-                this.latitude = latitude;
-                this.longitude = longitude;
+        public String getUser_id() {
+                return user_id;
         }
 
-        @Ignore
-        public FoodPost(Long post_id, String img_str, String title, String description, float rating, String sent_at, Double latitude, Double longitude) {
-                this.post_id = post_id;
-                this.img_str = img_str;
-                this.title = title;
-                this.description = description;
-                this.rating = rating;
-                this.sent_at = sent_at;
-                this.latitude = latitude;
-                this.longitude = longitude;
+        public void setUser_id(String user_id) {
+                this.user_id = user_id;
         }
 
-        public Long getPost_id() {
-                return post_id;
+        public String getImage_uri() {
+                return image_uri;
         }
 
-        public void setPost_id(Long post_id) {
-                this.post_id = post_id;
-        }
-
-        public String getImg_str() {
-                return img_str;
-        }
-
-        public void setImg_str(String img_str) {
-                this.img_str = img_str;
+        public void setImage_uri(String image_uri) {
+                this.image_uri = image_uri;
         }
 
         public String getTitle() {
@@ -117,11 +83,11 @@ public class FoodPost {
                 this.rating = rating;
         }
 
-        public String getSent_at() {
+        public Date getSent_at() {
                 return sent_at;
         }
 
-        public void setSent_at(String sent_at) {
+        public void setSent_at(Date sent_at) {
                 this.sent_at = sent_at;
         }
 
@@ -139,5 +105,19 @@ public class FoodPost {
 
         public void setLongitude(Double longitude) {
                 this.longitude = longitude;
+        }
+
+        @Exclude
+        public HashMap<String, Object> getFoodPostMap() {
+                HashMap<String, Object> data = new HashMap<>();
+                data.put("user_id", getUser_id());
+                data.put("image_uri", getImage_uri());
+                data.put("title", getTitle());
+                data.put("description", getDescription());
+                data.put("rating", getRating());
+                data.put("sent_at", FieldValue.serverTimestamp());
+                data.put("latitude", getLatitude());
+                data.put("longitude", getLongitude());
+                return data;
         }
 }

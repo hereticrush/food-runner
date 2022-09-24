@@ -1,16 +1,14 @@
-package com.example.food_notes.db.converters;
+package com.example.food_notes.ui.view.util.converters;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.room.TypeConverter;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
-import java.util.Date;
 
 public class Converters {
 
@@ -33,16 +31,6 @@ public class Converters {
             Log.d("CONVERTER_ERROR", "StrToBitmap: "+e.getLocalizedMessage());
             return null;
         }
-    }
-
-    @TypeConverter
-    public static Date fromTimestamp(Long value) {
-        return value == null ? null : new Date(value);
-    }
-
-    @TypeConverter
-    public static Long fromDateToTimestamp(Date date) {
-        return date == null ? null : date.getTime();
     }
 
 

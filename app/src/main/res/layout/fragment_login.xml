@@ -31,7 +31,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/til_margin_top"
-                    android:hint="@string/edit_text_username_hint"
+                    android:hint="@string/edit_text_email_hint"
                     android:inputType="textShortMessage"
                     android:textColorHint="#212121"
                     tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck,SpeakableTextPresentCheck,TextContrastCheck,TextContrastCheck" />

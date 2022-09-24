@@ -1,11 +1,14 @@
 <resources>
+    <string name="upload_fail">Failed to upload</string>
+    <string name="user_registered_success">User registration was successful</string>
+    <string name="an_error_occurred">An error occurred</string>
     <string name="app_name">Food Runner</string>
     <string name="button_create_new_user_placeholder_text">CREATE A USER</string>
     <string name="dialog_title">You can choose to</string>
     <string name="edit_text_hint">Title</string>
     <string name="button_text_create_post">CREATE</string>
     <string name="edit_text_hint_desc">Description</string>
-    <string name="edit_text_username_hint">Enter Username</string>
+    <string name="edit_text_email_hint">Enter Email</string>
     <string name="edit_text_password_hint">Enter Password</string>
     <string name="edit_text_choose_image">CHOOSE IMAGE</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>

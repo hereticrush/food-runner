@@ -2,7 +2,6 @@ package com.example.food_notes.ui.fragments;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,24 +17,19 @@ import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.example.food_notes.R;
+import com.example.food_notes.auth.AppAuthentication;
 import com.example.food_notes.databinding.FragmentSignupBinding;
 import com.example.food_notes.injection.Injection;
-import com.example.food_notes.ui.view.ApiClient;
 import com.example.food_notes.ui.view.factory.AuthenticationViewModelFactory;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 
-public class SignupFragment extends Fragment implements ApiClient {
+public class SignupFragment extends Fragment {
 
     private static final String TAG = "sign_up";
     private FragmentSignupBinding binding;
     private AuthenticationViewModelFactory mFactory;
     private AuthenticationViewModel mAuthViewModel;
-
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore mFirestore;
 
     private AppCompatButton btn;
     private AppCompatEditText editTextUsername;
@@ -52,9 +46,7 @@ public class SignupFragment extends Fragment implements ApiClient {
         mFactory = Injection.provideAuthViewModelFactory(requireContext());
         mAuthViewModel = mFactory.create(AuthenticationViewModel.class);
 
-        // init firebase auth
-        mAuth = FirebaseAuth.getInstance();
-        mFirestore = FirebaseFirestore.getInstance();
+        // init firebase
     }
 
     @Override
@@ -97,26 +89,6 @@ public class SignupFragment extends Fragment implements ApiClient {
     }
 
     /**
-     * Notifies successful events on ui, then navigates user to next fragment
-     */
-    @Override
-    public void onSuccess() {
-        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "User registered successfully", Toast.LENGTH_SHORT).show());
-        toLogin();
-    }
-
-    @Override
-    public void onFailed(String log) {
-        requireActivity().runOnUiThread(() -> Toast.makeText(requireActivity().getApplicationContext(), "User already exists", Toast.LENGTH_SHORT).show());
-        Log.e("FAILED", log);
-    }
-
-    @Override
-    public void whenCompleted() {
-        Log.d("COMPLETED", "done");
-    }
-
-    /**
      * Attempts to sign up through Firebase Authentication,
      * if it is a success, user is inserted into both localDB and Firestore
      */
@@ -127,14 +99,13 @@ public class SignupFragment extends Fragment implements ApiClient {
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
             Toast.makeText(requireActivity().getApplicationContext(), "Enter email and password", Toast.LENGTH_SHORT).show();
         } else {
-            mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnFailureListener(e -> onFailed(e.getLocalizedMessage()))
+            AppAuthentication.AUTH.createUserWithEmailAndPassword(email, password)
+                    .addOnFailureListener(e -> Toast.makeText(requireContext() ,R.string.an_error_occurred, Toast.LENGTH_SHORT).show())
                     .addOnSuccessListener(authResult -> {
-
+                        Toast.makeText(requireContext().getApplicationContext(), R.string.user_registered_success, Toast.LENGTH_SHORT).show();
                         String uid = authResult.getUser().getUid();
-
-                        mAuthViewModel.insertUserToLocalDB(uid, email);
                         addUserDocumentToFirestore(uid, email);
+                        toLogin();
                     });
         }
     }
@@ -146,14 +117,9 @@ public class SignupFragment extends Fragment implements ApiClient {
      */
     private void addUserDocumentToFirestore(final String uid, final String email) {
         if (uid != null && email != null) {
-            mFirestore.collection("users")
-                    .document(uid)
-                    .set(
-                            mAuthViewModel.createUserHashmap(uid, email),
-                            SetOptions.merge()
-                    ).addOnFailureListener(e -> onFailed(e.getLocalizedMessage()))
-                    .addOnSuccessListener(unused -> onSuccess());
+            mAuthViewModel.createUserDocumentForFirestore(uid, email);
         }
     }
+
 
 }

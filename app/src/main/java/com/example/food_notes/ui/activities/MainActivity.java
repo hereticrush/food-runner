@@ -3,6 +3,7 @@ package com.example.food_notes.ui.activities;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,7 +24,6 @@ import com.google.firebase.auth.FirebaseUser;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private final static String ENTRY_FRAGMENT = "login";
     private static final String TAG = "main_activity";
 
     // view binding variable
@@ -38,12 +38,7 @@ public class MainActivity extends AppCompatActivity {
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.main_nav_host_fragment);
         NavController navController = navHostFragment.getNavController();
-        navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener() {
-            @Override
-            public void onDestinationChanged(@NonNull NavController navController, @NonNull NavDestination navDestination, @Nullable Bundle bundle) {
-                Log.d(TAG, "onDestinationChanged: "+navDestination.getDisplayName());
-            }
-        });
+
     }
 
     @Override

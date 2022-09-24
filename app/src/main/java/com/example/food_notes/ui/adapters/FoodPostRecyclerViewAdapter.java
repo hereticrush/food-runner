@@ -1,105 +1,81 @@
 package com.example.food_notes.ui.adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RatingBar;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.food_notes.R;
 import com.example.food_notes.data.foodpost.FoodPost;
-import com.example.food_notes.ui.view.model.FoodPostViewModel;
+import com.example.food_notes.databinding.RowItemBinding;
 
-import java.util.List;
-
-import io.reactivex.rxjava3.core.Flowable;
+import java.util.ArrayList;
 
 public class FoodPostRecyclerViewAdapter extends RecyclerView.Adapter<FoodPostRecyclerViewAdapter.FoodPostViewHolder> {
 
     private final Context mContext;
-    private final FoodPostViewModel mFoodPostViewModel;
-    private Flowable<List<FoodPost>> items;
+    private ArrayList<FoodPost> list;
+    private RecyclerViewItemClickListener listener;
 
-    // holder class
-    public static class FoodPostViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textTitle, textDesc, textDate;
-        private final RatingBar ratingBar;
-        private final ImageView imageView;
-
-        /**
-         * Constructs the holder class of FoodPost
-         * @param itemView view
-         */
-        public FoodPostViewHolder(@NonNull View itemView) {
-            super(itemView);
-            textTitle = (TextView) itemView.findViewById(R.id.tv_title);
-            textDesc = (TextView) itemView.findViewById(R.id.tv_desc);
-            textDate = (TextView) itemView.findViewById(R.id.tv_date);
-            ratingBar = (RatingBar) itemView.findViewById(R.id.rb_post);
-            imageView = (ImageView) itemView.findViewById(R.id.iv_post_image);
-        }
-
-        public TextView getTextTitle() {
-            return textTitle;
-        }
-
-        public TextView getTextDesc() {
-            return textDesc;
-        }
-
-        public TextView getTextDate() {
-            return textDate;
-        }
-
-        public RatingBar getRatingBar() {
-            return ratingBar;
-        }
-
-        public ImageView getImageView() {
-            return imageView;
-        }
-    }
-
-
-    public FoodPostRecyclerViewAdapter(Context context, FoodPostViewModel foodPostViewModel) {
+    public FoodPostRecyclerViewAdapter(Context context, ArrayList<FoodPost> list, RecyclerViewItemClickListener listener) {
         this.mContext = context;
-        this.mFoodPostViewModel = foodPostViewModel;
+        this.list = list;
+        this.listener = listener;
     }
 
     @NonNull
     @Override
     public FoodPostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.row_item, parent, false);
-        return new FoodPostViewHolder(view);
+        RowItemBinding itemBinding = RowItemBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new FoodPostViewHolder(itemBinding, listener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull FoodPostViewHolder holder, final int position) {
-        items = mFoodPostViewModel.getAllFoodPosts();
-        Flowable<FoodPost> item = items.map(foodPosts -> foodPosts.get(position));
-        Glide.with(mContext)
-                        .asBitmap()
-                                .load(item.map(FoodPost::getImg_str))
-                                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                                .into(holder.getImageView());
-        holder.getTextTitle().setText(item.map(FoodPost::getTitle).toString());
-        holder.getTextDesc().setText(item.map(FoodPost::getDescription).toString());
-        holder.getTextDate().setText(item.map(FoodPost::getSent_at).toString());
-        holder.getRatingBar().setRating(item.map(FoodPost::getRating).map(Float::floatValue).blockingSingle());
+        Glide.with(mContext).load(Uri.parse(list.get(position).getImage_uri())).into(holder.itemBinding.ivPostImage);
+        holder.itemBinding.tvTitle.setText(list.get(position).getTitle());
+        holder.itemBinding.tvDesc.setText(list.get(position).getDescription());
+        holder.itemBinding.rbPost.setRating(list.get(position).getRating());
 
     }
 
     @Override
     public int getItemCount() {
-        return mFoodPostViewModel.getListSize();
+        return list.size();
+    }
+
+    // holder class
+    public static class FoodPostViewHolder extends RecyclerView.ViewHolder {
+
+        RowItemBinding itemBinding;
+
+        /**
+         * Constructs the holder class of FoodPost
+         * @param itemBinding RowItemBinding view binding for holder
+         */
+        public FoodPostViewHolder(RowItemBinding itemBinding, RecyclerViewItemClickListener listener) {
+            super(itemBinding.getRoot());
+            this.itemBinding = itemBinding;
+
+            itemBinding.getRoot().setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (listener != null) {
+                        int pos = getAdapterPosition();
+                        if (pos != RecyclerView.NO_POSITION) {
+                            listener.onLongItemClick(pos);
+                        }
+                    }
+                    return true;
+                }
+            });
+        }
+
     }
 
 }

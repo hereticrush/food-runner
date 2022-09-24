@@ -42,6 +42,7 @@ dependencies {
     def fragment_version = "1.5.2"
     def rx_version = '3.1.5'
     def glide_version = "4.12.0"
+    def app_compat_version = "1.5.1"
 
     // Google Firebase
     implementation "com.google.firebase:firebase-bom:30.5.0"
@@ -98,13 +99,11 @@ dependencies {
     // (see https://github.com/ReactiveX/RxJava/releases for latest 3.x.x version)
     implementation "io.reactivex.rxjava3:rxjava:$rx_version"
 
-    //Dexter eases the use of permissions
-    implementation 'com.karumi:dexter:6.2.3'
 
     // Paging 3
     implementation "androidx.paging:paging-compose:1.0.0-alpha12"
 
-    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation "androidx.appcompat:appcompat:$app_compat_version"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     //testing lib
