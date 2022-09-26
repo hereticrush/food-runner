@@ -99,7 +99,6 @@ public class LoginFragment extends Fragment {
         // start from userMainFragment
         if (auth.getCurrentUser() != null) {
             toUserMainFragment(auth.getCurrentUser().getUid());
-            Log.d(TAG, "onCreate: CurrentUid:"+auth.getCurrentUser().getUid());
         }
     }
 

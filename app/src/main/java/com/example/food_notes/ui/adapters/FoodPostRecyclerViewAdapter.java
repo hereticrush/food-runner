@@ -27,22 +27,18 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class FoodPostRecyclerViewAdapter extends RecyclerView.Adapter<FoodPostRecyclerViewAdapter.FoodPostViewHolder> implements EventListener<QuerySnapshot> {
+public class FoodPostRecyclerViewAdapter extends RecyclerView.Adapter<FoodPostRecyclerViewAdapter.FoodPostViewHolder> {
 
     private static final String TAG = "adapter";
     private final Context mContext;
     private ArrayList<FoodPost> list;
-    private Query query;
-    private ArrayList<DocumentSnapshot> snapshots;
-    private ListenerRegistration registration;
     private RecyclerViewItemClickListener listener;
+    private String item_id;
 
-    public FoodPostRecyclerViewAdapter(Context context, Query query, RecyclerViewItemClickListener listener) {
+    public FoodPostRecyclerViewAdapter(Context context, ArrayList<FoodPost> list, RecyclerViewItemClickListener listener) {
         this.mContext = context;
         this.list = list;
         this.listener = listener;
-        this.query = query;
-        snapshots = new ArrayList<>();
     }
 
     @NonNull
@@ -54,113 +50,18 @@ public class FoodPostRecyclerViewAdapter extends RecyclerView.Adapter<FoodPostRe
 
     @Override
     public void onBindViewHolder(@NonNull FoodPostViewHolder holder, final int position) {
-        /*Glide.with(mContext).load(Uri.parse(list.get(position).getImage_uri()))
+        item_id = list.get(position).getPost_id();
+        Glide.with(mContext).load(Uri.parse(list.get(position).getImage_uri()))
                 .placeholder(R.drawable.ic_baseline_choose_image_24).into(holder.itemBinding.ivPostImage);
         holder.itemBinding.tvTitle.setText(list.get(position).getTitle());
         holder.itemBinding.tvDesc.setText(list.get(position).getDescription());
-        holder.itemBinding.rbPost.setRating(list.get(position).getRating());*/
-        DocumentSnapshot snapshot = snapshots.get(position);
-        snapshot.getReference().addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                if (error != null) {
-                    Log.w(TAG, "onEvent: error", error);
-                }
-                if (value != null && value.exists()) {
-                    Map<String, Object> data = value.getData();
-                    String post_id = (String) data.get("post_id");
-                    String image_uri = (String) data.get("image_uri");
-                    String title = (String) data.get("title");
-                    String description = (String) data.get("description");
-                    Double rating = (Double) data.get("rating");
-
-                    holder.itemBinding.ivPostImage.setImageURI(Uri.parse(image_uri));
-                    holder.itemBinding.tvTitle.setText(title);
-                    holder.itemBinding.tvDesc.setText(description);
-                    holder.itemBinding.rbPost.setRating(rating.floatValue());
-                }
-            }
-        });
+        holder.itemBinding.rbPost.setRating(list.get(position).getRating());
     }
 
     @Override
     public int getItemCount() {
-        return snapshots.size();
+        return list.size();
     }
-
-    private void startListening() {
-        if (registration == null) {
-            registration = query.addSnapshotListener(this);
-        }
-    }
-
-    private void stopListening() {
-        registration.remove();
-        registration = null;
-
-        snapshots.clear();
-        notifyDataSetChanged();
-    }
-
-    public void setQuery(final Query query) {
-        stopListening();
-        snapshots.clear();
-        notifyDataSetChanged();
-        startListening();
-    }
-
-    public Query getQuery() {
-        return this.query;
-    }
-
-    public DocumentSnapshot getSnapshot(int index) {
-        return snapshots.get(index);
-    }
-
-    @Override
-    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-        if (error != null) {
-            Log.w(TAG, "onEvent: error", error);
-            return;
-        } if (value != null) {
-            for (DocumentChange change: value.getDocumentChanges()){
-                switch (change.getType()) {
-                    case ADDED:
-                        onDocumentAdded(change);
-                        break;
-                    case MODIFIED:
-                        onDocumentModified(change);
-                        break;
-                    case REMOVED:
-                        onDocumentRemoved(change);
-                        break;
-                }
-            }
-        }
-        notifyDataSetChanged();
-    }
-
-    private void onDocumentAdded(final DocumentChange change) {
-        snapshots.add(change.getNewIndex(), change.getDocument());
-        notifyItemInserted(change.getNewIndex());
-    }
-
-    private void onDocumentModified(final DocumentChange change) {
-        if (change.getOldIndex() == change.getNewIndex()) {
-            snapshots.set(change.getOldIndex(), change.getDocument());
-            notifyItemChanged(change.getOldIndex());
-        } else {
-            snapshots.remove(change.getOldIndex());
-            snapshots.add(change.getNewIndex(), change.getDocument());
-            notifyItemMoved(change.getOldIndex(), change.getNewIndex());
-        }
-    }
-
-    private void onDocumentRemoved(final DocumentChange change) {
-        snapshots.remove(change.getOldIndex());
-        notifyItemRemoved(change.getOldIndex());
-    }
-
 
     // holder class
     public static class FoodPostViewHolder extends RecyclerView.ViewHolder {
@@ -191,4 +92,7 @@ public class FoodPostRecyclerViewAdapter extends RecyclerView.Adapter<FoodPostRe
 
     }
 
+    public String getItem_id() {
+        return item_id;
+    }
 }

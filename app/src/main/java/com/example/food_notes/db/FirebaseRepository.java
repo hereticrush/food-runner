@@ -2,10 +2,8 @@ package com.example.food_notes.db;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.example.food_notes.data.foodpost.FoodPost;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -15,10 +13,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -26,7 +21,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FirebaseRepository implements FirebaseDataSource {
 
@@ -79,9 +73,26 @@ public class FirebaseRepository implements FirebaseDataSource {
         }
     }
 
+    /**
+     * Deletes a Firestore food_posts document
+     * @param documentReference
+     * @param callback
+     */
     @Override
-    public void deletePostDocument(final DocumentReference documentReference) {
-
+    public void deletePostDocument(final DocumentReference documentReference, CustomCallback callback) {
+        documentReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            String success = "Successfully deleted => "+documentReference.getId();
+                            callback.onEventSuccess(success);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            String failed = "Failed transaction => "+e.getLocalizedMessage();
+                            callback.onEventFailure(failed);
+                        }
+                    });
     }
 
     /**
@@ -123,18 +134,6 @@ public class FirebaseRepository implements FirebaseDataSource {
      */
     @Override
     public void createUserDocument(final String uid, final HashMap<String, Object> hashMap, final CustomCallback callback) {
-        /*mFirestore.collection(DatabaseConstants.USERS).add(hashMap)
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "onFailure: error while adding document"+ e.getLocalizedMessage());
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "onSuccess: user document added:"+ documentReference.getPath());
-                    }
-                });*/
         if (uid != null && hashMap != null) {
             mUserCollectionRef.add(hashMap).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                 @Override

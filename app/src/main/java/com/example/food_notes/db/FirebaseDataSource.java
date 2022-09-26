@@ -2,14 +2,10 @@ package com.example.food_notes.db;
 
 import com.example.food_notes.data.foodpost.FoodPost;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public interface FirebaseDataSource {
 
@@ -25,6 +21,6 @@ public interface FirebaseDataSource {
 
     void getFirestoreDocuments(final String uid, final CustomCallback callback);
 
-    void deletePostDocument(final DocumentReference documentReference);
+    void deletePostDocument(final DocumentReference documentReference, final CustomCallback callback);
 
 }

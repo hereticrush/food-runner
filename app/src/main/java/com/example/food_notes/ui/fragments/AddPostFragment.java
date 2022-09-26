@@ -3,12 +3,16 @@ package com.example.food_notes.ui.fragments;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
@@ -27,6 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavBackStackEntry;
@@ -44,25 +49,18 @@ import com.example.food_notes.ui.view.factory.FoodPostModelViewFactory;
 import com.example.food_notes.ui.view.model.FoodPostViewModel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
-//TODO fix activityResultLauncher for camera
+
 public class AddPostFragment extends Fragment implements AddImageOptionsDialogFragment.AddImageOptionsListener {
 
     private static final String TAG = "add_post";
@@ -89,6 +87,8 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
     private FoodPostViewModel mViewModel;
 
     private Uri mUri;
+    static String filepath;
+    File photoFile;
 
     // navigation components
     private NavController navController;
@@ -110,12 +110,11 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                        Intent uri_data = result.getData();
-                        if (uri_data != null) {
-                            mUri = uri_data.getData();
-                            Log.d(TAG, "onActivityResult: URI?"+mUri.getPath());
-                            loadImageThumbnail(mUri);
-                            Log.d(TAG, "onActivityResult: DONE_loadingThumbnail");
+                        Intent intent = result.getData();
+                        if (intent != null) {
+                            Log.d(TAG, "onActivityResult: "+intent.getData().toString());
+                            Uri resultUri = intent.getData();
+                            loadImageThumbnail(resultUri);
                         }
                     } else {
                         toast("Something went wrong.");
@@ -124,47 +123,50 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
             }
     );
 
-    // camera permissions
-    private final String[] CAMERA_PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.CAMERA
-    };
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        imageView = binding.ivSetImage;
+    }
 
-    private String currentPhotoPath;
-
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,
-                ".jpg",
-                storageDir
-        );
-
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        imageView = binding.ivSetImage;
     }
 
     /**
      * Register an ActivityResultLauncher for camera permissions
      */
-    private final ActivityResultLauncher<String[]> mCameraPermissions = registerForActivityResult(
-            new ActivityResultContracts.RequestMultiplePermissions(),
-            new ActivityResultCallback<Map<String, Boolean>>() {
-                @Override
-                public void onActivityResult(Map<String, Boolean> result) {
-                    if (!result.isEmpty() && result.containsValue(true)) {
-                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE_SECURE);
-                            Log.d(TAG, "onActivityResult: WORKS?");
-                            intent.putExtra(Intent.EXTRA_INTENT, Intent.ACTION_GET_CONTENT);
-                            Log.d(TAG, "onActivityResult: EXTRA?");
-                            mCameraIntent.launch(intent);
+    private final ActivityResultLauncher<String> mCameraPermission = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+                if (isGranted) {
+                    try {
+                        photoFile = createFile(requireContext().getApplicationContext());
+                        Log.d(TAG, ": photoFile:"+photoFile.getAbsolutePath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(getContext().getApplicationContext(),
+                            this.requireContext().getApplicationContext().getPackageName()+".fileprovider", photoFile));
+                    mCameraIntent.launch(intent);
+                } else {
+                    navigateToSettings();
                 }
             }
     );
+
+    private static File createFile(Context context) throws IOException {
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String fileName = "jpeg_" + timestamp + "_";
+        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(fileName, ".jpg", storageDir);
+
+        filepath = "file: "+ image.getAbsolutePath();
+        return image;
+    }
 
     /**
      * Registers an intent to go to gallery. If result is a success, pick an image and retrieve its uri.
@@ -241,9 +243,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
                             } catch (SecurityException e) {
                                 toast("NOT SECURE:" + e.getLocalizedMessage());
                             }
-                        } else {
-                        navigateToSettings();
-                    }
+                        }
                 }
             }
     );
@@ -278,6 +278,8 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
             Log.d(TAG, "onCreate: USER?" + auth.getCurrentUser().getUid());
             USER_ID = auth.getCurrentUser().getUid();
         }
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
 
         // init location services and get user's location
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity().getApplicationContext());
@@ -340,17 +342,11 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
         dialogFragment.show(getChildFragmentManager(), AddImageOptionsDialogFragment.TAG);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-    }
-
     /**
      * Launch the ActivityResultLauncher for camera permissions
      */
     private void askPermissionsForCamera() {
-        mCameraPermissions.launch(CAMERA_PERMISSIONS);
+        mCameraPermission.launch(Manifest.permission.CAMERA);
     }
 
     /**
@@ -401,7 +397,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
         super.onDestroyView();
         mLocationPermissions.unregister();
         mStoragePermissions.unregister();
-        mCameraPermissions.unregister();
+        mCameraPermission.unregister();
         mGalleryIntent.unregister();
         mCameraIntent.unregister();
         binding = null;

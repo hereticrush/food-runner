@@ -118,6 +118,10 @@ public class FoodPost implements Serializable {
                         '}';
         }
 
+        /**
+         * Gets a FoodPost hashMap
+         * @return
+         */
         @Exclude
         public HashMap<String, Object> getFoodPostMap() {
                 HashMap<String, Object> data = new HashMap<>();

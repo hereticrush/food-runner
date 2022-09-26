@@ -62,6 +62,10 @@ public class User implements Serializable {
                 this.createdAt = createdAt;
         }
 
+        /**
+         * Get a User model hashMap
+         * @return hashMap
+         */
         @Exclude
         public HashMap<String, Object> getUserMap() {
                 HashMap<String, Object> data = new HashMap<>();

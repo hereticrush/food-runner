@@ -11,7 +11,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
@@ -32,19 +31,13 @@ import com.example.food_notes.ui.view.factory.FoodPostModelViewFactory;
 import com.example.food_notes.ui.view.model.AuthenticationViewModel;
 import com.example.food_notes.ui.view.model.FoodPostViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -114,7 +107,6 @@ public class UserMainFragment extends Fragment implements RecyclerViewItemClickL
         authenticationViewModel = modelFactory.create(AuthenticationViewModel.class);
 
         postArrayList = new ArrayList<>();
-
         auth = authenticationViewModel.getAuth();
         mFirestore = FirebaseFirestore.getInstance();
         mStorage = FirebaseStorage.getInstance();
@@ -128,7 +120,6 @@ public class UserMainFragment extends Fragment implements RecyclerViewItemClickL
         //keeping active userReferenceFromFirestore in onCreate
         mViewModel.getUserDocument(getUserId());
         initData();
-        mViewModel.getDocumentArrayById(getUserId());
 
     }
 
@@ -166,72 +157,18 @@ public class UserMainFragment extends Fragment implements RecyclerViewItemClickL
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        query = mFirestore.collection(DatabaseConstants.USERS).document().collection(DatabaseConstants.FOOD_POSTS).whereEqualTo("user_id", getUserId());
-        mViewModel.getData().observe(getViewLifecycleOwner(), new Observer<ArrayList<FoodPost>>() {
-            @Override
-            public void onChanged(ArrayList<FoodPost> foodPosts) {
-                mAdapter.notifyDataSetChanged();
-            }
-        });
     }
 
     /**
      * Display cardview row items in fragment
      */
     private void displayCardItems() {
-        if (mAdapter == null) {
-            mRecyclerView = binding.rvUserMain;
-            CollectionReference userColRef = mFirestore.collection(DatabaseConstants.USERS);
-            userColRef.whereEqualTo("user_id", getUserId())
-                    .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                QuerySnapshot snapshot = task.getResult();
-                                snapshot.getDocuments().forEach(documentSnapshot -> {
-                                    //final DocumentReference documentReference = documentSnapshot.getReference();
-                                    //query = documentReference.collection(DatabaseConstants.FOOD_POSTS).whereEqualTo("user_id", getUserId());
-                                    query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if (task.isSuccessful()) {
-                                                task.getResult().getDocuments().forEach(ds -> {
-                                                    DocumentReference posts = ds.getReference();
-                                                    posts.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                                                        @Override
-                                                        public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                                                            if (value != null && value.exists()) {
-                                                                Log.d(TAG, "onEvent: "+value.getReference().getPath());
-                                                                Map<String, Object> data = value.getData();
-                                                                String post_id = (String) data.get("post_id");
-                                                                String user_id = (String) data.get("user_id");
-                                                                String image_uri = (String) data.get("image_uri");
-                                                                String title = (String) data.get("title");
-                                                                String description = (String) data.get("description");
-                                                                Double rating = (Double) data.get("rating");
-                                                                Double latitude = (Double) data.get("latitude");
-                                                                Double longitude = (Double) data.get("longitude");
-
-                                                                FoodPost foodPost = new FoodPost(post_id, user_id, image_uri, title, description, rating.floatValue(), latitude, longitude);
-                                                                postArrayList.add(foodPost);
-                                                                //Log.d(TAG, "data:"+ foodPost);
-                                                            }
-                                                        }
-                                                    });
-                                                });
-                                            }
-                                        }
-                                    });
-                                });
-                            }
-                        }
-                    });
-            mAdapter = new FoodPostRecyclerViewAdapter(this.getContext(), query, this);
-            binding.rvUserMain.setLayoutManager(new LinearLayoutManager(this.getContext()));
-            binding.rvUserMain.setHasFixedSize(true);
-            binding.rvUserMain.setItemAnimator(new DefaultItemAnimator());
-            binding.rvUserMain.setAdapter(mAdapter);
-        }
+        mRecyclerView = binding.rvUserMain;
+        mAdapter = new FoodPostRecyclerViewAdapter(this.getContext(), postArrayList, this);
+        binding.rvUserMain.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        binding.rvUserMain.setHasFixedSize(true);
+        binding.rvUserMain.setItemAnimator(new DefaultItemAnimator());
+        binding.rvUserMain.setAdapter(mAdapter);
     }
 
 
@@ -239,10 +176,7 @@ public class UserMainFragment extends Fragment implements RecyclerViewItemClickL
      * Initializes a list of documents from firestore collection
      */
     public void initData() {
-        mViewModel.getDocumentArrayById(getUserId());
-        //postArrayList.addAll(mViewModel.getDocumentArrayById(getUserId()));
-
-        /*CollectionReference userColRef = mFirestore.collection(DatabaseConstants.USERS);
+        CollectionReference userColRef = mFirestore.collection(DatabaseConstants.USERS);
         Query user = userColRef.whereEqualTo("user_id", USER_ID);
         user.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -279,7 +213,7 @@ public class UserMainFragment extends Fragment implements RecyclerViewItemClickL
                     });
                 }
             }
-        });*/
+        });
     }
 
     @Override
@@ -322,28 +256,17 @@ public class UserMainFragment extends Fragment implements RecyclerViewItemClickL
 
     @Override
     public void onLongItemClick(int position) {
-        Toast.makeText(requireActivity().getApplicationContext(), "Item deleted", Toast.LENGTH_SHORT).show();
+        Toast.makeText(requireActivity().getApplicationContext(), "Item has been deleted", Toast.LENGTH_SHORT).show();
         removeItem(position);
     }
 
+    /**
+     * Removes a Cardview item with long click
+     * @param position RecyclerViewAdapter position
+     */
     public void removeItem(int position) {
         postArrayList.remove(position);
-        mViewModel.getUserDocument(getUserId()).collection(DatabaseConstants.FOOD_POSTS)
-                .addSnapshotListener(MetadataChanges.INCLUDE, new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                        if (error != null) {
-                            Log.w(TAG, "onEvent: ", error);
-                        }
-                        if (value != null && !value.isEmpty()) {
-                            value.getDocuments().forEach(documentSnapshot -> {
-                                final String id = (String) documentSnapshot.get("post_id");
-                                Log.d(TAG, "onEvent: IDs:" + id);
-                                mViewModel.deletePostDocument(getUserId(), id);
-                            });
-                        }
-                    }
-                });
+        mViewModel.deletePostDocument(getUserId(), mAdapter.getItem_id());
 
         mAdapter.notifyItemRemoved(position);
     }

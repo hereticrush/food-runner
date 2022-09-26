@@ -134,26 +134,47 @@ public class FoodPostViewModel extends ViewModel {
 
    public void deletePostDocument(final String uid, final String item_id) {
         if (uid != null && item_id != null) {
-            DocumentReference reference = getUserDocument(uid);
-            Log.d(TAG, "userRef:"+reference.getId()+" => "+reference.getPath());
-            CollectionReference posts = reference.collection(DatabaseConstants.FOOD_POSTS);
-                    posts.whereEqualTo("user_id", uid);
-            posts.whereEqualTo("post_id", item_id).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        task.getResult().getDocuments().forEach(documentSnapshot -> {
-                            documentSnapshot.getReference().delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-                                    Log.d(TAG, "onSuccess: DELETED ITEM:"+documentSnapshot.getReference().getPath());
+            final DocumentReference documentReference = getUserDocument(uid);
+            documentReference.collection(DatabaseConstants.FOOD_POSTS).whereEqualTo("post_id", item_id)
+                    .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            queryDocumentSnapshots.getDocuments().forEach(documentSnapshot -> {
+                                if (documentSnapshot.getData().containsKey("post_id")
+                                && documentSnapshot.getData().containsValue(item_id)) {
+                                    final DocumentReference deleted = documentSnapshot.getReference();
+                                    mDataSource.deletePostDocument(deleted, new CustomCallback() {
+                                        @Override
+                                        public void onEventSuccess(Object o) {
+                                            String deletedItemId = (String) o;
+                                            Log.d(TAG, deletedItemId);
+                                        }
+
+                                        @Override
+                                        public void onEventFailure(Object o) {
+                                            String failed = (String) o;
+                                            Log.d(TAG, failed);
+                                        }
+                                    });
                                 }
                             });
-                        });
-                    } else
-                        Log.d(TAG, "Failed:"+task.getException());
+                        }
+                    });
+
+            /*mDataSource.deletePostDocument(documentReference, new CustomCallback() {
+                @Override
+                public void onEventSuccess(Object o) {
+                    String success = (String) o;
+                    Log.d(TAG, "onEventSuccess: "+success);
                 }
-            });
+
+                @Override
+                public void onEventFailure(Object o) {
+                    String failed = (String) o;
+                    Log.d(TAG, "onEventFailure: "+failed);
+                }
+            });*/
+
         }
     }
 
