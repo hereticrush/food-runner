@@ -13,7 +13,6 @@ import com.example.food_notes.ui.view.model.FoodPostViewModel;
 public class FoodPostModelViewFactory implements ViewModelProvider.Factory {
 
     private final FirebaseDataSource mDataSource;
-    private Context mContext;
 
     public FoodPostModelViewFactory(FirebaseDataSource dataSource) {
         mDataSource = dataSource;

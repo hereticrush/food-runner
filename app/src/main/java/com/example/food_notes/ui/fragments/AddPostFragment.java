@@ -161,7 +161,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
                             intent.putExtra(Intent.EXTRA_INTENT, Intent.ACTION_GET_CONTENT);
                             Log.d(TAG, "onActivityResult: EXTRA?");
                             mCameraIntent.launch(intent);
-                        }
+                    }
                 }
             }
     );
@@ -204,13 +204,8 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
                 public void onActivityResult(Map<String, Boolean> result) {
                     if (!result.isEmpty() && result.containsValue(true)) {
                         Intent intent = new Intent(Intent.ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        startActivity(intent);
                         mGalleryIntent.launch(intent);
                         Toast.makeText(requireActivity().getApplicationContext(), "Storage access has been granted.", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "onPermissionsChecked: GRANTED STORAGE ACCESS");
-                    }
-                    else {
-                            navigateToSettings();
                     }
                 }
             }
@@ -247,8 +242,8 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
                                 toast("NOT SECURE:" + e.getLocalizedMessage());
                             }
                         } else {
-                            navigateToSettings();
-                        }
+                        navigateToSettings();
+                    }
                 }
             }
     );
@@ -437,7 +432,7 @@ public class AddPostFragment extends Fragment implements AddImageOptionsDialogFr
      * @param uri Uri type image file uri
      */
     private void loadImageThumbnail(Uri uri) {
-        final int thumbnailSize = 150;
+        final int thumbnailSize = 200;
         Glide.with(requireParentFragment()).load(uri).centerCrop()
                 .thumbnail(Glide.with(requireParentFragment())
                         .load(uri)

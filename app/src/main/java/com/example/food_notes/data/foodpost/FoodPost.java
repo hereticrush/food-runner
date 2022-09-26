@@ -7,10 +7,12 @@ import com.google.firebase.firestore.ServerTimestamp;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 
 
 public class FoodPost implements Serializable {
         private String user_id;
+        private String post_id;
         private String image_uri;
         private String title;
         private String description;
@@ -22,7 +24,8 @@ public class FoodPost implements Serializable {
 
         public FoodPost() {}
 
-        public FoodPost(String user_id, String img_str, String title, String description, float rating, Double latitude, Double longitude) {
+        public FoodPost(String post_id, String user_id, String img_str, String title, String description, float rating, Double latitude, Double longitude) {
+                this.post_id = post_id;
                 this.user_id = user_id;
                 this.image_uri = img_str;
                 this.title = title;
@@ -32,15 +35,8 @@ public class FoodPost implements Serializable {
                 this.longitude = longitude;
         }
 
-        public FoodPost(String user_id, String img_str, String title, String description, float rating, Date sent_at, Double latitude, Double longitude) {
-                this.user_id = user_id;
-                this.image_uri = img_str;
-                this.title = title;
-                this.description = description;
-                this.rating = rating;
-                this.sent_at = sent_at;
-                this.latitude = latitude;
-                this.longitude = longitude;
+        public String getPost_id() {
+                return post_id;
         }
 
         public String getUser_id() {
@@ -107,9 +103,25 @@ public class FoodPost implements Serializable {
                 this.longitude = longitude;
         }
 
+        @Override
+        public String toString() {
+                return "FoodPost{" +
+                        "user_id='" + user_id + '\'' +
+                        ", post_id='" + post_id + '\'' +
+                        ", image_uri='" + image_uri + '\'' +
+                        ", title='" + title + '\'' +
+                        ", description='" + description + '\'' +
+                        ", rating=" + rating +
+                        ", sent_at=" + sent_at +
+                        ", latitude=" + latitude +
+                        ", longitude=" + longitude +
+                        '}';
+        }
+
         @Exclude
         public HashMap<String, Object> getFoodPostMap() {
                 HashMap<String, Object> data = new HashMap<>();
+                data.put("post_id", getPost_id());
                 data.put("user_id", getUser_id());
                 data.put("image_uri", getImage_uri());
                 data.put("title", getTitle());

@@ -2,6 +2,7 @@ package com.example.food_notes.db;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,12 +18,14 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FirebaseRepository implements FirebaseDataSource {
@@ -31,132 +34,124 @@ public class FirebaseRepository implements FirebaseDataSource {
     private final FirebaseStorage mStorage;
     private final FirebaseFirestore mFirestore;
     private Context mContext;
-    private DocumentReference mReference;
     private final CollectionReference mUserCollectionRef;
-    private final ArrayList<FoodPost> list;
+    private ArrayList<FoodPost> list;
+    private List<DocumentSnapshot> snapshots;
 
     public FirebaseRepository(Context context) {
         this.mContext = context;
         this.mStorage = FirebaseStorage.getInstance();
         this.mFirestore = FirebaseFirestore.getInstance();
         mUserCollectionRef = mFirestore.collection(DatabaseConstants.USERS);
-        this.list = new ArrayList<>();
     }
 
     @Override
-    public DocumentReference getUserDocument(final String uid) {
-        Query query_user = mUserCollectionRef.whereEqualTo("user_id", uid);
-        query_user.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+    public void getCurrentUserDocument(final String uid, final CustomCallback callback) {
+        Query userQuery = mUserCollectionRef.whereEqualTo("user_id", uid);
+        userQuery.get().addOnSuccessListener(queryDocumentSnapshots -> {
+            final DocumentReference documentReference = queryDocumentSnapshots
+                    .getDocuments().get(0).getReference();
+            callback.onEventSuccess(documentReference);
+            Log.d(TAG, "onSuccess: " + documentReference.getPath());
+        }).addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    QuerySnapshot querySnapshot = task.getResult();
-                    DocumentSnapshot d = querySnapshot.getDocuments().get(0);
-                    mReference = d.getReference();
-                    Log.d(TAG, d.getId()+" => "+d.getData());
-                } else {
-                    Log.d(TAG, "Error getting documents: "+ task.getException());
-                }
+            public void onFailure(@NonNull Exception e) {
+                callback.onEventFailure(e.getLocalizedMessage());
+                Log.w(TAG, "onFailure: ", e);
             }
-        }).addOnFailureListener(e -> Log.d(TAG, "getUserDocument: "+e.getLocalizedMessage()));
-        return mReference;
+        });
     }
 
     @Override
-    public void getFirestoreDocument(final DocumentReference documentReference, final String uid) {
-        mUserCollectionRef.document().collection(DatabaseConstants.FOOD_POSTS)
-                        .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                            @Override
-                            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                                if (error != null) {
-                                    Log.d(TAG, "onEvent: ERROR");
-                                    return;
-                                } if (value != null && !value.isEmpty()) {
-                                    for (DocumentSnapshot s: value.getDocuments()) {
-                                        Map<String, Object> data = s.getData();
-
-                                        String uid = (String) data.get("user_id");
-                                        String image_uri = (String) data.get("image_uri");
-                                        String title = (String) data.get("title");
-                                        String desc = (String) data.get("description");
-                                        float rating = (float) data.get("rating");
-                                        Double lat = (Double) data.get("latitude");
-                                        Double lon = (Double) data.get("longitude");
-
-                                        FoodPost foodPost = new FoodPost(uid, image_uri, title, desc, rating, lat, lon);
-
-                                        list.add(foodPost);
-                                    }
-                                } else {
-                                    Log.d(TAG, "onEvent: Failed to get doc");
-                                }
-                            }
-                        });
+    public void getFirestoreDocuments(final String uid, final CustomCallback callback) {
+        snapshots = new ArrayList<>();
+        if (uid != null) {
+            Query query = mUserCollectionRef.document().collection(DatabaseConstants.FOOD_POSTS).whereEqualTo("user_id", uid);
+            query.get().addOnSuccessListener(queryDocumentSnapshots -> queryDocumentSnapshots.getDocuments().forEach(documentSnapshot -> {
+                Log.d(TAG, "getFirestoreDocuments: snaps:"+documentSnapshot.getData());
+                snapshots.add(documentSnapshot);
+                Log.d(TAG, "getFirestoreDocuments: list adding?");
+                callback.onEventSuccess(snapshots);
+            })).addOnFailureListener(e -> {
+                callback.onEventFailure(e.getLocalizedMessage());
+                Log.d(TAG, "onFailure: firestoredocments:");
+            });
+        }
     }
 
     @Override
-    public FirebaseFirestore getFirestore() {
-        return mFirestore;
+    public void deletePostDocument(final DocumentReference documentReference) {
+
     }
-
-    @Override
-    public FirebaseStorage getStorage() {
-        return mStorage;
-    }
-
-
 
     /**
-     * Insert a post document to Firestore
+     * Insert a post document to Firestore under user document as a sub-collection.
+     * Once successful, fires a callback.
      * @param uid currentUserId
      * @param hashMap FoodPost hashMap
      */
     @Override
-    public void createPostDocument(final String uid, final HashMap<String, Object> hashMap) {
+    public void createPostDocument(final String uid, final HashMap<String, Object> hashMap, final CustomCallback callback) {
         if (uid != null && hashMap != null) {
-            mUserCollectionRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            getCurrentUserDocument(uid, new CustomCallback() {
                 @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    DocumentSnapshot snapshot = queryDocumentSnapshots.getDocuments().get(0);
-                    snapshot.getReference().collection(DatabaseConstants.FOOD_POSTS)
-                            .add(hashMap).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                public void onEventSuccess(Object o) {
+                    final DocumentReference documentReference = (DocumentReference) o;
+                    documentReference.collection(DatabaseConstants.FOOD_POSTS).add(hashMap)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                 @Override
                                 public void onSuccess(DocumentReference documentReference) {
-                                    Log.d(TAG, "onSuccess: "+documentReference.getId());
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d(TAG, "onFailure: error:"+e.getLocalizedMessage());
+                                    Log.d(TAG, "onSuccess: added postDocPath:" + documentReference.getPath());
                                 }
                             });
                 }
+
+                @Override
+                public void onEventFailure(Object o) {
+                    Log.d(TAG, "onEventFailure: post cannot be added");
+                    callback.onEventFailure(o.toString());
+                }
             });
-        } else {
-            Log.d(TAG, "createPostDocument: I do not know what to do");
+
         }
     }
 
     /**
-     * Insert a user document to Firestore
+     * Insert a user document to Firestore. Once successful, fires a callback
      * @param uid currentUserId
      * @param hashMap User hashMap
      */
     @Override
-    public void createUserDocument(final String uid, final HashMap<String, Object> hashMap) {
-        mFirestore.collection(DatabaseConstants.USERS).add(hashMap)
+    public void createUserDocument(final String uid, final HashMap<String, Object> hashMap, final CustomCallback callback) {
+        /*mFirestore.collection(DatabaseConstants.USERS).add(hashMap)
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "onFailure: error doc add"+ e.getLocalizedMessage());
+                        Log.d(TAG, "onFailure: error while adding document"+ e.getLocalizedMessage());
                     }
                 }).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "onSuccess: USER doc added:"+ documentReference.getPath());
+                        Log.d(TAG, "onSuccess: user document added:"+ documentReference.getPath());
                     }
-                });
+                });*/
+        if (uid != null && hashMap != null) {
+            mUserCollectionRef.add(hashMap).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                @Override
+                public void onSuccess(DocumentReference documentReference) {
+                    callback.onEventSuccess(documentReference);
+                    Log.d(TAG, "onSuccess: user document added:"+ documentReference.getPath());
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    callback.onEventFailure(e);
+                    Log.d(TAG, "onFailure: error while adding document"+ e.getLocalizedMessage());
+                }
+            });
+        }
     }
+
 
     /**
      * Get list of documents
@@ -165,6 +160,11 @@ public class FirebaseRepository implements FirebaseDataSource {
     @Override
     public ArrayList<FoodPost> getList() {
         return list;
+    }
+
+    @Override
+    public FirebaseStorage getStorageInstanceFromRepository() {
+        return this.mStorage;
     }
 
 }

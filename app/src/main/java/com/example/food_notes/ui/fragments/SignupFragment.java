@@ -90,7 +90,7 @@ public class SignupFragment extends Fragment {
 
     /**
      * Attempts to sign up through Firebase Authentication,
-     * if it is a success, user is inserted into both localDB and Firestore
+     * if it is a success, user is inserted into Firestore
      */
     public void attemptRegistration() {
 
@@ -104,22 +104,10 @@ public class SignupFragment extends Fragment {
                     .addOnSuccessListener(authResult -> {
                         Toast.makeText(requireContext().getApplicationContext(), R.string.user_registered_success, Toast.LENGTH_SHORT).show();
                         String uid = authResult.getUser().getUid();
-                        addUserDocumentToFirestore(uid, email);
+                        mAuthViewModel.createUserDocumentForFirestore(uid, email);
                         toLogin();
                     });
         }
     }
-
-    /**
-     * Adds a user document to Firestore if login was successful
-     * @param uid firebaseUser uid
-     * @param email firebase user_email
-     */
-    private void addUserDocumentToFirestore(final String uid, final String email) {
-        if (uid != null && email != null) {
-            mAuthViewModel.createUserDocumentForFirestore(uid, email);
-        }
-    }
-
 
 }
