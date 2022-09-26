@@ -47,12 +47,9 @@ public class FirebaseRepository implements FirebaseDataSource {
                     .getDocuments().get(0).getReference();
             callback.onEventSuccess(documentReference);
             Log.d(TAG, "onSuccess: " + documentReference.getPath());
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                callback.onEventFailure(e.getLocalizedMessage());
-                Log.w(TAG, "onFailure: ", e);
-            }
+        }).addOnFailureListener(e -> {
+            callback.onEventFailure(e.getLocalizedMessage());
+            Log.w(TAG, "onFailure: ", e);
         });
     }
 
